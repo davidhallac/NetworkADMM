@@ -38,7 +38,7 @@ def solveX(data):
     s = cp.square(norm(xnew - z))
     w = 0 #TODO fill in later
     for i in range(len(neighs)/(inputs+1)):
-        w = w + neighs[i*(inputs+1)]*norm(xnew - neighs[i*(inputs+1)+1:i*(inputs+1)+6])
+        w = w + neighs[i*(inputs+1)]*norm(xnew - neighs[i*(inputs+1)+1:i*(inputs+1)+(inputs+1)])
     objective = cp.Minimize(g + lamb/2*w + h + rho/2*s)
     constraints = []
     p = cp.Problem(objective, constraints)
@@ -60,7 +60,7 @@ def solveZ(data):
     s = cp.square(norm(x - znew))
     w = 0 #TODO fill in later
     for i in range(len(neighs)/(inputs+1)):
-        w = w + neighs[i*(inputs+1)]*norm(znew - neighs[i*(inputs+1)+1:i*(inputs+1)+6])
+        w = w + neighs[i*(inputs+1)]*norm(znew - neighs[i*(inputs+1)+1:i*(inputs+1)+(inputs+1)])
     objective = cp.Minimize(lamb/2*w + h + rho/2*s)
     constraints = []
     p = cp.Problem(objective, constraints)
@@ -138,7 +138,7 @@ def runADMM_Random(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z):
             counter = 0
             for j in S.getrow(i).nonzero()[1]:
                 neighs[counter*(inputs+1),i] = S.getrow(i).getcol(j).todense()
-                neighs[counter*(inputs+1)+1:counter*(inputs+1)+6,i] = z[:,j]
+                neighs[counter*(inputs+1)+1:counter*(inputs+1)+(inputs+1),i] = z[:,j]
                 counter = counter+1
         temp = np.concatenate((x,y,z,a,neighs,np.tile([rho,lamb,inputs], (m,1)).transpose()), axis=0)
         newx = pool.map(solveX, temp.transpose())
@@ -149,7 +149,7 @@ def runADMM_Random(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z):
             counter = 0
             for j in S.getrow(i).nonzero()[1]:
                 neighs[counter*(inputs+1),i] = S.getrow(i).getcol(j).todense()
-                neighs[counter*(inputs+1)+1:counter*(inputs+1)+6,i] = x[:,j]
+                neighs[counter*(inputs+1)+1:counter*(inputs+1)+(inputs+1),i] = x[:,j]
                 counter = counter+1
         temp = np.concatenate((x,y,z,a,neighs,np.tile([rho,lamb,inputs], (m,1)).transpose()), axis=0)
         newz = pool.map(solveZ, temp.transpose())
