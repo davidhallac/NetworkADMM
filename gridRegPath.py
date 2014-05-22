@@ -108,7 +108,7 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
 		A[2*i+1, ids[i,1]] = 1
 	sqn = math.sqrt(m*inputs)
 	sqp = math.sqrt(2*inputs*edges)
-	eabs = math.pow(10,-3) #CHANGE THESE TWO AS PARAMS
+	eabs = math.pow(10,-2) #CHANGE THESE TWO AS PARAMS
 	erel = math.pow(10,-3)
 
 
@@ -258,14 +258,14 @@ def main():
 	z = np.asarray(np.tile(x_con.value, (1,2*edges)))
 	
 	#Get UACTUAL
-	(u1, u2, u3, u4, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, 0, rho, 25, x, y ,z, S, ids, a)
+	(u1, u2, u3, u4, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, 0, rho/10, 25, x, y ,z, S, ids, a)
 	U = u1.max()
 	L = u1.min()
 
-	numiters = 100
+	numiters = 50
 	numtrials = 1
 	plots = np.zeros((numtrials,2))
-	for lamb in np.linspace(4, 4, num=numtrials):
+	for lamb in np.linspace(2.5, 2.5, num=numtrials):
 		(x, y, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y ,z, S, ids, a)
 		#x = np.array(xSol.value)
 		xplot = np.reshape(x.transpose(), (size, size, inputs))
