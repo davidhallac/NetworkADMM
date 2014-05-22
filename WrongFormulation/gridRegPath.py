@@ -118,6 +118,7 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
         temp = np.concatenate((x,y,z,a,neighs,np.tile([rho,lamb,inputs], (m,1)).transpose()), axis=0)
         newx = pool.map(solveX, temp.transpose())
         x = np.array(newx).transpose()[0]
+        print x.shape, y.shape, z.shape, a.shape, neighs.shape
 
         #z update
         for i in range(m):
@@ -230,8 +231,8 @@ def main():
     U = u1.max()
     L = u1.min()
     
-    numiters = 100
-    numtrials = 20
+    numiters = 10
+    numtrials = 1
     plots = np.zeros((numtrials,2))
     for lamb in np.linspace(4, 0, num=numtrials):
         (x, y, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y ,z, S, ids, a)
@@ -245,20 +246,20 @@ def main():
 
     #Plot noiseless
     #plt.figure(counter)
-    a = np.random.randn(inputs, m)
+    #a = np.random.randn(inputs, m)
     #Add offets
-    for i in range(m):
-        if (i < (m/2)):
-            if (i % size < (size/2)):
-                a[:,i] = [4,1,1]
-            else:
-                a[:,i] = [1,4,1]
-        else:
-            if (i % size < (size/2)):
-                a[:,i] = [1,1,4]
-            else:
-                a[:,i] = [2,2,2]
-    xplot = np.reshape(np.array(a).transpose(), (size, size, inputs))
+    #for i in range(m):
+    #    if (i < (m/2)):
+    #        if (i % size < (size/2)):
+    #            a[:,i] = [4,1,1]
+    #        else:
+    #            a[:,i] = [1,4,1]
+    #    else:
+    #        if (i % size < (size/2)):
+    #            a[:,i] = [1,1,4]
+    #        else:
+    #            a[:,i] = [2,2,2]
+    #xplot = np.reshape(np.array(a).transpose(), (size, size, inputs))
     #plt.imshow((xplot-L)/(U-L), interpolation='nearest')
 
     plt.figure(counter)
