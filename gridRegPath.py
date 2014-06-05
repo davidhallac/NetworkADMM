@@ -3,12 +3,13 @@ import itertools
 #import parmap
 from multiprocessing import Pool
 import matplotlib.pyplot as plt
+from matplotlib import rc
 #from base_test import BaseTest
 from cvxopt import matrix
 from numpy import linalg as LA
 import numpy as np
 import scipy as sp
-import cvxpy as cp
+#import cvxpy as cp
 import unittest
 import math
 import sys
@@ -22,27 +23,28 @@ def solveX(data):
 	x = data[0:inputs]
 	a = data[inputs:2*inputs]
 	neighs = data[2*inputs:len(data)-3]
-	xnew = cp.Variable(inputs,1)
-	g = 0.5*cp.square(norm(xnew - a))
+	xnew = Variable(inputs,1)
+	g = 0.5*square(norm(xnew - a))
 	h = 0
+	k = 0
 	for i in range(len(neighs)/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
 		if(weight != 0):
 			y = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
-			h = h + rho/2*cp.square(norm(xnew - z))
-			for j in range(inputs): #This can be written better...
-				h = h + y[j]*(xnew[j])
-	objective = cp.Minimize(g+h)
+			h = h + rho/2*square(norm(xnew - z))
+			for j in range(inputs):
+				k = k + y[j]*xnew[j]
+	objective = Minimize(g+h+k)
 	constraints = []
-	p = cp.Problem(objective, constraints)
+	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
-		objective = cp.Minimize(g+1.1*h)
+		objective = Minimize(g + h + 0.9*k)
 		constraints = []
-		p = cp.Problem(objective, constraints)
+		p = Problem(objective, constraints)
 		result = p.solve()
-		print "CVXPY BUG???", result
+		print "CVXPY BUG?", k
 	return xnew.value
 
 
@@ -56,15 +58,15 @@ def solveZ(data):
 	y2 = data[3*inputs:4*inputs]
 	z = data[4*inputs:6*inputs]
 	weight = data[len(data)-4]
-	znew = cp.Variable(2*inputs,1)
+	znew = Variable(2*inputs,1)
 	z1 = znew[0:inputs]
 	z2 = znew[inputs:2*inputs]
-	h = lamb*weight*norm(z1-z2)+rho/2*(cp.square(norm(x1-z1))+cp.square(norm(x2-z2)))
+	h = lamb*weight*norm(z1-z2)+rho/2*(square(norm(x1-z1))+square(norm(x2-z2)))
 	for i in range(inputs):	
 		h = h - y1[i]*z1[i] - y2[i]*z2[i]
-	objective = cp.Minimize(h)
+	objective = Minimize(h)
 	constraints = []
-	p = cp.Problem(objective, constraints)
+	p = Problem(objective, constraints)
 	result = p.solve()
 	return znew.value
 
@@ -79,16 +81,16 @@ def solveY(data):
 
 def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids, a):
 	#Find actual solution
-	x_actual = cp.Variable(inputs,m)
+	x_actual = Variable(inputs,m)
 	g = 0
 	for i in range(m):
-		g = g + 0.5*cp.square(norm(x_actual[:,i] - a[:,i]))
+		g = g + 0.5*square(norm(x_actual[:,i] - a[:,i]))
 	f = 0
 	for i in range(edges):
 		f = f + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*norm(x_actual[:,ids[i,0]] - x_actual[:,ids[i,1]])
-	objective = cp.Minimize(g + lamb*f)
+	objective = Minimize(g + lamb*f)
 	constraints = []
-	p = cp.Problem(objective, constraints)
+	p = Problem(objective, constraints)
 	result_actual = p.solve()
 
 	#Find max degree of graph
@@ -110,8 +112,6 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
 	sqp = math.sqrt(2*inputs*edges)
 	eabs = math.pow(10,-2) #CHANGE THESE TWO AS PARAMS
 	erel = math.pow(10,-3)
-
-
 
 	pool = Pool(processes = max(m, edges))
 	while(iters < numiters and (r > epri or s > edual or iters < 5)):
@@ -151,25 +151,23 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
 		ztemp = ztemp.reshape(inputs, 2*edges, order='F')
 		s = LA.norm(rho*np.dot(A.transpose(),(ztemp - z).transpose())) #For dual residual
 		z = ztemp
-		#print z
 
 		#y update
 		xtemp = np.zeros((inputs, 2*edges))
 		for j in range(edges):
-			#print j, ids[j,0], x[:,ids[j,0]]
 			xtemp[:,2*j] = np.array(x[:,ids[j,0]])
 			xtemp[:,2*j+1] = x[:,ids[j,1]]
 		temp = np.concatenate((y, xtemp, z, np.tile(rho, (1,2*edges))), axis=0)
 		newy = pool.map(solveY, temp.transpose())
 		y = np.array(newy).transpose()
 
-		#Stopping criterion - p19 of ADMM paper. TODO: Not 100% accurate for now. Need to change
+		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
 		edual = sqn*eabs + erel*LA.norm(np.dot(A.transpose(),y.transpose()), 'fro')
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s #updated at z-step
 
-		print r, epri, s, edual
+		#print r, epri, s, edual
 		obj2 = 0
 		for i in range(m):
 			obj2 = obj2 + 0.5*(LA.norm(x[:,i] - a[:,i]))*(LA.norm(x[:,i] - a[:,i]))
@@ -177,15 +175,16 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
 		for i in range(edges):
 			#obj1 = obj1 + lamb*S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
 			obj1 = obj1 + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
-		print lamb*obj1 + obj2 - result_actual, result_actual
+		#print lamb*obj1 + obj2 - result_actual, result_actual
 		iters = iters + 1
 
 	pool.close()
 	pool.join()
-	#print LA.norm(x)
 	#print LA.norm(x - x_actual.value)
-	#USE ACTUAL SOLUTION
-	#x = np.array(x_actual.value)
+
+	#UNCOMMENT TO USE ACTUAL SOLUTION
+	x = np.array(x_actual.value)
+	
 	obj2 = 0
 	for i in range(m):
 		obj2 = obj2 + 0.5*(LA.norm(x[:,i] - a[:,i]))*(LA.norm(x[:,i] - a[:,i]))
@@ -230,75 +229,85 @@ def main():
 		if (i < (m/2)):
 			if (i % size < (size/2)):
 				#Quadrant 1
-				a[:,i] = a[:,i] + [4,1,1]
+				a[:,i] = a[:,i] + [6,1,1]
 			else:
-				a[:,i] = a[:,i] + [1,4,1] #Quadrant 2
+				a[:,i] = a[:,i] + [1,6,1] #Quadrant 2
 		else:
 			if (i % size < (size/2)):
-				a[:,i] = a[:,i] + [1,1,4] #Quadrant 3
+				a[:,i] = a[:,i] + [1,1,6] #Quadrant 3
 			else:
 				a[:,i] = a[:,i] + [2,2,2] #Quadrant 4
 
-	
 	#GenCon Solution - TODO make this distributed
 	x = 0.0*np.ones((inputs,m))
 	y = 0.0*np.ones((inputs,2*edges))
 	z = 0.0*np.ones((inputs,2*edges))
 	counter = 1 #For plotting
-	x_con = cp.Variable(inputs,1)
+	x_con = Variable(inputs,1)
 	g = 0
 	for i in range(m):
-		g = g + 0.5*cp.square(norm(x_con - a[:,i]))
-	objective = cp.Minimize(g)
+		g = g + 0.5*square(norm(x_con - a[:,i]))
+	objective = Minimize(g)
 	constraints = []
-	p = cp.Problem(objective, constraints)
+	p = Problem(objective, constraints)
 	result_actual = p.solve()
 	
 	#Convert GenCon to z
 	z = np.asarray(np.tile(x_con.value, (1,2*edges)))
 	
 	#Get UACTUAL
-	(u1, u2, u3, u4, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, 0, rho/10, 25, x, y ,z, S, ids, a)
-	U = u1.max()
-	L = u1.min()
+	#(u1, u2, u3, u4, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, 0, rho/10, 25, x, y ,z, S, ids, a)
+	#U = u1.max()
+	#L = u1.min()
+	U = 6
+	L = -1.6
 
-	numiters = 50
-	numtrials = 1
-	plots = np.zeros((numtrials,2))
-	for lamb in np.linspace(2.5, 2.5, num=numtrials):
+
+	numiters = 3
+	thresh = 9
+	lamb = 9
+	numtrials = math.log10(thresh/float(lamb))/(math.log10(0.95)) + 1
+	plots = np.zeros((math.floor(numtrials),2))
+	while(lamb >= thresh):
 		(x, y, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y ,z, S, ids, a)
 		#x = np.array(xSol.value)
 		xplot = np.reshape(x.transpose(), (size, size, inputs))
 		plt.figure(counter)
 		plt.imshow((xplot-L)/(U-L), interpolation='nearest')
+		plt.title('$\lambda = 7$')
+		plt.savefig('../Tex Files/Final Report/figures/lam_7',bbox_inches='tight')
 		plots[counter-1,:] = [pl1, pl2]
 		counter = counter + 1
+		lamb = lamb*0.95
 	print "Finished"
-	#print x.shape
 
 	#Plot noiseless
-	#plt.figure(counter)
-	#a = np.random.randn(inputs, m)
-	#Add offets
-	#for i in range(m):
-	#    if (i < (m/2)):
-	#        if (i % size < (size/2)):
-	#            a[:,i] = [4,1,1]
-	#        else:
-	#            a[:,i] = [1,4,1]
-	#    else:
-	#        if (i % size < (size/2)):
-	#            a[:,i] = [1,1,4]
-	#        else:
-	#            a[:,i] = [2,2,2]
-	#xplot = np.reshape(np.array(a).transpose(), (size, size, inputs))
-	#plt.imshow((xplot-L)/(U-L), interpolation='nearest')
+	plt.figure(counter)
+	a = np.random.randn(inputs, m)
+	for i in range(m):
+	    if (i < (m/2)):
+	        if (i % size < (size/2)):
+	            a[:,i] = [6,1,1]
+	        else:
+	            a[:,i] = [1,6,1]
+	    else:
+	        if (i % size < (size/2)):
+	            a[:,i] = [1,1,6]
+	        else:
+	            a[:,i] = [2,2,2]
+	xplot = np.reshape(np.array(a).transpose(), (size, size, inputs))
+	plt.imshow((xplot-L)/(U-L), interpolation='nearest')
+	counter = counter + 1
+	#plt.savefig('../Tex Files/Final Report/figures/actual_sol',bbox_inches='tight')
 
 	plt.figure(counter)
 	plt.plot(plots[:,0], plots[:,1], 'ro')
-	#plt.grid(True)
-	
-	plt.show()
+	plt.xlabel('$\sum w_{jk}||x_j - x_k||$')
+	plt.ylabel('$\sum f_i(x_i)$')	
+	#plt.savefig('../Tex Files/Poster/figures/tex_demo',bbox_inches='tight')
+
+	plt.rc('font', family='serif')
+	#plt.show()
 
 
 if __name__ == '__main__':
