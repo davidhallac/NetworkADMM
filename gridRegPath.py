@@ -30,11 +30,11 @@ def solveX(data):
 	for i in range(len(neighs)/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
 		if(weight != 0):
-			y = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
+			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			h = h + rho/2*square(norm(xnew - z))
 			for j in range(inputs):
-				k = k + y[j]*xnew[j]
+				k = k + u[j]*xnew[j]
 	objective = Minimize(g+h+k)
 	constraints = []
 	p = Problem(objective, constraints)
@@ -44,7 +44,7 @@ def solveX(data):
 		constraints = []
 		p = Problem(objective, constraints)
 		result = p.solve()
-		print "CVXPY BUG?", k
+		print "CVXPY BUG?", x
 	return xnew.value
 
 
@@ -54,8 +54,8 @@ def solveZ(data):
 	rho = data[len(data)-3]
 	x1 = data[0:inputs]
 	x2 = data[inputs:2*inputs]
-	y1 = data[2*inputs:3*inputs]
-	y2 = data[3*inputs:4*inputs]
+	u1 = data[2*inputs:3*inputs]
+	u2 = data[3*inputs:4*inputs]
 	z = data[4*inputs:6*inputs]
 	weight = data[len(data)-4]
 	znew = Variable(2*inputs,1)
@@ -63,23 +63,23 @@ def solveZ(data):
 	z2 = znew[inputs:2*inputs]
 	h = lamb*weight*norm(z1-z2)+rho/2*(square(norm(x1-z1))+square(norm(x2-z2)))
 	for i in range(inputs):	
-		h = h - y1[i]*z1[i] - y2[i]*z2[i]
+		h = h - u1[i]*z1[i] - u2[i]*z2[i]
 	objective = Minimize(h)
 	constraints = []
 	p = Problem(objective, constraints)
 	result = p.solve()
 	return znew.value
 
-def solveY(data):
+def solveU(data):
 	leng = len(data)-1
-	y = data[0:leng/3]
+	u = data[0:leng/3]
 	x = data[leng/3:2*leng/3]
 	z = data[(2*leng/3):leng]
 	rho = data[len(data)-1]
-	return y + rho*(x - z)
+	return u + rho*(x - z)
 
 
-def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids, a):
+def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, u, z, S, ids, a):
 	#Find actual solution
 	x_actual = Variable(inputs,m)
 	g = 0
@@ -123,12 +123,12 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
 			#Smaller number always first. This is ij with i < j
 				if(ids[j,0] == i):
 					neighs[counter*(2*inputs+1),i] = S.getrow(i).getcol(ids[j,1]).todense() #weight
-					neighs[counter*(2*inputs+1)+1:counter*(2*inputs+1)+(inputs+1),i] = y[:,2*j] #y_ij 
+					neighs[counter*(2*inputs+1)+1:counter*(2*inputs+1)+(inputs+1),i] = u[:,2*j] #u_ij 
 					neighs[counter*(2*inputs+1)+(inputs+1):(counter+1)*(2*inputs+1),i] = z[:,2*j] #z_ij
 					counter = counter + 1
 				elif(ids[j,1] == i):
 					neighs[counter*(2*inputs+1),i] = S.getrow(i).getcol(ids[j,0]).todense()
-					neighs[counter*(2*inputs+1)+1:counter*(2*inputs+1)+(inputs+1),i] = y[:,2*j+1]
+					neighs[counter*(2*inputs+1)+1:counter*(2*inputs+1)+(inputs+1),i] = u[:,2*j+1]
 					neighs[counter*(2*inputs+1)+(inputs+1):(counter+1)*(2*inputs+1),i] = z[:,2*j+1]
 					counter = counter + 1
 		temp = np.concatenate((x,a,neighs,np.tile([rho,lamb,inputs], (m,1)).transpose()), axis=0)
@@ -137,7 +137,7 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
  
 		#z update
 		ztemp = z.reshape(2*inputs, edges, order='F')
-		ytemp = y.reshape(2*inputs, edges, order='F')
+		utemp = u.reshape(2*inputs, edges, order='F')
 		xtemp = np.zeros((inputs, 2*edges))
 		weights = np.zeros((1, edges))
 		for j in range(edges):
@@ -145,29 +145,28 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
 			xtemp[:,2*j] = np.array(x[:,ids[j,0]])
 			xtemp[:,2*j+1] = x[:,ids[j,1]]
 		xtemp = xtemp.reshape(2*inputs, edges, order='F')
-		temp = np.concatenate((xtemp,ytemp,ztemp,weights,np.tile([rho,lamb,inputs], (edges,1)).transpose()), axis=0)
+		temp = np.concatenate((xtemp,utemp,ztemp,weights,np.tile([rho,lamb,inputs], (edges,1)).transpose()), axis=0)
 		newz = pool.map(solveZ, temp.transpose())
 		ztemp = np.array(newz).transpose()[0]
 		ztemp = ztemp.reshape(inputs, 2*edges, order='F')
 		s = LA.norm(rho*np.dot(A.transpose(),(ztemp - z).transpose())) #For dual residual
 		z = ztemp
 
-		#y update
+		#u update
 		xtemp = np.zeros((inputs, 2*edges))
 		for j in range(edges):
 			xtemp[:,2*j] = np.array(x[:,ids[j,0]])
 			xtemp[:,2*j+1] = x[:,ids[j,1]]
-		temp = np.concatenate((y, xtemp, z, np.tile(rho, (1,2*edges))), axis=0)
-		newy = pool.map(solveY, temp.transpose())
-		y = np.array(newy).transpose()
+		temp = np.concatenate((u, xtemp, z, np.tile(rho, (1,2*edges))), axis=0)
+		newu = pool.map(solveU, temp.transpose())
+		u = np.array(newu).transpose()
 
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
-		edual = sqn*eabs + erel*LA.norm(np.dot(A.transpose(),y.transpose()), 'fro')
+		edual = sqn*eabs + erel*LA.norm(np.dot(A.transpose(),u.transpose()), 'fro')
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s #updated at z-step
 
-		#print r, epri, s, edual
 		obj2 = 0
 		for i in range(m):
 			obj2 = obj2 + 0.5*(LA.norm(x[:,i] - a[:,i]))*(LA.norm(x[:,i] - a[:,i]))
@@ -175,7 +174,8 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
 		for i in range(edges):
 			#obj1 = obj1 + lamb*S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
 			obj1 = obj1 + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
-		#print lamb*obj1 + obj2 - result_actual, result_actual
+		print lamb*obj1 + obj2 - result_actual, result_actual
+		print r, epri, s, edual
 		iters = iters + 1
 
 	pool.close()
@@ -183,7 +183,7 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
 	#print LA.norm(x - x_actual.value)
 
 	#UNCOMMENT TO USE ACTUAL SOLUTION
-	x = np.array(x_actual.value)
+	#x = np.array(x_actual.value)
 	
 	obj2 = 0
 	for i in range(m):
@@ -193,11 +193,11 @@ def runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y, z, S, ids
 		#obj1 = obj1 + lamb*S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
 		obj1 = obj1 + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
 	print lamb*obj1 + obj2 - result_actual, result_actual
-	return (x, y, z, x_actual, obj1, obj2)
+	return (x, u, z, x_actual, obj1, obj2)
 
 def main():
 	#Build 2x2 Grid
-	size = 8
+	size = 6
 	edges = 2*size*(size-1)
 	m = size*size
 	inputs = 3 #RGB
@@ -240,7 +240,7 @@ def main():
 
 	#GenCon Solution - TODO make this distributed
 	x = 0.0*np.ones((inputs,m))
-	y = 0.0*np.ones((inputs,2*edges))
+	u = 0.0*np.ones((inputs,2*edges))
 	z = 0.0*np.ones((inputs,2*edges))
 	counter = 1 #For plotting
 	x_con = Variable(inputs,1)
@@ -256,20 +256,20 @@ def main():
 	z = np.asarray(np.tile(x_con.value, (1,2*edges)))
 	
 	#Get UACTUAL
-	#(u1, u2, u3, u4, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, 0, rho/10, 25, x, y ,z, S, ids, a)
+	#(u1, u2, u3, u4, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, 0, rho/10, 25, x, u ,z, S, ids, a)
 	#U = u1.max()
 	#L = u1.min()
 	U = 6
 	L = -1.6
 
 
-	numiters = 3
-	thresh = 9
-	lamb = 9
+	numiters = 100
+	thresh = 3
+	lamb = 3
 	numtrials = math.log10(thresh/float(lamb))/(math.log10(0.95)) + 1
 	plots = np.zeros((math.floor(numtrials),2))
 	while(lamb >= thresh):
-		(x, y, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, y ,z, S, ids, a)
+		(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, outputs, lamb, rho, numiters, x, u ,z, S, ids, a)
 		#x = np.array(xSol.value)
 		xplot = np.reshape(x.transpose(), (size, size, inputs))
 		plt.figure(counter)
