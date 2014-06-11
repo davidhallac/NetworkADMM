@@ -175,7 +175,8 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 	pool.join()
 
 	#UNCOMMENT TO USE ACTUAL SOLUTION
-	x = np.array(x_actual.value)
+	if(numiters == 0):
+		x = np.array(x_actual.value)
 	
 	(obj2, obj1) = (0, 0)
 	for i in range(m):

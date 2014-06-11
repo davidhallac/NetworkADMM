@@ -75,7 +75,7 @@ def solveU(data):
 	rho = data[len(data)-1]
 	return u + (x - z)
 
-def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
+def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, x_train, y_train):
 	#Find actual solution
 	x_actual = Variable(inputs,m)
 	g = 0
