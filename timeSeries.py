@@ -103,8 +103,8 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 		A[2*i+1, ids[i,1]] = 1
 	sqn = math.sqrt(m*inputs)
 	sqp = math.sqrt(2*inputs*edges)
-	eabs = math.pow(10,-2) #CHANGE THESE TWO AS PARAMS
-	erel = math.pow(10,-3)
+	eabs = math.pow(10,-3) #CHANGE THESE TWO AS PARAMS
+	erel = math.pow(10,-4)
 
 	maxProcesses =  100
 	pool = Pool(processes = min(max(m, edges), maxProcesses))
@@ -174,8 +174,9 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 	pool.close()
 	pool.join()
 
-	#UNCOMMENT TO USE ACTUAL SOLUTION
-	x = np.array(x_actual.value)
+	#TO USE ACTUAL SOLUTION
+	if(numiters == 0):
+		x = np.array(x_actual.value)
 	
 	(obj2, obj1) = (0, 0)
 	for i in range(m):
@@ -187,21 +188,16 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 
 def main():
 	#Build 2x2 Grid
-	size = 20
-	edges = 2*size*(size-1)
-	m = size*size
-	inputs = 3 #RGB
-	rho = 0.5
+	size = 12
+	edges = size - 1
+	m = size
+	inputs = 10
+	rho = 2
 
-	#Uniform weights, build grid
+	#Uniform weights, build graph
 	(weights, ids) = (np.ones((edges,1)).flatten(), np.zeros((edges, 2)).astype(np.int64))
 	counter = 0
-	for i in range(m):
-		if(i < m - size):
-			ids[counter,0] = round(i)
-			ids[counter,1] = round(i+size)
-			counter = counter + 1
-		if((i+1) % size != 0):
+	for i in range(m-1):
 			ids[counter,0] = round(i)
 			ids[counter,1] = round(i+1)
 			counter = counter + 1
@@ -212,73 +208,51 @@ def main():
 	np.random.seed(2) #usually seed 0
 	a_noise = np.random.randn(inputs, m)
 	a = np.zeros((inputs,m))
-	#QUADRANT EXAMPLE
-	# for i in range(m):
-	# 	if (i < (m/2)):
-	# 		if (i % size < (size/2)):
-	# 			#Quadrant 1
-	# 			a[:,i] = a_noise[:,i] + [6,1,1]
-	# 		else:
-	# 			a[:,i] = a_noise[:,i] + [1,6,1] #Quadrant 2
-	# 	else:
-	# 		if (i % size < (size/2)):
-	# 			a[:,i] = a_noise[:,i] + [1,1,6] #Quadrant 3
-	# 		else:
-	# 			a[:,i] = a_noise[:,i] + [2,2,2] #Quadrant 4
-
-	#SMILEY FACE EXAMPLE - works on 20x20 only
-	for i in range(m):
-		if ( (i/20) <= 1 or (i/20) >= 18 or (i%20) <= 1 or (i%20) >= 18):
-			a[:,i] = a_noise[:,i] + [1,1,0] #Border
-		elif ((5 <= (i/20) <= 7) and ((5 <= (i%20) <= 7) or (12 <= (i%20) <= 14))):
-			a[:,i] = a_noise[:,i] + [0,2,0] #Eyes
-		elif ((12 <= (i/20) <= 14) and (5 <= (i%20) <= 14)):
-			a[:,i] = a_noise[:,i] + [0,1.25,0] #Mouth
-		elif ((i/20 == 9) and (9 <= (i%20) <= 10)):
-			a[:,i] = a_noise[:,i] + [0,4,0] #Nose
-		else:
-			a[:,i] = a_noise[:,i] + [1,0,1.5] #Face
-
-
+	#Random
+	for i in range(7):
+		a[:,i] = a_noise[:,i] + [1,2,3,4,5,6,7,8,9,10]
+	for i in range(5):
+		a[:,i+7] = a_noise[:,i+7] + [4,3,7,1,2,9,8,10,6,5]
 	#For GenCon Solution - see old files
 	(x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
 	numiters = 0
-	thresh = 1
-	lamb = 1
+	thresh = .2
+	lamb = 0.19
 	updateVal = 1.5
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
+	counter = 1
 	#Solve for lambda = 0
 	(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, 0, 0.00001, numiters, x, u ,z, S, ids, a)
 	(U, L) = (x.max(), x.min())
-	xplot = np.reshape(x.transpose(), (size, size, inputs))
-	plt.figure(counter-1)
-	plt.imshow((xplot-L)/(U-L), interpolation='nearest')
-	plt.gca().axes.get_xaxis().set_visible(False)
-	plt.gca().axes.get_yaxis().set_visible(False)
-	plots[counter-1,:] = [pl1, pl2]
+	plt.figure(counter - 1)
+	for i in range(inputs):
+		plt.plot(np.arange(12), x[i])
+	plt.ylim([-2,12])
+	plt.xlabel('Month')
+	#plots[counter-1,:] = [pl1, pl2]
 	#(U, L) = (9, -2.3)
 	while(lamb <= thresh):
 		print lamb
 		(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, a)
-		xplot = np.reshape(x.transpose(), (size, size, inputs))
 		plt.figure(counter)
-		plt.imshow((xplot-L)/(U-L), interpolation='nearest')
-		plt.gca().axes.get_xaxis().set_visible(False)
-		plt.gca().axes.get_yaxis().set_visible(False)
-		#plt.title('$\lambda = 7$')
-		#plt.savefig('../Tex Files/temptemp',bbox_inches='tight')
-		plots[counter,:] = [pl1, pl2]
+		for i in range(inputs):
+			plt.plot(np.arange(12), x[i])
+		plt.ylim([-2,12])
+		plt.xlabel('Month')
+		#plots[counter,:] = [pl1, pl2]
 		counter = counter + 1
 		lamb = lamb*updateVal
 	print "Finished"
 
 	#Plot noiseless
-	#a_noiseless = a - a_noise
-	#xplot = np.reshape(np.array(a_noiseless).transpose(), (size, size, inputs))
-	#plt.figure(counter)
-	#plt.imshow((xplot-L)/(U-L), interpolation='nearest')
+	a_noiseless = a - a_noise
+	plt.figure(counter).suptitle('Actual Solution')
+	for i in range(inputs):
+		plt.plot(np.arange(12), a_noiseless[i])
+	plt.ylim([-2,12])
+	plt.xlabel('Month')
 
 	# plt.figure(counter+1)
 	# plt.plot(plots[:,0], plots[:,1], 'ro')

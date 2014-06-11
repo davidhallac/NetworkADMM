@@ -186,62 +186,50 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 	return (x, u, z, x_actual, obj1, obj2)
 
 def main():
-	#Build 2x2 Grid
-	size = 20
-	edges = 2*size*(size-1)
-	m = size*size
-	inputs = 3 #RGB
+	
+	size = 100
+	partitions = 5
+	inputs = 10
 	rho = 0.5
+	maxedges = size*(size-1) #maximum possible edges
 
-	#Uniform weights, build grid
-	(weights, ids) = (np.ones((edges,1)).flatten(), np.zeros((edges, 2)).astype(np.int64))
+	sizepart = size/partitions
+	(weights, ids) = (np.ones((maxedges,1)).flatten(), np.zeros((maxedges, 2)).astype(np.int64))
 	counter = 0
-	for i in range(m):
-		if(i < m - size):
-			ids[counter,0] = round(i)
-			ids[counter,1] = round(i+size)
-			counter = counter + 1
-		if((i+1) % size != 0):
-			ids[counter,0] = round(i)
-			ids[counter,1] = round(i+1)
-			counter = counter + 1
-	S = sp.sparse.coo_matrix((weights,(ids[:,0].flatten(),ids[:,1].flatten())), shape=(m,m))
-	S = S + S.transpose() #+ sp.sparse.identity(m)
+	np.random.seed(2)
+	for i in range(size):
+		for j in range(i,size):
+			if(((i/sizepart) == (j/sizepart)) and i != j):
+				#Same partition
+				if(np.random.random() >= 0.5):
+					ids[counter,0] = round(i)
+					ids[counter,1] = round(j)
+					counter = counter+1
+			elif (i != j):
+				#Different partition
+				if(np.random.random() >= 0.9):
+					ids[counter,0] = round(i)
+					ids[counter,1] = round(j)
+					counter = counter+1
+	S = sp.sparse.coo_matrix((weights,(ids[:,0].flatten(),ids[:,1].flatten())), shape=(size,size))
+	S = S + S.transpose()
+	S[0,0] = 0
+	edges = counter #Actual number of edges
 
-	#Random "targets" a
-	np.random.seed(2) #usually seed 0
-	a_noise = np.random.randn(inputs, m)
-	a = np.zeros((inputs,m))
-	#QUADRANT EXAMPLE
-	# for i in range(m):
-	# 	if (i < (m/2)):
-	# 		if (i % size < (size/2)):
-	# 			#Quadrant 1
-	# 			a[:,i] = a_noise[:,i] + [6,1,1]
-	# 		else:
-	# 			a[:,i] = a_noise[:,i] + [1,6,1] #Quadrant 2
-	# 	else:
-	# 		if (i % size < (size/2)):
-	# 			a[:,i] = a_noise[:,i] + [1,1,6] #Quadrant 3
-	# 		else:
-	# 			a[:,i] = a_noise[:,i] + [2,2,2] #Quadrant 4
+	#True a at each partition
+	a_true = np.random.randn(inputs, partitions)
+	#number of given values in the training set at each node
+	numtests = 10
+	v = np.random.randn(numtests,size)
 
-	#SMILEY FACE EXAMPLE - works on 20x20 only
-	for i in range(m):
-		if ( (i/20) <= 1 or (i/20) >= 18 or (i%20) <= 1 or (i%20) >= 18):
-			a[:,i] = a_noise[:,i] + [1,1,0] #Border
-		elif ((5 <= (i/20) <= 7) and ((5 <= (i%20) <= 7) or (12 <= (i%20) <= 14))):
-			a[:,i] = a_noise[:,i] + [0,2,0] #Eyes
-		elif ((12 <= (i/20) <= 14) and (5 <= (i%20) <= 14)):
-			a[:,i] = a_noise[:,i] + [0,1.25,0] #Mouth
-		elif ((i/20 == 9) and (9 <= (i%20) <= 10)):
-			a[:,i] = a_noise[:,i] + [0,4,0] #Nose
-		else:
-			a[:,i] = a_noise[:,i] + [1,0,1.5] #Face
+	x_train = np.random.randn(numtests*inputs, size)
+	y_train = np.zeros((numtests,size))
+	for i in range(size):
+		a_part = a_true[:,i/sizepart]
+		for j in range(numtests):
+			y_train[j,i] = np.sign([np.dot(a_part.transpose(), x_train[j*inputs:j*inputs+numtests,i])])
 
-
-	#For GenCon Solution - see old files
-	(x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
+	(a_pred,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
 	numiters = 0
 	thresh = 1
@@ -250,59 +238,53 @@ def main():
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
-	(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, 0, 0.00001, numiters, x, u ,z, S, ids, a)
-	(U, L) = (x.max(), x.min())
-	xplot = np.reshape(x.transpose(), (size, size, inputs))
-	plt.figure(counter-1)
-	plt.imshow((xplot-L)/(U-L), interpolation='nearest')
-	plt.gca().axes.get_xaxis().set_visible(False)
-	plt.gca().axes.get_yaxis().set_visible(False)
-	plots[counter-1,:] = [pl1, pl2]
-	#(U, L) = (9, -2.3)
-	while(lamb <= thresh):
-		print lamb
-		(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, a)
-		xplot = np.reshape(x.transpose(), (size, size, inputs))
-		plt.figure(counter)
-		plt.imshow((xplot-L)/(U-L), interpolation='nearest')
-		plt.gca().axes.get_xaxis().set_visible(False)
-		plt.gca().axes.get_yaxis().set_visible(False)
-		#plt.title('$\lambda = 7$')
-		#plt.savefig('../Tex Files/temptemp',bbox_inches='tight')
-		plots[counter,:] = [pl1, pl2]
-		counter = counter + 1
-		lamb = lamb*updateVal
-	print "Finished"
+	(a_pred, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, 0, 0.00001, numiters, a_pred, u ,z, S, ids, x_train, y_train)
 
-	#Plot noiseless
-	#a_noiseless = a - a_noise
-	#xplot = np.reshape(np.array(a_noiseless).transpose(), (size, size, inputs))
-	#plt.figure(counter)
-	#plt.imshow((xplot-L)/(U-L), interpolation='nearest')
+	# #(U, L) = (9, -2.3)
+	# while(lamb <= thresh):
+	# 	print lamb
+	# 	(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, a)
+	# 	xplot = np.reshape(x.transpose(), (size, size, inputs))
+	# 	plt.figure(counter)
+	# 	plt.imshow((xplot-L)/(U-L), interpolation='nearest')
+	# 	plt.gca().axes.get_xaxis().set_visible(False)
+	# 	plt.gca().axes.get_yaxis().set_visible(False)
+	# 	#plt.title('$\lambda = 7$')
+	# 	#plt.savefig('../Tex Files/temptemp',bbox_inches='tight')
+	# 	plots[counter,:] = [pl1, pl2]
+	# 	counter = counter + 1
+	# 	lamb = lamb*updateVal
+	# print "Finished"
 
-	# plt.figure(counter+1)
-	# plt.plot(plots[:,0], plots[:,1], 'ro')
-	# plt.xlabel('$\sum w_{jk}||x_j - x_k||$')
-	# plt.ylabel('$\sum f_i(x_i)$')	
-	#counter = counter + 2
+	# #Plot noiseless
+	# #a_noiseless = a - a_noise
+	# #xplot = np.reshape(np.array(a_noiseless).transpose(), (size, size, inputs))
+	# #plt.figure(counter)
+	# #plt.imshow((xplot-L)/(U-L), interpolation='nearest')
 
-	#REWEIGHTING STEP
-	reweight = 0
-	lamb = lamb/2
-	if (reweight == 1):
-		S_temp = S
-		#(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, a)
-		for i in range(edges):
-			val = LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
-			if(val >= 1e-4):
-				(S_temp[ids[i,0],ids[i,1]],S_temp[ids[i,1],ids[i,0]]) = (0.5,0.5)
-		(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S_temp, ids, a)
-		xplot = np.reshape(x.transpose(), (size, size, inputs))
-		plt.figure(counter)
-		plt.imshow((xplot-L)/(U-L), interpolation='nearest')
+	# # plt.figure(counter+1)
+	# # plt.plot(plots[:,0], plots[:,1], 'ro')
+	# # plt.xlabel('$\sum w_{jk}||x_j - x_k||$')
+	# # plt.ylabel('$\sum f_i(x_i)$')	
+	# #counter = counter + 2
 
-	plt.rc('font', family='serif')
-	plt.show()
+	# #REWEIGHTING STEP
+	# reweight = 0
+	# lamb = lamb/2
+	# if (reweight == 1):
+	# 	S_temp = S
+	# 	#(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, a)
+	# 	for i in range(edges):
+	# 		val = LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
+	# 		if(val >= 1e-4):
+	# 			(S_temp[ids[i,0],ids[i,1]],S_temp[ids[i,1],ids[i,0]]) = (0.5,0.5)
+	# 	(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S_temp, ids, a)
+	# 	xplot = np.reshape(x.transpose(), (size, size, inputs))
+	# 	plt.figure(counter)
+	# 	plt.imshow((xplot-L)/(U-L), interpolation='nearest')
+
+	# plt.rc('font', family='serif')
+	# plt.show()
 
 if __name__ == '__main__':
 	main()
