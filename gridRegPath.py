@@ -25,6 +25,8 @@ def solveX(data):
 	xnew = Variable(inputs,1)
 	g = 0.5*square(norm(xnew - a))
 	h = 0
+	for i in range(10000000):
+		temp = 1+1
 	for i in range(len(neighs)/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
 		if(weight != 0):
@@ -106,7 +108,8 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 	eabs = math.pow(10,-2) #CHANGE THESE TWO AS PARAMS
 	erel = math.pow(10,-3)
 
-	maxProcesses =  100
+	maxProcesses =  80
+	#pool = Pool(processes = max(m, edges))
 	pool = Pool(processes = min(max(m, edges), maxProcesses))
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 		#x update
@@ -245,8 +248,8 @@ def main():
 	(x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
 	numiters = 0
-	thresh = 1
-	lamb = 1
+	thresh = 3
+	lamb = 0.1
 	updateVal = 1.5
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
@@ -265,6 +268,7 @@ def main():
 		(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, a)
 		xplot = np.reshape(x.transpose(), (size, size, inputs))
 		plt.figure(counter)
+		(U, L) = (x.max()+0.1, x.min()-0.1)
 		plt.imshow((xplot-L)/(U-L), interpolation='nearest')
 		plt.gca().axes.get_xaxis().set_visible(False)
 		plt.gca().axes.get_yaxis().set_visible(False)
@@ -303,7 +307,7 @@ def main():
 		plt.imshow((xplot-L)/(U-L), interpolation='nearest')
 
 	plt.rc('font', family='serif')
-	plt.show()
+	#plt.show()
 
 if __name__ == '__main__':
 	main()

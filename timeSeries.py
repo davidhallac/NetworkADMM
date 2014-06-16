@@ -108,6 +108,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 
 	maxProcesses =  100
 	pool = Pool(processes = min(max(m, edges), maxProcesses))
+	#pool = Pool(processes = max(m, edges))
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 		#x update
 		neighs = np.zeros(((2*inputs+1)*maxdeg,m))
@@ -217,8 +218,8 @@ def main():
 	(x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
 	numiters = 0
-	thresh = .2
-	lamb = 0.19
+	thresh = 10
+	lamb = 0.1
 	updateVal = 1.5
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
@@ -276,7 +277,7 @@ def main():
 		plt.imshow((xplot-L)/(U-L), interpolation='nearest')
 
 	plt.rc('font', family='serif')
-	plt.show()
+	#plt.show()
 
 if __name__ == '__main__':
 	main()

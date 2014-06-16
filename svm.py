@@ -75,119 +75,35 @@ def solveU(data):
 	rho = data[len(data)-1]
 	return u + (x - z)
 
-def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, x_train, y_train):
-	#Find actual solution
-	x_actual = Variable(inputs,m)
+def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_train, y_train, c):
+
+
+	a = Variable(inputs,m)
+	epsil = Variable(numtests,m)
+	b = Variable(1,m)
 	g = 0
+	constraints = [epsil >= 0]
 	for i in range(m):
-		g = g + 0.5*square(norm(x_actual[:,i] - a[:,i]))
+		g = g + 0.5*square(norm(a[:,i]))+ c*norm(epsil[:,i],1)
+		for j in range(numtests):
+			temp = np.asmatrix(x_train[j*inputs:j*inputs+numtests,i])
+			constraints = constraints + [y_train[j,i]*(temp*a[:,i] + b[i]) >= 1 - epsil[j,i]]
 	f = 0
 	for i in range(edges):
-		f = f + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*norm(x_actual[:,ids[i,0]] - x_actual[:,ids[i,1]])
+		f = f + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*norm(a[:,ids[i,0]] - a[:,ids[i,1]])
 	objective = Minimize(g + lamb*f)
-	constraints = []
 	p = Problem(objective, constraints)
 	result_actual = p.solve()
 
-	#Find max degree of graph
-	maxdeg = 0;
-	for i in range(m):
-		maxdeg = max(maxdeg, len(S.getrow(i).nonzero()[1]))
-	iters = 0
 
-	#Stopping criteria
-	(s, r, epri, edual) = (1,1,0,0)
-	A = np.zeros((2*edges, m))
-	for i in range(edges):
-		A[2*i,ids[i,0]] = 1
-		A[2*i+1, ids[i,1]] = 1
-	sqn = math.sqrt(m*inputs)
-	sqp = math.sqrt(2*inputs*edges)
-	eabs = math.pow(10,-2) #CHANGE THESE TWO AS PARAMS
-	erel = math.pow(10,-3)
-
-	maxProcesses =  100
-	pool = Pool(processes = min(max(m, edges), maxProcesses))
-	while(iters < numiters and (r > epri or s > edual or iters < 1)):
-		#x update
-		neighs = np.zeros(((2*inputs+1)*maxdeg,m))
-		for i in range(m):
-			counter = 0
-			for j in range(edges):
-			#Smaller number always first. This is ij with i < j
-				if(ids[j,0] == i):
-					neighs[counter*(2*inputs+1),i] = S.getrow(i).getcol(ids[j,1]).todense() #weight
-					neighs[counter*(2*inputs+1)+1:counter*(2*inputs+1)+(inputs+1),i] = u[:,2*j] #u_ij 
-					neighs[counter*(2*inputs+1)+(inputs+1):(counter+1)*(2*inputs+1),i] = z[:,2*j] #z_ij
-					counter = counter + 1
-				elif(ids[j,1] == i):
-					neighs[counter*(2*inputs+1),i] = S.getrow(i).getcol(ids[j,0]).todense()
-					neighs[counter*(2*inputs+1)+1:counter*(2*inputs+1)+(inputs+1),i] = u[:,2*j+1]
-					neighs[counter*(2*inputs+1)+(inputs+1):(counter+1)*(2*inputs+1),i] = z[:,2*j+1]
-					counter = counter + 1
-		temp = np.concatenate((x,a,neighs,np.tile([rho,lamb,inputs], (m,1)).transpose()), axis=0)
-		newx = pool.map(solveX, temp.transpose())
-		x = np.array(newx).transpose()[0]
- 
-		#z update
-		ztemp = z.reshape(2*inputs, edges, order='F')
-		utemp = u.reshape(2*inputs, edges, order='F')
-		xtemp = np.zeros((inputs, 2*edges))
-		weights = np.zeros((1, edges))
-		for j in range(edges):
-			weights[0,j] = S.getrow(ids[j,0]).getcol(ids[j,1]).todense()
-			xtemp[:,2*j] = np.array(x[:,ids[j,0]])
-			xtemp[:,2*j+1] = x[:,ids[j,1]]
-		xtemp = xtemp.reshape(2*inputs, edges, order='F')
-		temp = np.concatenate((xtemp,utemp,ztemp,weights,np.tile([rho,lamb,inputs], (edges,1)).transpose()), axis=0)
-		newz = pool.map(solveZ, temp.transpose())
-		ztemp = np.array(newz).transpose()[0]
-		ztemp = ztemp.reshape(inputs, 2*edges, order='F')
-		s = LA.norm(rho*np.dot(A.transpose(),(ztemp - z).transpose())) #For dual residual
-		z = ztemp
-
-		#u update
-		xtemp = np.zeros((inputs, 2*edges))
-		for j in range(edges):
-			xtemp[:,2*j] = np.array(x[:,ids[j,0]])
-			xtemp[:,2*j+1] = x[:,ids[j,1]]
-		temp = np.concatenate((u, xtemp, z, np.tile(rho, (1,2*edges))), axis=0)
-		newu = pool.map(solveU, temp.transpose())
-		u = np.array(newu).transpose()
-
-		#Stopping criterion - p19 of ADMM paper
-		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
-		edual = sqn*eabs + erel*LA.norm(np.dot(A.transpose(),u.transpose()), 'fro')
-		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
-		s = s #updated at z-step
-
-		obj2 = 0
-		for i in range(m):
-			obj2 = obj2 + 0.5*(LA.norm(x[:,i] - a[:,i]))*(LA.norm(x[:,i] - a[:,i]))
-		obj1 = 0
-		for i in range(edges):
-			obj1 = obj1 + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
-		print lamb*obj1 + obj2 - result_actual, result_actual
-		print r, epri, s, edual
-		iters = iters + 1
-
-	pool.close()
-	pool.join()
-
-	#UNCOMMENT TO USE ACTUAL SOLUTION
-	x = np.array(x_actual.value)
-	
-	(obj2, obj1) = (0, 0)
-	for i in range(m):
-		obj2 = obj2 + 0.5*(LA.norm(x[:,i] - a[:,i]))*(LA.norm(x[:,i] - a[:,i]))
-	for i in range(edges):
-		obj1 = obj1 + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
-	print lamb*obj1 + obj2 - result_actual, result_actual
-	return (x, u, z, x_actual, obj1, obj2)
+	x_actual = np.array(a.value)
+	#print x_actual
+	return (x_actual, u, z, x_actual, 0, 0)	
 
 def main():
 	
 	size = 100
+	m = size
 	partitions = 5
 	inputs = 10
 	rho = 0.5
@@ -220,41 +136,67 @@ def main():
 	a_true = np.random.randn(inputs, partitions)
 	#number of given values in the training set at each node
 	numtests = 10
+	testSetSize = 5
 	v = np.random.randn(numtests,size)
+	vtest = np.random.randn(testSetSize,size)
 
 	x_train = np.random.randn(numtests*inputs, size)
 	y_train = np.zeros((numtests,size))
 	for i in range(size):
 		a_part = a_true[:,i/sizepart]
 		for j in range(numtests):
-			y_train[j,i] = np.sign([np.dot(a_part.transpose(), x_train[j*inputs:j*inputs+numtests,i])])
+			y_train[j,i] = np.sign([np.dot(a_part.transpose(), x_train[j*inputs:j*inputs+numtests,i])+v[j,i]])
+
+	x_test = np.random.randn(testSetSize*inputs, size)
+	y_test = np.zeros((testSetSize, size))
+	for i in range(size):
+		a_part = a_true[:,i/sizepart]
+		for j in range(testSetSize):
+			y_test[j,i] = np.sign([np.dot(a_part.transpose(), x_test[j*inputs:j*inputs+numtests,i])+vtest[j,i]])
 
 	(a_pred,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
 	numiters = 0
+	c = 0.79 #Between 0.785 and 0.793
 	thresh = 1
-	lamb = 1
-	updateVal = 1.5
+	lamb = 0.04
+	updateVal = 1.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
-	(a_pred, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, 0, 0.00001, numiters, a_pred, u ,z, S, ids, x_train, y_train)
-
-	# #(U, L) = (9, -2.3)
-	# while(lamb <= thresh):
-	# 	print lamb
-	# 	(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, a)
-	# 	xplot = np.reshape(x.transpose(), (size, size, inputs))
-	# 	plt.figure(counter)
-	# 	plt.imshow((xplot-L)/(U-L), interpolation='nearest')
-	# 	plt.gca().axes.get_xaxis().set_visible(False)
-	# 	plt.gca().axes.get_yaxis().set_visible(False)
-	# 	#plt.title('$\lambda = 7$')
-	# 	#plt.savefig('../Tex Files/temptemp',bbox_inches='tight')
-	# 	plots[counter,:] = [pl1, pl2]
-	# 	counter = counter + 1
-	# 	lamb = lamb*updateVal
-	# print "Finished"
+	(a_pred, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, 0, 0.00001, numiters, a_pred, u ,z, S, ids, numtests, x_train, y_train, c)
+	#Test results on test set
+	right = 0
+	total = testSetSize*size
+	for i in range(size):
+		temp = a_pred[:,i]
+		for j in range(testSetSize):
+			pred = np.sign([np.dot(temp.transpose(), x_test[j*inputs:j*inputs+numtests,i])])
+			if(pred == y_test[j,i]):
+				right = right + 1
+	print right / float(total)
+	plots[counter-1,:] = [0, right/float(total)]
+	
+	while(lamb <= thresh):
+		print "Lambda = ", lamb
+		(a_pred, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, a_pred, u ,z, S, ids, numtests, x_train, y_train, c)
+		right = 0
+		total = testSetSize*size
+		for i in range(size):
+			temp = a_pred[:,i]
+			for j in range(testSetSize):
+				pred = np.sign([np.dot(temp.transpose(), x_test[j*inputs:j*inputs+numtests,i])])
+				if(pred == y_test[j,i]):
+					right = right + 1
+		plots[counter,:] = [lamb, right/float(total)]
+		counter = counter + 1
+		# if(lamb < 0.1):
+		# 	lamb = lamb*2*updateVal
+		# else:
+		lamb = lamb*updateVal
+		#lamb = lamb + 0.05
+		print right / float(total)
+	print "Finished"
 
 	# #Plot noiseless
 	# #a_noiseless = a - a_noise
@@ -262,29 +204,15 @@ def main():
 	# #plt.figure(counter)
 	# #plt.imshow((xplot-L)/(U-L), interpolation='nearest')
 
-	# # plt.figure(counter+1)
-	# # plt.plot(plots[:,0], plots[:,1], 'ro')
-	# # plt.xlabel('$\sum w_{jk}||x_j - x_k||$')
-	# # plt.ylabel('$\sum f_i(x_i)$')	
-	# #counter = counter + 2
+	plt.figure(0)
+	plt.plot(plots[:,0], plots[:,1], 'ro')
+	plt.xlabel('$\lambda$')
+	plt.ylabel('Prediction Accuracy')	
+	#plt.xscale('log')
+	plt.savefig('svm_reg_path',bbox_inches='tight')
 
-	# #REWEIGHTING STEP
-	# reweight = 0
-	# lamb = lamb/2
-	# if (reweight == 1):
-	# 	S_temp = S
-	# 	#(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, a)
-	# 	for i in range(edges):
-	# 		val = LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
-	# 		if(val >= 1e-4):
-	# 			(S_temp[ids[i,0],ids[i,1]],S_temp[ids[i,1],ids[i,0]]) = (0.5,0.5)
-	# 	(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S_temp, ids, a)
-	# 	xplot = np.reshape(x.transpose(), (size, size, inputs))
-	# 	plt.figure(counter)
-	# 	plt.imshow((xplot-L)/(U-L), interpolation='nearest')
 
-	# plt.rc('font', family='serif')
-	# plt.show()
+	plt.show()
 
 if __name__ == '__main__':
 	main()
