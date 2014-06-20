@@ -25,8 +25,6 @@ def solveX(data):
 	xnew = Variable(inputs,1)
 	g = 0.5*square(norm(xnew - a))
 	h = 0
-	for i in range(10000000):
-		temp = 1+1
 	for i in range(len(neighs)/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
 		if(weight != 0):
@@ -43,8 +41,6 @@ def solveX(data):
 			if(weight != 0):
 				u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 				z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
-				#print u, z
-		#print neighs, a
 		objective = Minimize(2*g+h)
 		p = Problem(objective, constraints)
 		result = p.solve()
@@ -78,19 +74,7 @@ def solveU(data):
 	return u + (x - z)
 
 def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
-	#Find actual solution
-	x_actual = Variable(inputs,m)
-	g = 0
-	for i in range(m):
-		g = g + 0.5*square(norm(x_actual[:,i] - a[:,i]))
-	f = 0
-	for i in range(edges):
-		f = f + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*norm(x_actual[:,ids[i,0]] - x_actual[:,ids[i,1]])
-	objective = Minimize(g + lamb*f)
-	constraints = []
-	p = Problem(objective, constraints)
-	result_actual = p.solve()
-
+	
 	#Find max degree of graph
 	maxdeg = 0;
 	for i in range(m):
@@ -109,7 +93,6 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 	erel = math.pow(10,-3)
 
 	maxProcesses =  80
-	#pool = Pool(processes = max(m, edges))
 	pool = Pool(processes = min(max(m, edges), maxProcesses))
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 		#x update
@@ -170,24 +153,45 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 		obj1 = 0
 		for i in range(edges):
 			obj1 = obj1 + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
-		print lamb*obj1 + obj2 - result_actual, result_actual
 		print r, epri, s, edual
 		iters = iters + 1
 
 	pool.close()
 	pool.join()
-
-	#UNCOMMENT TO USE ACTUAL SOLUTION
-	if(numiters == 0):
-		x = np.array(x_actual.value)
 	
-	(obj2, obj1) = (0, 0)
-	for i in range(m):
-		obj2 = obj2 + 0.5*(LA.norm(x[:,i] - a[:,i]))*(LA.norm(x[:,i] - a[:,i]))
-	for i in range(edges):
-		obj1 = obj1 + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
-	print lamb*obj1 + obj2 - result_actual, result_actual
-	return (x, u, z, x_actual, obj1, obj2)
+	if(numiters == 0):
+		#Find actual solution
+		x_actual = Variable(inputs,m)
+		g = 0
+		for i in range(m):
+			g = g + 0.5*square(norm(x_actual[:,i] - a[:,i]))
+		f = 0
+		for i in range(edges):
+			f = f + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*norm(x_actual[:,ids[i,0]] - x_actual[:,ids[i,1]])
+		objective = Minimize(g + lamb*f)
+		constraints = []
+		p = Problem(objective, constraints)
+		result_actual = p.solve()
+
+		x = np.array(x_actual.value)
+		(obj2, obj1) = (0, 0)
+		for i in range(m):
+			obj2 = obj2 + 0.5*(LA.norm(x[:,i] - a[:,i]))*(LA.norm(x[:,i] - a[:,i]))
+		for i in range(edges):
+			obj1 = obj1 + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
+
+		print result_actual, lamb*obj1 + obj2 - result_actual
+		return (x, u, z, x_actual, obj1, obj2)
+
+	else:
+		x_actual = x
+		(obj2, obj1) = (0, 0)
+		for i in range(m):
+			obj2 = obj2 + 0.5*(LA.norm(x[:,i] - a[:,i]))*(LA.norm(x[:,i] - a[:,i]))
+		for i in range(edges):
+			obj1 = obj1 + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
+		print lamb*obj1 + obj2
+		return (x, u, z, x_actual, obj1, obj2)
 
 def main():
 	#Build 2x2 Grid
@@ -247,8 +251,8 @@ def main():
 	#For GenCon Solution - see old files
 	(x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
-	numiters = 0
-	thresh = 3
+	numiters = 10
+	thresh = 0.16
 	lamb = 0.1
 	updateVal = 1.5
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
