@@ -242,7 +242,7 @@ def main():
 	lamb = lamb/2
 	if (reweight == 1):
 		S_temp = S
-		#(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, a)
+		(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, a)
 		for i in range(edges):
 			val = LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
 			if(val >= 1e-4):
