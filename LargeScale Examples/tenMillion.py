@@ -1,6 +1,6 @@
 from cvxpy import *
 from multiprocessing import Pool
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from numpy import linalg as LA
 import numpy as np
 import scipy as sp
