@@ -105,7 +105,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 		temp = np.concatenate((x,a,neighs,np.tile([rho,lamb,inputs], (m,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
- 		print time.time() - t, " = stop 1"
+
 		#z update
 		ztemp = z.reshape(2*inputs, edges, order='F')
 		utemp = u.reshape(2*inputs, edges, order='F')
@@ -122,7 +122,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 		ztemp = ztemp.reshape(inputs, 2*edges, order='F')
 		s = LA.norm(rho*np.dot(A.transpose(),(ztemp - z).transpose())) #For dual residual
 		z = ztemp
-		print time.time() - t, " = stop 2"
+
 		#u update
 		xtemp = np.zeros((inputs, 2*edges))
 		for j in range(edges):
@@ -131,13 +131,13 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, a):
 		temp = np.concatenate((u, xtemp, z, np.tile(rho, (1,2*edges))), axis=0)
 		newu = pool.map(solveU, temp.transpose())
 		u = np.array(newu).transpose()
-		print time.time() - t, " = stop 3"
+
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
 		edual = sqn*eabs + erel*LA.norm(np.dot(A.transpose(),u.transpose()), 'fro')
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s #updated at z-step
-		print time.time() - t, " = stop 4"
+
 		obj2 = 0
 		for i in range(m):
 			obj2 = obj2 + 0.5*(LA.norm(x[:,i] - a[:,i]))*(LA.norm(x[:,i] - a[:,i]))
