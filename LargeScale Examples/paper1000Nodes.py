@@ -221,9 +221,9 @@ def main():
 	(x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
 	numiters = 25
-	thresh = 0.05#0.16
+	thresh = 5
 	lamb = 0.1
-	updateVal = 2#1.5
+	updateVal = 1.5
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	#Solve for lambda = 0
 	(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, 0, 0.00001, numiters, x, u ,z, S, ids, a)
