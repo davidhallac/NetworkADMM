@@ -153,6 +153,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s #updated at z-step
 
+		print r, epri, s, edual
 		iters = iters + 1
 
 	x_actual = np.array(x)
@@ -214,7 +215,7 @@ def main():
 
 	(a_pred,x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
-	numiters = 7
+	numiters = 10
 	c = 0.79 #Between 0.785 and 0.793 NOT SURE WHAT THIS IS??
 	thresh = 1
 	lamb = 0.1#0.04
