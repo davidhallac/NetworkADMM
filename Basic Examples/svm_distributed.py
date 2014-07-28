@@ -236,7 +236,7 @@ def main():
 
 	(a_pred,x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
-	numiters = 4
+	numiters = 10
 	c = 0.79 #Between 0.785 and 0.793 NOT SURE WHAT THIS IS??
 	thresh = 1
 	lamb = 0.5#0.04
