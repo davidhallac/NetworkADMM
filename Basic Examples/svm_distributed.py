@@ -118,7 +118,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 					counter = counter + 1
 		temp = np.concatenate((x,x_train,y_train,neighs,np.tile([c,numtests,rho,lamb,inputs], (m,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
-		print "Solved X"
+		print "Solved X", iters
 		x = np.array(newx).transpose()[0]
 
 		#z update
