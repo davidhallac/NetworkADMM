@@ -237,7 +237,7 @@ def main():
 			pred = np.sign([np.dot(temp.transpose(), x_test[j*inputs:j*inputs+numtests,i])])
 			if(pred == y_test[j,i]):
 				right = right + 1
-	print right / float(total)
+	print "Lambda = 0, ", right / float(total)
 	plots[counter-1,:] = [0, right/float(total)]
 	
 	while(lamb <= thresh):
