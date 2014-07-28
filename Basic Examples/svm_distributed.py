@@ -155,29 +155,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 
 		iters = iters + 1
 
-	# A = np.zeros((inputs, m))
-	# a = Variable(inputs,m)
-	# epsil = Variable(numtests,m)
-	# b = Variable(1,m)
-	# g = 0
-	# constraints = [epsil >= 0]
-	# for i in range(m):
-	# 	g = g + 0.5*square(norm(a[:,i]))+ c*norm(epsil[:,i],1)
-	# 	for j in range(numtests):
-	# 		temp = np.asmatrix(x_train[j*inputs:j*inputs+numtests,i])
-	# 		constraints = constraints + [y_train[j,i]*(temp*a[:,i] + b[i]) >= 1 - epsil[j,i]]
-	# f = 0
-	# for i in range(edges):
-	# 	f = f + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*norm(a[:,ids[i,0]] - a[:,ids[i,1]])
-	# objective = Minimize(g + lamb*f)
-	# p = Problem(objective, constraints)
-	# result_actual = p.solve()
-
-	# A = a.value
-
-
 	x_actual = np.array(x)
-	#print x_actual
 	return (x_actual, x_actual, u, z, x_actual, 0, 0)	
 
 def main():
@@ -239,7 +217,7 @@ def main():
 	numiters = 7
 	c = 0.79 #Between 0.785 and 0.793 NOT SURE WHAT THIS IS??
 	thresh = 1
-	lamb = 0.5#0.04
+	lamb = 0.1#0.04
 	updateVal = 1.5#1.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
