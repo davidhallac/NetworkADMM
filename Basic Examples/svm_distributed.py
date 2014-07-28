@@ -45,7 +45,7 @@ def solveX(data):
 	result = p.solve()
 	if(result == None):
 		#result = p.solve(verbose=True)
-		objective = Minimize(g+1.01*f)
+		objective = Minimize(g+0.99*f)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
 		print "SCALING BUG"
