@@ -42,7 +42,7 @@ def solveX(data):
 			f = f + rho/2*square(norm(a - z + u))
 	objective = Minimize(g + lamb*f)
 	p = Problem(objective, constraints)
-	result_actual = p.solve()
+	result = p.solve()
 	if(result == None):
 		result = p.solve(verbose=True)
 		objective = Minimize(g+1.001*f)
