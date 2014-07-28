@@ -215,7 +215,7 @@ def main():
 
 	(a_pred,x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
-	numiters = 10
+	numiters = 25
 	c = 0.79 #Between 0.785 and 0.793 NOT SURE WHAT THIS IS??
 	thresh = 1
 	lamb = 0.1#0.04
@@ -249,19 +249,10 @@ def main():
 					right = right + 1
 		plots[counter,:] = [lamb, right/float(total)]
 		counter = counter + 1
-		# if(lamb < 0.1):
-		# 	lamb = lamb*2*updateVal
-		# else:
 		lamb = lamb*updateVal
 		#lamb = lamb + 0.05
 		print right / float(total)
 	print "Finished"
-
-	# #Plot noiseless
-	# #a_noiseless = a - a_noise
-	# #xplot = np.reshape(np.array(a_noiseless).transpose(), (size, size, inputs))
-	# #plt.figure(counter)
-	# #plt.imshow((xplot-L)/(U-L), interpolation='nearest')
 
 	# plt.figure(0)
 	# plt.plot(plots[:,0], plots[:,1], 'ro')
