@@ -100,8 +100,10 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 
 	maxProcesses =  80
 	pool = Pool(processes = min(max(m, edges), maxProcesses))
+	print 'Memory usage Beginning: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 		#x update
+		print 'Memory usage MIDDLE: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 		neighs = np.zeros(((2*inputs+1)*maxdeg,m))
 		for i in range(m):
 			counter = 0
@@ -156,7 +158,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 
 		#print r, epri, s, edual
 		iters = iters + 1
-	print 'Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+	print 'Memory usage End: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 	x_actual = np.array(x)
 	return (x_actual, x_actual, u, z, x_actual, 0, 0)	
 
