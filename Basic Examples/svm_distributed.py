@@ -14,7 +14,7 @@ import math
 import sys
 from cStringIO import StringIO
 
-import resource
+#import resource; print 'Memory usage End: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
 def solveX(data):
 	inputs = int(data[len(data)-1])
@@ -100,10 +100,8 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 
 	maxProcesses =  80
 	pool = Pool(processes = min(max(m, edges), maxProcesses))
-	print 'Memory usage Beginning: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 		#x update
-		print 'Memory usage MIDDLE: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 		neighs = np.zeros(((2*inputs+1)*maxdeg,m))
 		for i in range(m):
 			counter = 0
@@ -161,7 +159,6 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 	
 	pool.close()
 	pool.join()		
-	print 'Memory usage End: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 	x_actual = x#np.array(x)
 	return (x_actual, u, z, x_actual, 0, 0)	
 
