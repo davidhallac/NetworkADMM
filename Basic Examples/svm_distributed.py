@@ -220,7 +220,7 @@ def main():
 
 	numiters = 25
 	c = 0.79 #Between 0.785 and 0.793 NOT SURE WHAT THIS IS??
-	thresh = 1.2
+	thresh = 0.5
 	lamb = 0.1#0.04
 	updateVal = 1.5#1.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
