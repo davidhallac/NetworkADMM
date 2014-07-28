@@ -159,8 +159,8 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 		#print r, epri, s, edual
 		iters = iters + 1
 	print 'Memory usage End: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-	x_actual = np.array(x)
-	return (x_actual, x_actual, u, z, x_actual, 0, 0)	
+	x_actual = np.array(x.value)
+	return (x_actual, u, z, x_actual, 0, 0)	
 
 def main():
 	
@@ -226,7 +226,8 @@ def main():
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
-	(a_pred, x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, 0, 0.00001, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
+	(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, 0, 0.00001, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
+	a_pred = x
 	#Test results on test set
 	right = 0
 	total = testSetSize*size
