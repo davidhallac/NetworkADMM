@@ -155,28 +155,28 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 
 		iters = iters + 1
 
-	A = np.zeros((inputs, m))
-	a = Variable(inputs,m)
-	epsil = Variable(numtests,m)
-	b = Variable(1,m)
-	g = 0
-	constraints = [epsil >= 0]
-	for i in range(m):
-		g = g + 0.5*square(norm(a[:,i]))+ c*norm(epsil[:,i],1)
-		for j in range(numtests):
-			temp = np.asmatrix(x_train[j*inputs:j*inputs+numtests,i])
-			constraints = constraints + [y_train[j,i]*(temp*a[:,i] + b[i]) >= 1 - epsil[j,i]]
-	f = 0
-	for i in range(edges):
-		f = f + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*norm(a[:,ids[i,0]] - a[:,ids[i,1]])
-	objective = Minimize(g + lamb*f)
-	p = Problem(objective, constraints)
-	result_actual = p.solve()
+	# A = np.zeros((inputs, m))
+	# a = Variable(inputs,m)
+	# epsil = Variable(numtests,m)
+	# b = Variable(1,m)
+	# g = 0
+	# constraints = [epsil >= 0]
+	# for i in range(m):
+	# 	g = g + 0.5*square(norm(a[:,i]))+ c*norm(epsil[:,i],1)
+	# 	for j in range(numtests):
+	# 		temp = np.asmatrix(x_train[j*inputs:j*inputs+numtests,i])
+	# 		constraints = constraints + [y_train[j,i]*(temp*a[:,i] + b[i]) >= 1 - epsil[j,i]]
+	# f = 0
+	# for i in range(edges):
+	# 	f = f + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*norm(a[:,ids[i,0]] - a[:,ids[i,1]])
+	# objective = Minimize(g + lamb*f)
+	# p = Problem(objective, constraints)
+	# result_actual = p.solve()
 
-	A = a.value
+	# A = a.value
 
 
-	x_actual = np.array(A)
+	x_actual = np.array(x)
 	#print x_actual
 	return (x_actual, x_actual, u, z, x_actual, 0, 0)	
 
@@ -236,7 +236,7 @@ def main():
 
 	(a_pred,x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
-	numiters = 5
+	numiters = 2
 	c = 0.79 #Between 0.785 and 0.793 NOT SURE WHAT THIS IS??
 	thresh = 1
 	lamb = 0.5#0.04
