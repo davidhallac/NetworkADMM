@@ -40,6 +40,9 @@ def solveX(data):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			f = f + rho/2*square(norm(a - z + u))
+	objective = Minimize(g + lamb*f)
+	p = Problem(objective, constraints)
+	result_actual = p.solve()
 	if(result == None):
 		result = p.solve(verbose=True)
 		objective = Minimize(g+1.001*f)
@@ -47,10 +50,6 @@ def solveX(data):
 		result = p.solve(verbose=True)
 		print "CVXPY BUG?", result
 		print a
-	objective = Minimize(g + lamb*f)
-	p = Problem(objective, constraints)
-	result_actual = p.solve()
-
 
 	return a.value
 
