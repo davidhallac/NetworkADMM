@@ -44,10 +44,10 @@ def solveX(data):
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
-		result = p.solve(verbose=True)
+		#result = p.solve(verbose=True)
 		objective = Minimize(g+1.001*f)
 		p = Problem(objective, constraints)
-		result = p.solve(verbose=True)
+		result = p.solve(verbose=False)
 		print "CVXPY BUG?", result
 		print a
 
