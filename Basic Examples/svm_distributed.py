@@ -159,7 +159,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 		#print r, epri, s, edual
 		iters = iters + 1
 	print 'Memory usage End: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-	x_actual = np.array(x.value)
+	x_actual = x#np.array(x)
 	return (x_actual, u, z, x_actual, 0, 0)	
 
 def main():
