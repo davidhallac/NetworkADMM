@@ -242,7 +242,8 @@ def main():
 	
 	while(lamb <= thresh):
 		print "Lambda = ", lamb
-		(a_pred, x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
+		(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
+		a_pred = x
 		right = 0
 		total = testSetSize*size
 		for i in range(size):
@@ -255,7 +256,6 @@ def main():
 		counter = counter + 1
 		lamb = lamb*updateVal
 		#lamb = lamb + 0.05
-		print 'Memory usage2: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 		print right / float(total)
 	print "Finished"
 
