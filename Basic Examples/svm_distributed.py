@@ -153,13 +153,6 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s #updated at z-step
 
-		obj2 = 0
-		for i in range(m):
-			obj2 = obj2 + 0.5*(LA.norm(x[:,i] - a[:,i]))*(LA.norm(x[:,i] - a[:,i]))
-		obj1 = 0
-		for i in range(edges):
-			obj1 = obj1 + S.getrow(ids[i,0]).getcol(ids[i,1]).todense()*LA.norm(x[:,ids[i,0]] - x[:,ids[i,1]])
-		print r, epri, s, edual
 		iters = iters + 1
 
 	A = np.zeros((inputs, m))
