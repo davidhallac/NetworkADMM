@@ -165,7 +165,7 @@ def main():
 	m = size
 	partitions = 5
 	inputs = 10
-	rho = 0.5
+	rho = 2
 	maxedges = size*(size-1) #maximum possible edges
 
 	sizepart = size/partitions
