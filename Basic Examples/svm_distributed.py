@@ -40,7 +40,7 @@ def solveX(data):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			f = f + rho/2*square(norm(a - z + u))
-	objective = Minimize(g + lamb*f)
+	objective = Minimize(0.5(g + lamb*f))
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
