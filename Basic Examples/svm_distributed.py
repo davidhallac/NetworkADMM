@@ -282,12 +282,12 @@ def main():
 	# #plt.figure(counter)
 	# #plt.imshow((xplot-L)/(U-L), interpolation='nearest')
 
-	plt.figure(0)
-	plt.plot(plots[:,0], plots[:,1], 'ro')
-	plt.xlabel('$\lambda$')
-	plt.ylabel('Prediction Accuracy')	
-	#plt.xscale('log')
-	plt.savefig('svm_reg_path',bbox_inches='tight')
+	# plt.figure(0)
+	# plt.plot(plots[:,0], plots[:,1], 'ro')
+	# plt.xlabel('$\lambda$')
+	# plt.ylabel('Prediction Accuracy')	
+	# #plt.xscale('log')
+	# plt.savefig('svm_reg_path',bbox_inches='tight')
 
 
 	#plt.show()
