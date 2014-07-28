@@ -158,6 +158,9 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 
 		#print r, epri, s, edual
 		iters = iters + 1
+	
+	pool.close()
+	pool.join()		
 	print 'Memory usage End: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 	x_actual = x#np.array(x)
 	return (x_actual, u, z, x_actual, 0, 0)	
@@ -220,7 +223,7 @@ def main():
 
 	numiters = 25
 	c = 0.79 #Between 0.785 and 0.793 NOT SURE WHAT THIS IS??
-	thresh = 0.5
+	thresh = 1.2
 	lamb = 0.1#0.04
 	updateVal = 1.5#1.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
