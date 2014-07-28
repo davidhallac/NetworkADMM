@@ -153,7 +153,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s #updated at z-step
 
-		print r, epri, s, edual
+		#print r, epri, s, edual
 		iters = iters + 1
 
 	x_actual = np.array(x)
@@ -165,7 +165,7 @@ def main():
 	m = size
 	partitions = 5
 	inputs = 10
-	rho = 0.1
+	rho = 0.25
 	maxedges = size*(size-1) #maximum possible edges
 
 	sizepart = size/partitions
@@ -217,7 +217,7 @@ def main():
 
 	numiters = 25
 	c = 0.79 #Between 0.785 and 0.793 NOT SURE WHAT THIS IS??
-	thresh = 1
+	thresh = 1.2
 	lamb = 0.1#0.04
 	updateVal = 1.5#1.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
