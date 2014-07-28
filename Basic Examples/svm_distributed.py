@@ -40,11 +40,13 @@ def solveX(data):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			f = f + rho/2*square(norm(a - z + u))
-	# for j in range(edges):
-	# 	if(ids[j,0] == i):
-	# 		f = f + S.getrow(ids[j,0]).getcol(ids[j,1]).todense()*norm(a[:,ids[j,0]] - z[:,ids[j,1]])
-	# 	elif(ids[j,1] == i):
-	# 		f = f + S.getrow(ids[j,0]).getcol(ids[j,1]).todense()*norm(a[:,ids[j,1]] - z[:,ids[j,0]])
+	if(result == None):
+		result = p.solve(verbose=True)
+		objective = Minimize(g+1.001*f)
+		p = Problem(objective, constraints)
+		result = p.solve(verbose=True)
+		print "CVXPY BUG?", result
+		print a
 	objective = Minimize(g + lamb*f)
 	p = Problem(objective, constraints)
 	result_actual = p.solve()
