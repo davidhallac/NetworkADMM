@@ -267,7 +267,7 @@ def main():
 	plt.savefig('svm_reg_path',bbox_inches='tight')
 
 
-	#plt.show()
+	plt.show()
 
 if __name__ == '__main__':
 	main()
