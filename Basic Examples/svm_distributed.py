@@ -152,14 +152,17 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
 		edual = sqn*eabs + erel*LA.norm(np.dot(A.transpose(),u.transpose()), 'fro')
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
-		s = s #updated at z-step
+		s = s
+
+		#Update rho starting after the 3rd iteration
+		if(iter > 3):
+			rho = rho*(r/epri)/(s/edual)
 
 		#print r, epri, s, edual
 		iters = iters + 1
 	
 	pool.close()
 	pool.join()		
-	x_actual = x#np.array(x)
 	return (x, u, z, 0, iters)	
 
 def main():
@@ -191,26 +194,22 @@ def main():
 					counter = counter+1
 	S = sp.sparse.coo_matrix((weights,(ids[:,0].flatten(),ids[:,1].flatten())), shape=(size,size))
 	S = S + S.transpose()
-	#S[0,0] = 0 SHOULDNT MATTER, RIGHT??
 	edges = counter #Actual number of edges
 
 	#True a at each partition
 	a_true = np.random.randn(inputs, partitions)
-	#number of given values in the training set at each node
-	numtests = 10
+	numtests = 10 #Training set size
 	testSetSize = 5
 	v = np.random.randn(numtests,size)
 	vtest = np.random.randn(testSetSize,size)
 
-	x_train = np.random.randn(numtests*inputs, size)
-	y_train = np.zeros((numtests,size))
+	(x_train, y_train) = (np.random.randn(numtests*inputs, size), np.zeros((numtests,size)))
 	for i in range(size):
 		a_part = a_true[:,i/sizepart]
 		for j in range(numtests):
 			y_train[j,i] = np.sign([np.dot(a_part.transpose(), x_train[j*inputs:j*inputs+numtests,i])+v[j,i]])
 
-	x_test = np.random.randn(testSetSize*inputs, size)
-	y_test = np.zeros((testSetSize, size))
+	(x_test, y_test) = (np.random.randn(testSetSize*inputs, size), np.zeros((testSetSize, size)))
 	for i in range(size):
 		a_part = a_true[:,i/sizepart]
 		for j in range(testSetSize):
@@ -222,7 +221,7 @@ def main():
 	c = 0.79 #Between 0.785 and 0.793
 	thresh = 1
 	lamb = 0.1#0.04
-	updateVal = 1.2#1.05
+	updateVal = 1.5#1.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
@@ -265,7 +264,7 @@ def main():
 	plt.plot(plots[:,0], plots[:,1], 'ro')
 	plt.xlabel('$\lambda$')
 	plt.ylabel('Prediction Accuracy')	
-	#plt.xscale('log')
+	plt.xscale('log')
 	plt.savefig('svm_reg_path',bbox_inches='tight')
 
 
