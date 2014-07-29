@@ -171,7 +171,7 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 				if(norm(x[:,i] - x[:,j]) < thresh and S[i,j] > 0):
 					unique = 0
 			if(unique == 1):
-				numClusters++;
+				numClusters++
 
 
 
