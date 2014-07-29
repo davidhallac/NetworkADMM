@@ -168,7 +168,7 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 		for i in range(m):
 			unique = 1
 			for j in range(i):
-				if(norm(x[:,i] - x[:,j]) < thresh and S[i,j] > 0):
+				if(LA.norm(x[:,i] - x[:,j]) < thresh and S[i,j] > 0):
 					unique = 0
 					break
 			if(unique == 1):
