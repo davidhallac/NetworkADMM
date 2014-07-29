@@ -160,7 +160,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 	pool.close()
 	pool.join()		
 	x_actual = x#np.array(x)
-	return (x_actual, u, z, x_actual, 0, 0)	
+	return (x_actual, u, z, x_actual, 0, iters)	
 
 def main():
 	
@@ -239,8 +239,8 @@ def main():
 				right = right + 1
 	print "Lambda = 0"
 	print right / float(total)
-	plots[counter-1,:] = [0, right/float(total)]
-	
+	#plots[counter-1,:] = [0, right/float(total)]
+	plots[counter-1,:] = [0, pl2]
 	while(lamb <= thresh):
 		print "Lambda = ", lamb
 		(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
@@ -253,7 +253,10 @@ def main():
 				pred = np.sign([np.dot(temp.transpose(), x_test[j*inputs:j*inputs+numtests,i])])
 				if(pred == y_test[j,i]):
 					right = right + 1
-		plots[counter,:] = [lamb, right/float(total)]
+			#Option 1: For accuracy
+		#plots[counter,:] = [lamb, right/float(total)]
+			#Option 2: For what pl2 returns
+		plots[counter,:] = [lamb, pl2]
 		counter = counter + 1
 		lamb = lamb*updateVal
 		print right / float(total)
