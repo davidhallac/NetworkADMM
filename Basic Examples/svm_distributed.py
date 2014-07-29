@@ -221,7 +221,7 @@ def main():
 	c = 0.79 #Between 0.785 and 0.793
 	thresh = 1
 	lamb = 0.1#0.04
-	updateVal = 1.5#1.05
+	updateVal = 1.9#1.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
