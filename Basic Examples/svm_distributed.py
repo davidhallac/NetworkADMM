@@ -226,7 +226,7 @@ def main():
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
-	(x, u, z, xSol, pl1, pl2) = runADMM(m, edges, inputs, 0, 0.00001, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
+	(x, u, z, pl1, pl2) = runADMM(m, edges, inputs, 0, 0.00001, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
 	a_pred = x
 	#Test results on test set
 	(right, total) = (0, testSetSize*size)
