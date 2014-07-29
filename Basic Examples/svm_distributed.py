@@ -174,7 +174,7 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 			if(unique == 1):
 				numClusters = numClusters+1
 
-	print numClusters
+	print numClusters, iters
 
 	return (x, u, z, 0, numClusters)	
 
@@ -234,7 +234,7 @@ def main():
 	c = 0.79 #Between 0.785 and 0.793
 	thresh = 1.2
 	lamb = 0.1#0.04
-	updateVal = 1.2#1.05
+	updateVal = 1.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
@@ -253,7 +253,6 @@ def main():
 	#plots[counter-1,:] = [0, right/float(total)]
 	plots[counter-1,:] = [0, pl2]
 	while(lamb <= thresh):
-		print "Lambda = ", lamb
 		(x, u, z, pl1, pl2) = runADMM(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
 		a_pred = x
 		right = 0
@@ -270,6 +269,7 @@ def main():
 		plots[counter,:] = [lamb, pl2]
 		counter = counter + 1
 		lamb = lamb*updateVal
+		print "Lambda = ", lamb
 		print right / float(total)
 	print "Finished"
 
