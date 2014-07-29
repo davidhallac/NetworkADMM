@@ -162,14 +162,20 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 
 	#Find number of clusters
 	findClusters = 1
+	numClusters = 0
 	if (findClusters == 1):
 		thresh = 0.1
 		for i in range(m):
+			unique = 1
 			for j in range(i):
-				print i, j
+				if(norm(x[:,i] - x[:,j]) < thresh and S[i,j] > 0):
+					unique = 0
+			if(unique == 1):
+				numClusters++;
 
 
-	return (x, u, z, 0, iters)	
+
+	return (x, u, z, 0, numClusters)	
 
 def main():
 	
@@ -225,9 +231,9 @@ def main():
 
 	numiters = 50
 	c = 0.79 #Between 0.785 and 0.793
-	thresh = 1
+	thresh = 1.2
 	lamb = 0.1#0.04
-	updateVal = 1.5#1.05
+	updateVal = 1.2#1.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
