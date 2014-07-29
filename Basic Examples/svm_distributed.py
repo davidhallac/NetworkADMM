@@ -95,8 +95,8 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 		A[2*i+1, ids[i,1]] = 1
 	sqn = math.sqrt(m*inputs)
 	sqp = math.sqrt(2*inputs*edges)
-	eabs = math.pow(10,-2) #CHANGE THESE TWO AS PARAMS
-	erel = math.pow(10,-3)
+	eabs = math.pow(10,-3) #CHANGE THESE TWO AS PARAMS
+	erel = math.pow(10,-4)
 
 	maxProcesses =  80
 	pool = Pool(processes = min(max(m, edges), maxProcesses))
