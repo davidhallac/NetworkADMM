@@ -79,7 +79,7 @@ def solveU(data):
 	rho = data[len(data)-1]
 	return u + (x - z)
 
-def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_train, y_train, c):
+def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_train, y_train, c):
 
 	#Find max degree of graph
 	maxdeg = 0;
@@ -160,7 +160,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 	pool.close()
 	pool.join()		
 	x_actual = x#np.array(x)
-	return (x_actual, u, z, x_actual, 0, iters)	
+	return (x, u, z, 0, iters)	
 
 def main():
 	
@@ -218,19 +218,18 @@ def main():
 
 	(a_pred,x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
-	numiters = 40
+	numiters = 50
 	c = 0.79 #Between 0.785 and 0.793
 	thresh = 1
 	lamb = 0.1#0.04
-	updateVal = 1.1#1.05
+	updateVal = 1.2#1.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
-	(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, 0, 0.00001, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
+	(x, u, z, xSol, pl1, pl2) = runADMM(m, edges, inputs, 0, 0.00001, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
 	a_pred = x
 	#Test results on test set
-	right = 0
-	total = testSetSize*size
+	(right, total) = (0, testSetSize*size)
 	for i in range(size):
 		temp = a_pred[:,i]
 		for j in range(testSetSize):
@@ -243,7 +242,7 @@ def main():
 	plots[counter-1,:] = [0, pl2]
 	while(lamb <= thresh):
 		print "Lambda = ", lamb
-		(x, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
+		(x, u, z, pl1, pl2) = runADMM(m, edges, inputs, lamb, rho, numiters, x, u ,z, S, ids, numtests, x_train, y_train, c)
 		a_pred = x
 		right = 0
 		total = testSetSize*size
