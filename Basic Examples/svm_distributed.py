@@ -211,7 +211,7 @@ def main():
 		for j in range(numtests):
 			y_train[j,i] = np.sign([np.dot(a_part.transpose(), x_train[j*inputs:j*inputs+numtests,i])+v[j,i]])
 
-	(x_test,y_test) = (np.random.randn(testSetSize*inputs, size, np.zeros((testSetSize, size))))
+	(x_test,y_test) = (np.random.randn(testSetSize*inputs, size), np.zeros((testSetSize, size)))
 	for i in range(size):
 		a_part = a_true[:,i/sizepart]
 		for j in range(testSetSize):
