@@ -14,8 +14,6 @@ import math
 import sys
 from cStringIO import StringIO
 
-import resource
-
 def solveX(data):
 	inputs = int(data[len(data)-1])
 	lamb = data[len(data)-2]
@@ -190,7 +188,6 @@ def main():
 					right = right + 1
 		plots[counter,:] = [lamb, right/float(total)]
 		counter = counter + 1
-		print 'Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 		print "Lambda = ", lamb
 		print right / float(total)
 		lamb = lamb*updateVal
