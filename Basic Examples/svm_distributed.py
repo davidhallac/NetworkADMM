@@ -205,7 +205,7 @@ def main():
 	v = np.random.randn(numtests,size)
 	vtest = np.random.randn(testSetSize,size)
 
-	(x_train,y_train) = (np.random.randn(numtests*inputs, size, np.zeros((numtests,size))))
+	(x_train, y_train) = (np.random.randn(numtests*inputs, size), np.zeros((numtests,size)))
 	for i in range(size):
 		a_part = a_true[:,i/sizepart]
 		for j in range(numtests):
