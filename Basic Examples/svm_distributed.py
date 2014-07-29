@@ -154,12 +154,6 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s
 
-		#Update rho starting after the 3rd iteration
-		if(r < epri):
-			rho = rho/1.1
-		elif(s<edual):
-			rho = rho*1.1
-
 		print r, epri, s, edual
 		iters = iters + 1
 	
