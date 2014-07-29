@@ -154,20 +154,20 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s
 
-		print r, epri, s, edual
+		#print r, epri, s, edual
 		iters = iters + 1
 	
 	pool.close()
 	pool.join()		
 
 	#Find number of clusters
-	findClusters = 0
+	findClusters = 1
 	if (findClusters == 1):
 		thresh = 0.1
 		for i in range(m):
 			for j in range(i):
 				print i, j
-				
+
 
 	return (x, u, z, 0, iters)	
 
