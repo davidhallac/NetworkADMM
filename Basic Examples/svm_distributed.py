@@ -219,7 +219,7 @@ def main():
 	(a_pred,x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
 	numiters = 25
-	c = 0.79 #Between 0.785 and 0.793 NOT SURE WHAT THIS IS??
+	c = 0.79 #Between 0.785 and 0.793
 	thresh = 1.2
 	lamb = 0.1#0.04
 	updateVal = 1.5#1.05
@@ -237,7 +237,8 @@ def main():
 			pred = np.sign([np.dot(temp.transpose(), x_test[j*inputs:j*inputs+numtests,i])])
 			if(pred == y_test[j,i]):
 				right = right + 1
-	print "Lambda = 0, ", right / float(total)
+	print "Lambda = 0"
+	print right / float(total)
 	plots[counter-1,:] = [0, right/float(total)]
 	
 	while(lamb <= thresh):
@@ -255,16 +256,15 @@ def main():
 		plots[counter,:] = [lamb, right/float(total)]
 		counter = counter + 1
 		lamb = lamb*updateVal
-		#lamb = lamb + 0.05
 		print right / float(total)
 	print "Finished"
 
-	# plt.figure(0)
-	# plt.plot(plots[:,0], plots[:,1], 'ro')
-	# plt.xlabel('$\lambda$')
-	# plt.ylabel('Prediction Accuracy')	
-	# #plt.xscale('log')
-	# plt.savefig('svm_reg_path',bbox_inches='tight')
+	plt.figure(0)
+	plt.plot(plots[:,0], plots[:,1], 'ro')
+	plt.xlabel('$\lambda$')
+	plt.ylabel('Prediction Accuracy')	
+	#plt.xscale('log')
+	plt.savefig('svm_reg_path',bbox_inches='tight')
 
 
 	#plt.show()
