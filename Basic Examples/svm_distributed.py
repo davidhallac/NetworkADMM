@@ -156,7 +156,8 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 
 		#Update rho starting after the 3rd iteration
 		if(iter > 3):
-			rho = rho*(r/epri)/(s/edual)
+			1+1
+			#rho = rho*(r/epri)/(s/edual)
 
 		print r, epri, s, edual
 		iters = iters + 1
