@@ -155,9 +155,10 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 		s = s
 
 		#Update rho starting after the 3rd iteration
-		if(iter > 3):
-			1+1
-			#rho = rho*(r/epri)/(s/edual)
+		if(r < epri):
+			rho = rho/1.1
+		elif(s<edual):
+			rho = rho*1.1
 
 		print r, epri, s, edual
 		iters = iters + 1
@@ -204,15 +205,13 @@ def main():
 	v = np.random.randn(numtests,size)
 	vtest = np.random.randn(testSetSize,size)
 
-	x_train = np.random.randn(numtests*inputs, size)
-	y_train = np.zeros((numtests,size))
+	(x_train,y_train) = np.random.randn(numtests*inputs, size, np.zeros((numtests,size)))
 	for i in range(size):
 		a_part = a_true[:,i/sizepart]
 		for j in range(numtests):
 			y_train[j,i] = np.sign([np.dot(a_part.transpose(), x_train[j*inputs:j*inputs+numtests,i])+v[j,i]])
 
-	x_test = np.random.randn(testSetSize*inputs, size)
-	y_test = np.zeros((testSetSize, size))
+	(x_test,y_test) = np.random.randn(testSetSize*inputs, size, np.zeros((testSetSize, size)))
 	for i in range(size):
 		a_part = a_true[:,i/sizepart]
 		for j in range(testSetSize):
