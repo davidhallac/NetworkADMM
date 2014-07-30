@@ -1,6 +1,8 @@
 from cvxpy import *
 import itertools
 from multiprocessing import Pool
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import rc
 #from base_test import BaseTest
