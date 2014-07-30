@@ -118,7 +118,7 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 
 	print numClusters
 
-	return (x_actual, u, z, x_actual, 0, 0)	
+	return (x_actual, u, z, x_actual, 0, numClusters)	
 
 def main():
 	
@@ -178,9 +178,9 @@ def main():
 
 	numiters = 0
 	c = 0.79 #Between 0.785 and 0.793 NOT SURE WHAT THIS IS??
-	thresh = 1.2
+	thresh = 1
 	lamb = 0.1#0.04
-	updateVal = 1.5#1.05
+	updateVal = 1.02
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
@@ -195,8 +195,8 @@ def main():
 			if(pred == y_test[j,i]):
 				right = right + 1
 	print "Lambda = 0, ", right / float(total)
-	plots[counter-1,:] = [0, right/float(total)]
-	
+	#plots[counter-1,:] = [0, right/float(total)]
+	plots[counter-1,:] = [0, pl2]
 	while(lamb <= thresh):
 		(a_pred, u, z, xSol, pl1, pl2) = runADMM_Grid(m, edges, inputs, lamb, rho, numiters, a_pred, u ,z, S, ids, numtests, x_train, y_train, c)
 		right = 0
@@ -207,7 +207,8 @@ def main():
 				pred = np.sign([np.dot(temp.transpose(), x_test[j*inputs:j*inputs+numtests,i])])
 				if(pred == y_test[j,i]):
 					right = right + 1
-		plots[counter,:] = [lamb, right/float(total)]
+		#plots[counter,:] = [lamb, right/float(total)]
+		plots[counter,:] = [lamb, pl2]
 		counter = counter + 1
 		print "Lambda = ", lamb
 		print right / float(total)
@@ -229,7 +230,7 @@ def main():
 	plt.savefig('svm_reg_path',bbox_inches='tight')
 
 
-	#plt.show()
+	plt.show()
 
 if __name__ == '__main__':
 	main()
