@@ -96,7 +96,28 @@ def runADMM_Grid(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtest
 
 
 	x_actual = np.array(a.value)
-	#print x_actual
+
+	#Find number of clusters
+	findClusters = 1
+	numClusters = 0
+	if (findClusters == 1):
+		thresh = 0.2
+		for i in range(m):
+			unique = 1
+			for j in range(i):
+				if(LA.norm(x_actual[:,i] - x_actual[:,j]) < thresh and S[i,j] > 0):
+			#		print "Node ", i, " connected to node", j
+					unique = 0
+					break
+			if(unique == 1):
+				#minVal = 100
+				#for j in range(i):
+			#		minVal = min(minVal, LA.norm(x[:,i] - x[:,j]))
+			#	print "Node ", i, " is unique. Max value = ", minVal
+				numClusters = numClusters+1
+
+	print numClusters
+
 	return (x_actual, u, z, x_actual, 0, 0)	
 
 def main():
