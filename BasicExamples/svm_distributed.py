@@ -1,6 +1,8 @@
 from cvxpy import *
 import itertools
 from multiprocessing import Pool
+import matplotlib
+	matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import rc
 #from base_test import BaseTest
@@ -14,7 +16,6 @@ import math
 import sys
 from cStringIO import StringIO
 
-import matplotlib
 #import resource; print 'Memory usage End: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
 def solveX(data):
@@ -179,8 +180,7 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 
 	return (x, u, z, 0, numClusters)	
 
-def main():
-	matplotlib.use('Agg') 
+def main(): 
 	size = 100
 	m = size
 	partitions = 5
