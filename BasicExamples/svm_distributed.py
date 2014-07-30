@@ -179,7 +179,7 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 	return (x, u, z, 0, numClusters)	
 
 def main():
-	
+	plt.ioff() 
 	size = 100
 	m = size
 	partitions = 5
@@ -234,7 +234,7 @@ def main():
 	c = 0.79 #Between 0.785 and 0.793
 	thresh = 1.2
 	lamb = 0.1#0.04
-	updateVal = 1.05
+	updateVal = 5.05
 	numtrials = math.log(thresh/lamb, updateVal) + 1 
 	plots =	np.zeros((math.floor(numtrials)+1,2))
 	#Solve for lambda = 0
