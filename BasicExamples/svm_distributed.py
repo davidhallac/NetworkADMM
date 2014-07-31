@@ -100,7 +100,7 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 	eabs = math.pow(10,-3) #CHANGE THESE TWO AS PARAMS
 	erel = math.pow(10,-4)
 
-	maxProcesses =  80
+	maxProcesses =  800
 	pool = Pool(processes = min(max(m, edges), maxProcesses))
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 		#x update
