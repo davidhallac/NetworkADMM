@@ -100,7 +100,7 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 	eabs = math.pow(10,-3) #CHANGE THESE TWO AS PARAMS
 	erel = math.pow(10,-4)
 
-	maxProcesses =  320
+	maxProcesses =  80
 	pool = Pool(processes = min(max(m, edges), maxProcesses))
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 		#x update
@@ -135,6 +135,7 @@ def runADMM(m, edges, inputs, lamb, rho, numiters, x, u, z, S, ids, numtests, x_
 			xtemp[:,2*j+1] = x[:,ids[j,1]]
 		xtemp = xtemp.reshape(2*inputs, edges, order='F')
 		temp = np.concatenate((xtemp,utemp,ztemp,weights,np.tile([rho,lamb,inputs], (edges,1)).transpose()), axis=0)
+		print temp.shape, weights.shape, xtemp.shape, edges
 		newz = pool.map(solveZ, temp.transpose())
 		ztemp = np.array(newz).transpose()[0]
 		ztemp = ztemp.reshape(inputs, 2*edges, order='F')
