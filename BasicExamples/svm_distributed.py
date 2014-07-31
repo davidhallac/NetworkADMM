@@ -269,9 +269,9 @@ def main():
 			#Option 2: For what pl2 returns
 		plots[counter,:] = [lamb, pl2]
 		counter = counter + 1
-		lamb = lamb*updateVal
 		print "Lambda = ", lamb
 		print right / float(total)
+		lamb = lamb*updateVal
 	print "Finished"
 
 	plt.figure(0)
