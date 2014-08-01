@@ -23,14 +23,14 @@ def solveX(data):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			h = h + rho/2*square(norm(xnew - z + u))
-	objective = Minimize(g+h)
+	objective = Minimize(5*g+5*h)
 	constraints = []
 	p = Problem(objective, constraints)
 	result = p.solve()
 	#print neighs
 	if(result == None):
 		#result = p.solve(verbose=True)
-		objective = Minimize(g+1.000001*h)
+		objective = Minimize(g+1.001*h)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
 		print "SCALING BUG"
@@ -201,25 +201,7 @@ def main():
 		lamb = lamb + updateVal
 
 
-	print "x = ", x
-	#print "a = ", a
 
-
-
-
-
-
-
-
-
-
-
-	for EI in G1.Edges():
-		1+1#print "edge (%d, %d)" % (EI.GetSrcNId(), EI.GetDstNId())
-
-	for NI in G1.Nodes():
-		for Id in NI.GetOutEdges():
-			1+1#print "edge (%d %d)" % (NI.GetId(), Id)
 
 
 
