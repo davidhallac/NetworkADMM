@@ -173,9 +173,9 @@ def main():
 	nodes = 25
 	edges = 100
 	#Size of x
-	sizeOptVar = 5
+	sizeOptVar = 6
 	#Size of side information at each node
-	sizeData = 5
+	sizeData = 6
 
 
 	#Generate graph, edge weights
