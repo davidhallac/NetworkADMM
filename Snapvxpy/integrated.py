@@ -5,13 +5,15 @@ from numpy import linalg as LA
 import math
 from multiprocessing import Pool
 
+
 def solveX(data):
 	inputs = int(data[data.size-1])
 	lamb = data[data.size-2]
 	rho = data[data.size-3]
+	sizeData = data[data.size-4]
 	x = data[0:inputs]
-	a = data[inputs:2*inputs]
-	neighs = data[2*inputs:data.size-3]
+	a = data[inputs:(inputs + sizeData)]
+	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
 	g = 0.5*square(norm(xnew - a))
 	h = 0
@@ -25,6 +27,7 @@ def solveX(data):
 	constraints = []
 	p = Problem(objective, constraints)
 	result = p.solve()
+	#print neighs
 	if(result == None):
 		#result = p.solve(verbose=True)
 		objective = Minimize(g+1.000001*h)
@@ -59,7 +62,7 @@ def solveU(data):
 	rho = data[data.size-1]
 	return u + (x - z)
 
-def runADMM(G1, sizeOptVar, lamb, rho, numiters, x, u, z, a, edgeWeights):
+def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
@@ -73,8 +76,8 @@ def runADMM(G1, sizeOptVar, lamb, rho, numiters, x, u, z, a, edgeWeights):
 		counter = counter + 1
 
 	#Stopping criteria
-	eabs = math.pow(10,-2)
-	erel = math.pow(10,-3)
+	eabs = math.pow(10,-3)
+	erel = math.pow(10,-4)
 	(r, s, epri, edual, counter) = (1,1,0,0,0)
 	A = np.zeros((2*edges, nodes))
 	for EI in G1.Edges():
@@ -95,15 +98,21 @@ def runADMM(G1, sizeOptVar, lamb, rho, numiters, x, u, z, a, edgeWeights):
 			counter2 = 0
 			edgenum = 0
 			for EI in G1.Edges():
-				if(EI.GetSrcNId() == NI.GetId()):
-					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights[counter]
+				if (node2mat.GetDat(EI.GetSrcNId()) == NI.GetId()):
+					#print "Found: ", NI.GetId(), "Connected to", EI.GetDstNId()
+					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] #u_ij 
 					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum] #z_ij
 					counter2 = counter2 + 1
-				elif(EI.GetDstNId() == NI.GetId()):
-					1+1
+				elif (node2mat.GetDat(EI.GetDstNId()) == NI.GetId()):
+					#print "Found: ", NI.GetId(), "Connected to", EI.GetSrcNId()
+					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] #u_ij 
+					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1] #z_ij
+					counter2 = counter2 + 1
 				edgenum = edgenum+1
-		temp = np.concatenate((x,a,neighs,np.tile([rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
+			counter = counter + 1
+		temp = np.concatenate((x,a,neighs,np.tile([sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
 
@@ -112,12 +121,14 @@ def runADMM(G1, sizeOptVar, lamb, rho, numiters, x, u, z, a, edgeWeights):
 		utemp = u.reshape(2*sizeOptVar, edges, order='F')
 		xtemp = np.zeros((sizeOptVar, 2*edges))
 		counter = 0
+		weightsList = np.zeros((1, edges))
 		for EI in G1.Edges():
 			xtemp[:,2*counter] = np.array(x[:,node2mat.GetDat(EI.GetSrcNId())])
 			xtemp[:,2*counter+1] = x[:,node2mat.GetDat(EI.GetDstNId())]
+			weightsList[0,counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			counter = counter+1
 		xtemp = xtemp.reshape(2*sizeOptVar, edges, order='F')
-		temp = np.concatenate((xtemp,utemp,ztemp,np.reshape(edgeWeights, (-1,edges)),np.tile([rho,lamb,sizeOptVar], (edges,1)).transpose()), axis=0)
+		temp = np.concatenate((xtemp,utemp,ztemp,np.reshape(weightsList, (-1,edges)),np.tile([rho,lamb,sizeOptVar], (edges,1)).transpose()), axis=0)
 		newz = pool.map(solveZ, temp.transpose())
 		ztemp = np.array(newz).transpose()[0]
 		ztemp = ztemp.reshape(sizeOptVar, 2*edges, order='F')
@@ -152,56 +163,54 @@ def runADMM(G1, sizeOptVar, lamb, rho, numiters, x, u, z, a, edgeWeights):
 
 def main():
 
-	#Generate graph, edge weights
+	#Set parameters
+	rho = 0.1
+	numiters = 25
+	thresh = 3
+	lamb = 0.0
+	updateVal = 0.5
+	#Graph Information
 	nodes = 25
 	edges = 100
-	G1 = GenRndGnm(PUNGraph, nodes, edges)
-	edgeWeights = np.ones((edges,1)).flatten()
+	#Size of x
+	sizeOptVar = 5
+	#Size of side information at each node
+	sizeData = 5
 
-	#Generate data
-	sizeData = 20
+
+	#Generate graph, edge weights
+	np.random.seed(2)
+	G1 = GenRndGnm(PUNGraph, nodes, edges)
+	edgeWeights = TIntPrFltH()
+	for EI in G1.Edges():
+		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
+		edgeWeights.AddDat(temp, 1)
+
+	#Generate side information
 	a = np.random.randn(sizeData, nodes)
 
 	#Initialize variables to 0
-	sizeOptVar = 5
 	x = np.zeros((sizeOptVar,nodes))
 	u = np.zeros((sizeOptVar,2*edges))
 	z = np.zeros((sizeOptVar,2*edges))
 
-	#Set parameters
-	rho = 5
-	numiters = 10
-	thresh = 1
-	lamb = 0.1
-	updateVal = 0.05
-
 	#Run regularization path
 	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, lamb, rho, numiters, x, u ,z, a, edgeWeights)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/10, numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
 		lamb = lamb + updateVal
 
 
-
-	
-	counter = 0
-	node2mat = TIntIntH()
-	for NI in G1.Nodes():
-		#print "node id %d with out-degree %d and in-degree %d" % (NI.GetId(), NI.GetDeg(), NI.GetDeg())
-		node2mat.AddDat(NI.GetId(), counter)
-		counter = counter + 1
+	print "x = ", x
+	#print "a = ", a
 
 
-	counter = 0
-	for NI in G1.Nodes():
-		xnew = Variable(sizeData,1)
-		g = 0.5*square(norm(xnew - a[:,counter]))
-		objective = Minimize(g)
-		constraints = []
-		p = Problem(objective, constraints)
-		result = p.solve()
-		#print xnew.value
-		counter = counter + 1
+
+
+
+
+
+
 
 
 
