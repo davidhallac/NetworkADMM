@@ -29,11 +29,8 @@ def solveX(data):
 			h = h + rho/2*square(norm(xnew - z + u))
 	objective = Minimize(5*g+5*h)
 	constraints = []
-	print "Stop 6"
 	p = Problem(objective, constraints)
-	print "Stop 7"
 	result = p.solve()
-	print "Stop 8"
 	if(result == None):
 		#Todo: CVXOPT scaling issue
 		objective = Minimize(g+1.001*h)
@@ -236,14 +233,14 @@ def main():
 	for line in file:
 		a[0,counter] = float(line.split(",")[4])
 		a[1,counter] = float(line.split(",")[5])
-		a[2,counter] = float(line.split(",")[6])
+		a[2,counter] = float(line.split(",")[6])/10
 		if(line.split(",")[7] == "Residential"):
 			a[3,counter] = 1
 		elif(line.split(",")[7] == "Condo"):
 			a[3,counter] = 2
 		elif(line.split(",")[7] == "Multi-Family"):
 			a[3,counter] = 3
-		a[4,counter] = float(line.split(",")[9])
+		a[4,counter] = float(line.split(",")[9])/10000
 		counter = counter + 1
 
 	#Initialize variables to 0
