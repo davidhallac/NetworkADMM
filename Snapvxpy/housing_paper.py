@@ -17,7 +17,7 @@ def solveX(data):
 	a = data[inputs:(inputs + sizeData)]
 	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
-
+	print a
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
 	g = 0.5*square(norm(xnew - a))
 
