@@ -233,14 +233,14 @@ def main():
 	for line in file:
 		a[0,counter] = float(line.split(",")[4])
 		a[1,counter] = float(line.split(",")[5])
-		a[2,counter] = float(line.split(",")[6])/100
+		a[2,counter] = float(line.split(",")[6])/1000
 		if(line.split(",")[7] == "Residential"):
 			a[3,counter] = 1
 		elif(line.split(",")[7] == "Condo"):
 			a[3,counter] = 2
 		elif(line.split(",")[7] == "Multi-Family"):
 			a[3,counter] = 3
-		a[4,counter] = float(line.split(",")[9])/10000
+		a[4,counter] = float(line.split(",")[9])/100000
 		counter = counter + 1
 
 	#Initialize variables to 0
