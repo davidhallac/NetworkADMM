@@ -166,7 +166,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	rho = 0.1
+	rho = 0.00001
 	numiters = 25
 	thresh = 0.15
 	lamb = 0.0
