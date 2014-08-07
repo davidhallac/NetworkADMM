@@ -10,18 +10,23 @@ import csv
 
 def solveX(data):
 	inputs = int(data[data.size-1])
+	print "Stop 1"
 	lamb = data[data.size-2]
+	print "Stop 2"
 	rho = data[data.size-3]
 	sizeData = data[data.size-4]
+	print "Stop 3"
 	x = data[0:inputs]
 	a = data[inputs:(inputs + sizeData)]
+	print "Stop 4"
 	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
-	print a
+	print "Stop 5"
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
 	g = 0.5*square(norm(xnew - a))
 
 	h = 0
+	print "Stop 6"
 	for i in range(neighs.size/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
 		if(weight != 0):
