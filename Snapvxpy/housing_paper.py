@@ -21,18 +21,19 @@ def solveX(data):
 	g = 0.5*square(norm(xnew - a))
 
 	h = 0
-	print "Stop 6"
 	for i in range(neighs.size/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
 		if(weight != 0):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			h = h + rho/2*square(norm(xnew - z + u))
-	print "Stop 7"
 	objective = Minimize(5*g+5*h)
 	constraints = []
+	print "Stop 6"
 	p = Problem(objective, constraints)
+	print "Stop 7"
 	result = p.solve()
+	print "Stop 8"
 	if(result == None):
 		#Todo: CVXOPT scaling issue
 		objective = Minimize(g+1.001*h)
