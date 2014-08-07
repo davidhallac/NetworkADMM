@@ -233,7 +233,7 @@ def main():
 	for line in file:
 		a[0,counter] = float(line.split(",")[4])
 		a[1,counter] = float(line.split(",")[5])
-		a[2,counter] = float(line.split(",")[6])/10
+		a[2,counter] = float(line.split(",")[6])/100
 		if(line.split(",")[7] == "Residential"):
 			a[3,counter] = 1
 		elif(line.split(",")[7] == "Condo"):
