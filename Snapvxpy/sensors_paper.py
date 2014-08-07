@@ -167,12 +167,12 @@ def main():
 	#Set parameters
 	rho = 0.1
 	numiters = 25
-	thresh = 3
+	thresh = 0.15
 	lamb = 0.0
-	updateVal = 0.5
+	updateVal = 0.1
 	#Graph Information
-	nodes = 10
-	edges = 25
+	nodes = 54
+	edges = 100
 	#Size of x
 	sizeOptVar = 5
 	#Size of side information at each node
@@ -180,20 +180,46 @@ def main():
 
 
 	#Generate graph, edge weights
-	np.random.seed(2)
-	G1 = GenRndGnm(PUNGraph, nodes, edges)
+	file = open("location_sensors.txt", "r")
+	G1 = TUNGraph.New()
+	locations = TIntFltPrH()
+	for line in file:
+		G1.AddNode(int(line.split()[0]))
+		temp = TFltPr(float(line.split()[1]),float(line.split()[2]))
+		locations.AddDat(int(line.split()[0]), temp)
+
+	#For each node, find closest neightbors and add edge, weight = 5/distance
 	edgeWeights = TIntPrFltH()
-	for EI in G1.Edges():
-		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
-		edgeWeights.AddDat(temp, 1)
+	numNeighs = 3
+	for NI in G1.Nodes():
+		distances = TIntFltH()
+		x1 = locations.GetDat(NI.GetId()).GetVal1()
+		y1 = locations.GetDat(NI.GetId()).GetVal2()
+		for NI2 in G1.Nodes():
+			if(NI.GetId() != NI2.GetId()):
+				x2 = locations.GetDat(NI2.GetId()).GetVal1()
+				y2 = locations.GetDat(NI2.GetId()).GetVal2()
+				dist = math.sqrt(math.pow(x1-x2,2) + math.pow(y1 - y2,2))
+				distances.AddDat(NI2.GetId(), dist)
+		distances.Sort(False, True)
+		it = distances.BegI()
+		for j in range(numNeighs):
+			if (not G1.IsEdge(NI.GetId(), it.GetKey())):
+				G1.AddEdge(NI.GetId(), it.GetKey())
+				#Add edge weight
+				temp = TIntPr(min(NI.GetId(), it.GetKey()), max(NI.GetId(), it.GetKey()))
+				edgeWeights.AddDat(temp, 5/it.GetDat())
+			it.Next()
+
+
 
 	#Generate side information
 	a = np.random.randn(sizeData, nodes)
 
 	#Initialize variables to 0
 	x = np.zeros((sizeOptVar,nodes))
-	u = np.zeros((sizeOptVar,2*edges))
-	z = np.zeros((sizeOptVar,2*edges))
+	u = np.zeros((sizeOptVar,2*G1.GetEdges()))
+	z = np.zeros((sizeOptVar,2*G1.GetEdges()))
 
 	#Run regularization path
 	while(lamb <= thresh):

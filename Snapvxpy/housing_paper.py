@@ -5,6 +5,8 @@ from numpy import linalg as LA
 import math
 from multiprocessing import Pool
 
+import csv
+
 
 def solveX(data):
 	inputs = int(data[data.size-1])
@@ -167,12 +169,12 @@ def main():
 	#Set parameters
 	rho = 0.1
 	numiters = 25
-	thresh = 3
+	thresh = 0.15
 	lamb = 0.0
-	updateVal = 0.5
+	updateVal = 0.1
 	#Graph Information
-	nodes = 10
-	edges = 25
+		#nodes = 54
+		#edges = 100
 	#Size of x
 	sizeOptVar = 5
 	#Size of side information at each node
@@ -180,20 +182,72 @@ def main():
 
 
 	#Generate graph, edge weights
-	np.random.seed(2)
-	G1 = GenRndGnm(PUNGraph, nodes, edges)
+	file = open("Sacramentorealestatetransactions.csv", "rU")
+	file.readline() #ignore first line
+	G1 = TUNGraph.New()
+	locations = TIntFltPrH()
+	counter = 0
+	for line in file:
+		G1.AddNode(counter)
+		temp = TFltPr(float(line.split(",")[10]),float(line.split(",")[11]))
+		locations.AddDat(counter, temp)
+		counter = counter + 1
+
+	#For each node, find closest neightbors and add edge, weight = 5/distance
 	edgeWeights = TIntPrFltH()
-	for EI in G1.Edges():
-		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
-		edgeWeights.AddDat(temp, 1)
+	numNeighs = 10
+	for NI in G1.Nodes():
+		distances = TIntFltH()
+		lat1 = locations.GetDat(NI.GetId()).GetVal1()
+		lon1 = locations.GetDat(NI.GetId()).GetVal2()
+		for NI2 in G1.Nodes():
+			if(NI.GetId() != NI2.GetId()):
+				lat2 = locations.GetDat(NI2.GetId()).GetVal1()
+				lon2 = locations.GetDat(NI2.GetId()).GetVal2()
+				dlon = math.radians(lon2 - lon1)
+				dlat = math.radians(lat2 - lat1)
+				a = math.pow(math.sin(dlat/2),2) + math.cos(lat1)*math.cos(lat2) * math.pow(math.sin(dlon/2),2)
+				c = 2 * math.atan2( math.sqrt(a), math.sqrt(1-a) ) 
+				dist = 3961 * c
+				distances.AddDat(NI2.GetId(), dist)
+
+		distances.Sort(False, True)
+		it = distances.BegI()
+		for j in range(numNeighs):
+			if (not G1.IsEdge(NI.GetId(), it.GetKey())):
+				G1.AddEdge(NI.GetId(), it.GetKey())
+				#Add edge weight
+				temp = TIntPr(min(NI.GetId(), it.GetKey()), max(NI.GetId(), it.GetKey()))
+				edgeWeights.AddDat(temp, 1/(it.GetDat()+ 0.1))
+			it.Next()		
+
+	nodes = G1.GetNodes()
+	edges = G1.GetEdges()
+
+	print nodes, edges
 
 	#Generate side information
-	a = np.random.randn(sizeData, nodes)
+	a = np.zeros((sizeData, nodes))
+	file = open("Sacramentorealestatetransactions.csv", "rU")
+	file.readline() #ignore first line
+	counter = 0
+	for line in file:
+		a[0,counter] = float(line.split(",")[4])
+		a[1,counter] = float(line.split(",")[5])
+		a[2,counter] = float(line.split(",")[6])
+		if(line.split(",")[7] == "Residential"):
+			a[3,counter] = 1
+		elif(line.split(",")[7] == "Condo"):
+			a[3,counter] = 2
+		elif(line.split(",")[7] == "Multi-Family"):
+			a[3,counter] = 3
+		a[4,counter] = float(line.split(",")[9])
+		counter = counter + 1
 
 	#Initialize variables to 0
 	x = np.zeros((sizeOptVar,nodes))
-	u = np.zeros((sizeOptVar,2*edges))
-	z = np.zeros((sizeOptVar,2*edges))
+	u = np.zeros((sizeOptVar,2*G1.GetEdges()))
+	z = np.zeros((sizeOptVar,2*G1.GetEdges()))
 
 	#Run regularization path
 	while(lamb <= thresh):

@@ -181,7 +181,13 @@ def main():
 
 	#Generate graph, edge weights
 	np.random.seed(2)
-	G1 = GenRndGnm(PUNGraph, nodes, edges)
+	G1 = TUNGraph.New()
+	for i in range(nodes):
+		G1.AddNode(i)
+
+	
+
+	#G1 = GenRndGnm(PUNGraph, nodes, edges)
 	edgeWeights = TIntPrFltH()
 	for EI in G1.Edges():
 		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
