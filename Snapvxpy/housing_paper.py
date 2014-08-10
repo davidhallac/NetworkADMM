@@ -18,7 +18,7 @@ def solveX(data):
 	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	g = 0.5*square(norm(xnew - a))
+	g = 0.5*square(norm(xnew - a[4]))
 
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
@@ -168,14 +168,14 @@ def main():
 	#Set parameters
 	rho = 0.00001
 	numiters = 25
-	thresh = 0.15
+	thresh = 0.05
 	lamb = 0.0
 	updateVal = 0.1
 	#Graph Information
 		#nodes = 54
 		#edges = 100
 	#Size of x
-	sizeOptVar = 5
+	sizeOptVar = 1
 	#Size of side information at each node
 	sizeData = 5
 
@@ -185,12 +185,42 @@ def main():
 	file.readline() #ignore first line
 	G1 = TUNGraph.New()
 	locations = TIntFltPrH()
+	dataset = TIntIntVH()
 	counter = 0
 	for line in file:
 		G1.AddNode(counter)
 		temp = TFltPr(float(line.split(",")[10]),float(line.split(",")[11]))
 		locations.AddDat(counter, temp)
+		tempData = TIntV()
+		tempData.Add(int(line.split(",")[4]))
+		tempData.Add(int(line.split(",")[5]))
+		tempData.Add(int(line.split(",")[6]))
+		if(line.split(",")[7] == "Residential"):
+			tempData.Add(1)
+		elif(line.split(",")[7] == "Condo"):
+			tempData.Add(2)
+		elif(line.split(",")[7] == "Multi-Family"):
+			tempData.Add(3)
+		else:
+			tempData.Add(4)
+		tempData.Add(int(line.split(",")[9]))
+		dataset.AddDat(counter, tempData)
 		counter = counter + 1
+
+	#Remove random subset of nodes for test and validation sets
+	testSetSize = 100
+	validationSetSize = 100
+	testList = TIntV()
+	for i in range(testSetSize):
+		temp = G1.GetRndNId()
+		G1.DelNode(temp)
+		testList.Add(temp)
+
+	validationList = TIntV()
+	for i in range(validationSetSize):
+		temp = G1.GetRndNId()
+		G1.DelNode(temp)
+		validationList.Add(temp)
 
 	#For each node, find closest neightbors and add edge, weight = 5/distance
 	edgeWeights = TIntPrFltH()
@@ -222,25 +252,17 @@ def main():
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
-
 	print nodes, edges
 
-	#Generate side information
+	#Get side information
 	a = np.zeros((sizeData, nodes))
-	file = open("Sacramentorealestatetransactions.csv", "rU")
-	file.readline() #ignore first line
 	counter = 0
-	for line in file:
-		a[0,counter] = float(line.split(",")[4])
-		a[1,counter] = float(line.split(",")[5])
-		a[2,counter] = float(line.split(",")[6])/1000
-		if(line.split(",")[7] == "Residential"):
-			a[3,counter] = 1
-		elif(line.split(",")[7] == "Condo"):
-			a[3,counter] = 2
-		elif(line.split(",")[7] == "Multi-Family"):
-			a[3,counter] = 3
-		a[4,counter] = float(line.split(",")[9])/100000
+	for NI in G1.Nodes():
+		a[0,counter] = dataset.GetDat(NI.GetId())[0]
+		a[1,counter] = dataset.GetDat(NI.GetId())[1]
+		a[2,counter] = dataset.GetDat(NI.GetId())[2]
+		a[3,counter] = dataset.GetDat(NI.GetId())[3]
+		a[4,counter] = dataset.GetDat(NI.GetId())[4]
 		counter = counter + 1
 
 	#Initialize variables to 0
@@ -252,11 +274,35 @@ def main():
 	while(lamb <= thresh):
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/10, numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
+
+
+
 		lamb = lamb + updateVal
 
+	#Calculate accuracy on test set
+	for i in testList:
+		#Find closest neighbors
+		distances = TIntFltH()
+		lat1 = locations.GetDat(i).GetVal1()
+		lon1 = locations.GetDat(i).GetVal2()
+		for NI2 in G1.Nodes():
+			if(i != NI2.GetId()):
+				lat2 = locations.GetDat(NI2.GetId()).GetVal1()
+				lon2 = locations.GetDat(NI2.GetId()).GetVal2()
+				dlon = math.radians(lon2 - lon1)
+				dlat = math.radians(lat2 - lat1)
+				a = math.pow(math.sin(dlat/2),2) + math.cos(lat1)*math.cos(lat2) * math.pow(math.sin(dlon/2),2)
+				c = 2 * math.atan2( math.sqrt(a), math.sqrt(1-a) ) 
+				dist = 3961 * c
+				distances.AddDat(NI2.GetId(), dist)		
+		#Predict price
+
+		#Find MSE
 
 
 
+
+	print x
 
 
 
