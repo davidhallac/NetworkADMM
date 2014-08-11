@@ -18,8 +18,7 @@ def solveX(data):
 	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	g = 0.5*square(norm(xnew - a[4]))
-
+	g = 0.5*square(norm(xnew[0] - a[4]/10000))
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
@@ -160,7 +159,6 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	pool.close()
 	pool.join()
 
-
 	return (x,u,z,0,0)
 
 def main():
@@ -175,7 +173,7 @@ def main():
 		#nodes = 54
 		#edges = 100
 	#Size of x
-	sizeOptVar = 1
+	sizeOptVar = 2
 	#Size of side information at each node
 	sizeData = 5
 
@@ -208,7 +206,7 @@ def main():
 		counter = counter + 1
 
 	#Remove random subset of nodes for test and validation sets
-	testSetSize = 100
+	testSetSize = 10
 	validationSetSize = 100
 	testList = TIntV()
 	for i in range(testSetSize):
@@ -224,7 +222,7 @@ def main():
 
 	#For each node, find closest neightbors and add edge, weight = 5/distance
 	edgeWeights = TIntPrFltH()
-	numNeighs = 10
+	numNeighs = 5
 	for NI in G1.Nodes():
 		distances = TIntFltH()
 		lat1 = locations.GetDat(NI.GetId()).GetVal1()
@@ -235,8 +233,8 @@ def main():
 				lon2 = locations.GetDat(NI2.GetId()).GetVal2()
 				dlon = math.radians(lon2 - lon1)
 				dlat = math.radians(lat2 - lat1)
-				a = math.pow(math.sin(dlat/2),2) + math.cos(lat1)*math.cos(lat2) * math.pow(math.sin(dlon/2),2)
-				c = 2 * math.atan2( math.sqrt(a), math.sqrt(1-a) ) 
+				a2 = math.pow(math.sin(dlat/2),2) + math.cos(lat1)*math.cos(lat2) * math.pow(math.sin(dlon/2),2)
+				c = 2 * math.atan2( math.sqrt(a2), math.sqrt(1-a2) ) 
 				dist = 3961 * c
 				distances.AddDat(NI2.GetId(), dist)
 
@@ -274,35 +272,52 @@ def main():
 	while(lamb <= thresh):
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/10, numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
-
-
-
-		lamb = lamb + updateVal
-
-	#Calculate accuracy on test set
-	for i in testList:
-		#Find closest neighbors
-		distances = TIntFltH()
-		lat1 = locations.GetDat(i).GetVal1()
-		lon1 = locations.GetDat(i).GetVal2()
-		for NI2 in G1.Nodes():
-			if(i != NI2.GetId()):
+		mse = 0
+		#Calculate accuracy on test set
+		for i in testList:
+			#Find closest neighbors
+			distances = TIntFltH()
+			lat1 = locations.GetDat(i).GetVal1()
+			lon1 = locations.GetDat(i).GetVal2()
+			counter = 0
+			for NI2 in G1.Nodes():
 				lat2 = locations.GetDat(NI2.GetId()).GetVal1()
 				lon2 = locations.GetDat(NI2.GetId()).GetVal2()
 				dlon = math.radians(lon2 - lon1)
 				dlat = math.radians(lat2 - lat1)
-				a = math.pow(math.sin(dlat/2),2) + math.cos(lat1)*math.cos(lat2) * math.pow(math.sin(dlon/2),2)
-				c = 2 * math.atan2( math.sqrt(a), math.sqrt(1-a) ) 
+				a2 = math.pow(math.sin(dlat/2),2) + math.cos(lat1)*math.cos(lat2) * math.pow(math.sin(dlon/2),2)
+				c = 2 * math.atan2( math.sqrt(a2), math.sqrt(1-a2) ) 
 				dist = 3961 * c
-				distances.AddDat(NI2.GetId(), dist)		
-		#Predict price
+				distances.AddDat(counter, dist)		
+				counter = counter + 1
+			distances.Sort(False, True)
 
-		#Find MSE
+			numNewNeighs = 5
+			#Predict price
+			xpred = Variable(sizeOptVar,1)
+			g = 0
+			it = distances.BegI()
+			for j in range(numNewNeighs):
+				#neighsList.AddDat(it.GetKey(), it.GetDat())
+				weight = 1/(it.GetDat()+ 0.1)
+				g = g + weight*norm(xpred - x[0, it.GetKey()])
+				it.Next()	
+		
+			objective = Minimize(g)
+			constraints = []
+			p = Problem(objective, constraints)
+			result = p.solve()	
+
+			#Find MSE
+			mse = mse + 1/testSetSize *math.pow(xpred.value[0] - dataset.GetDat(i)[4]/10000,2)
+		print mse
+
+		lamb = lamb + updateVal
 
 
+	#print x[0,:]
+	#print (a[4,:]/10000)
 
-
-	print x
 
 
 
