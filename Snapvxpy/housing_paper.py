@@ -18,7 +18,7 @@ def solveX(data):
 	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	g = 0.5*square(norm(xnew[0] - a[4]/10000))
+	g = 0.5*square(norm(xnew[0] - a[4]/100000))
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
@@ -309,7 +309,7 @@ def main():
 			result = p.solve()	
 
 			#Find MSE
-			mse = mse + 1/testSetSize *math.pow(xpred.value[0] - dataset.GetDat(i)[4]/10000,2)
+			mse = mse + 1/testSetSize *math.pow(xpred.value[0] - dataset.GetDat(i)[4]/100000,2)
 		print mse
 
 		lamb = lamb + updateVal
