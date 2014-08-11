@@ -164,9 +164,9 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	rho = 0.00001
+	rho = 0.0001
 	numiters = 25
-	thresh = 0.05
+	thresh = 5
 	lamb = 0.0
 	updateVal = 0.1
 	#Test/Validation Set Information
@@ -307,7 +307,6 @@ def main():
 			result = p.solve()	
 
 			#Find MSE
-			print xpred.value[0], float(dataset.GetDat(i)[4])/100000, xpred.value[0] - float(dataset.GetDat(i)[4]/100000), math.pow(xpred.value[0] - dataset.GetDat(i)[4]/100000,2)/testSetSize
 			mse = mse + math.pow(xpred.value[0] - float(dataset.GetDat(i)[4])/100000,2)/testSetSize
 		print mse, "= mse"
 
