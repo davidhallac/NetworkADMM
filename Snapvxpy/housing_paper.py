@@ -310,7 +310,7 @@ def main():
 
 			#Find MSE
 			mse = mse + 1/testSetSize *math.pow(xpred.value[0] - dataset.GetDat(i)[4]/100000,2)
-		print mse
+		print mse, "= mse"
 
 		lamb = lamb + updateVal
 
