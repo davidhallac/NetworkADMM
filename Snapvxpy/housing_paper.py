@@ -164,7 +164,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	rho = 0.0001
+	rho = 0.001
 	numiters = 100
 	thresh = 5
 	lamb = 0.0
@@ -269,7 +269,7 @@ def main():
 
 	#Run regularization path
 	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/5, numiters, x, u ,z, a, edgeWeights)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb, numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
 		mse = 0
 		#Calculate accuracy on test set
