@@ -26,7 +26,7 @@ def solveX(data):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			h = h + rho/2*square(norm(xnew - z + u))
-	objective = Minimize(50*g+50*h)
+	objective = Minimize(5*g+5*h)
 	constraints = []
 	p = Problem(objective, constraints)
 	result = p.solve()
@@ -99,14 +99,12 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			counter2 = 0
 			edgenum = 0
 			for EI in G1.Edges():
-				if (node2mat.GetDat(EI.GetSrcNId()) == NI.GetId()):
-					#print "Found: ", NI.GetId(), "Connected to", EI.GetDstNId()
+				if (EI.GetSrcNId() == NI.GetId()):
 					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] #u_ij 
 					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum] #z_ij
 					counter2 = counter2 + 1
-				elif (node2mat.GetDat(EI.GetDstNId()) == NI.GetId()):
-					#print "Found: ", NI.GetId(), "Connected to", EI.GetSrcNId()
+				elif (EI.GetDstNId() == NI.GetId()):
 					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] #u_ij 
 					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1] #z_ij
@@ -153,7 +151,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s
 
-		print r, epri, s, edual
+		#print r, epri, s, edual
 		iters = iters + 1
 
 	pool.close()
@@ -168,7 +166,8 @@ def main():
 	numiters = 100
 	thresh = 5
 	lamb = 0.0
-	updateVal = 0.1
+	updateVal = 0.25
+	numNeighs = 5
 	#Test/Validation Set Information
 	testSetSize = 10
 	validationSetSize = 100
@@ -221,7 +220,6 @@ def main():
 
 	#For each node, find closest neightbors and add edge, weight = 5/distance
 	edgeWeights = TIntPrFltH()
-	numNeighs = 5
 	for NI in G1.Nodes():
 		distances = TIntFltH()
 		lat1 = locations.GetDat(NI.GetId()).GetVal1()

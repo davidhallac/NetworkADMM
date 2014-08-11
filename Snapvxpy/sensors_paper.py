@@ -99,13 +99,13 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			counter2 = 0
 			edgenum = 0
 			for EI in G1.Edges():
-				if (node2mat.GetDat(EI.GetSrcNId()) == NI.GetId()):
+				if (EI.GetSrcNId() == NI.GetId()):
 					#print "Found: ", NI.GetId(), "Connected to", EI.GetDstNId()
 					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] #u_ij 
 					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum] #z_ij
 					counter2 = counter2 + 1
-				elif (node2mat.GetDat(EI.GetDstNId()) == NI.GetId()):
+				elif (EI.GetDstNId() == NI.GetId()):
 					#print "Found: ", NI.GetId(), "Connected to", EI.GetSrcNId()
 					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] #u_ij 
