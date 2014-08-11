@@ -166,7 +166,7 @@ def main():
 	#Set parameters
 	rho = 0.00001
 	numiters = 25
-	thresh = 0.05
+	thresh = 0.5
 	lamb = 0.0
 	updateVal = 0.1
 	#Graph Information
