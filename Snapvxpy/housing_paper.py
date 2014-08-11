@@ -307,7 +307,7 @@ def main():
 			result = p.solve()	
 
 			#Find MSE
-			print xpred.value[0], dataset.GetDat(i)[4]/100000, xpred.value[0] - float(dataset.GetDat(i)[4]/100000), math.pow(xpred.value[0] - dataset.GetDat(i)[4]/100000,2)/testSetSize
+			print xpred.value[0], float(dataset.GetDat(i)[4])/100000, xpred.value[0] - float(dataset.GetDat(i)[4]/100000), math.pow(xpred.value[0] - dataset.GetDat(i)[4]/100000,2)/testSetSize
 			mse = mse + math.pow(xpred.value[0] - float(dataset.GetDat(i)[4])/100000,2)/testSetSize
 		print mse, "= mse"
 
