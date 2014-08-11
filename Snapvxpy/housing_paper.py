@@ -166,12 +166,13 @@ def main():
 	#Set parameters
 	rho = 0.00001
 	numiters = 25
-	thresh = 0.5
+	thresh = 0.05
 	lamb = 0.0
 	updateVal = 0.1
-	#Graph Information
-		#nodes = 54
-		#edges = 100
+	#Test/Validation Set Information
+	testSetSize = 10
+	validationSetSize = 100
+	numNewNeighs = 5 #For test/validation nodes
 	#Size of x
 	sizeOptVar = 2
 	#Size of side information at each node
@@ -206,8 +207,6 @@ def main():
 		counter = counter + 1
 
 	#Remove random subset of nodes for test and validation sets
-	testSetSize = 10
-	validationSetSize = 100
 	testList = TIntV()
 	for i in range(testSetSize):
 		temp = G1.GetRndNId()
@@ -270,7 +269,7 @@ def main():
 
 	#Run regularization path
 	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/10, numiters, x, u ,z, a, edgeWeights)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/5, numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
 		mse = 0
 		#Calculate accuracy on test set
@@ -292,7 +291,6 @@ def main():
 				counter = counter + 1
 			distances.Sort(False, True)
 
-			numNewNeighs = 5
 			#Predict price
 			xpred = Variable(sizeOptVar,1)
 			g = 0
