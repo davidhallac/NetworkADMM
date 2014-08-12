@@ -166,10 +166,10 @@ def main():
 	numiters = 100
 	thresh = 10
 	lamb = 0.0
-	updateVal = 0.25
+	updateVal = 0.2
 	numNeighs = 5
 	#Test/Validation Set Information
-	testSetSize = 10
+	testSetSize = 100
 	validationSetSize = 100
 	numNewNeighs = 5 #For test/validation nodes
 	#Size of x
@@ -305,7 +305,7 @@ def main():
 			result = p.solve()	
 
 			#Find MSE
-			print xpred.value[0], float(dataset.GetDat(i)[4])/100000
+			#print xpred.value[0], float(dataset.GetDat(i)[4])/100000
 			mse = mse + math.pow(xpred.value[0] - float(dataset.GetDat(i)[4])/100000,2)/testSetSize
 		print mse, "= mse"
 
