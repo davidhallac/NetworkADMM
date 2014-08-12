@@ -151,7 +151,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s
 
-		#print r, epri, s, edual
+		print r, epri, s, edual
 		iters = iters + 1
 
 	pool.close()
@@ -164,7 +164,7 @@ def main():
 	#Set parameters
 	rho = 0.001
 	numiters = 100
-	thresh = 5
+	thresh = 0.3
 	lamb = 0.0
 	updateVal = 0.25
 	numNeighs = 5
