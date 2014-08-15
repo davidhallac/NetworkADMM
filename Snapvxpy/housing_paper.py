@@ -6,6 +6,8 @@ import math
 from multiprocessing import Pool
 
 import csv
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
