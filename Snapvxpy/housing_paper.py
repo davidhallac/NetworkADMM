@@ -6,6 +6,7 @@ import math
 from multiprocessing import Pool
 
 import csv
+import matplotlib.pyplot as plt
 
 
 def solveX(data):
@@ -163,10 +164,10 @@ def main():
 
 	#Set parameters
 	rho = 0.001
-	numiters = 100
-	thresh = 10
+	numiters = 250
+	thresh = 40
 	lamb = 0.0
-	updateVal = 0.2
+	updateVal = 0.1
 	numNeighs = 5
 	#Test/Validation Set Information
 	testSetSize = 100
@@ -248,6 +249,7 @@ def main():
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
 	print nodes, edges
+	print GetBfsFullDiam(G1, 1000, False);
 
 	#Get side information
 	a = np.zeros((sizeData, nodes))
@@ -266,6 +268,7 @@ def main():
 	z = np.zeros((sizeOptVar,2*G1.GetEdges()))
 
 	#Run regularization path
+	[plot1, plot2] = [TFltV(), TFltV()]
 	while(lamb <= thresh):
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
@@ -308,13 +311,16 @@ def main():
 			#print xpred.value[0], float(dataset.GetDat(i)[4])/100000
 			mse = mse + math.pow(xpred.value[0] - float(dataset.GetDat(i)[4])/100000,2)/testSetSize
 		print mse, "= mse"
-
+		plot1.Add(lamb)
+		plot2.Add(mse)
 		lamb = lamb + updateVal
 
 
-	#print x[0,:]
-	#print (a[4,:]/10000)
-
+	#Print/Save plot
+	pl1 = np.array(plot1)
+	pl2 = np.array(plot2)
+	plt.plot(pl1, pl2)
+	plt.savefig('temp',bbox_inches='tight')
 
 
 
