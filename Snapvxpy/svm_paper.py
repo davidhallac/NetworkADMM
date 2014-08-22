@@ -246,7 +246,7 @@ def main():
 	#Run regularization path
 	[plot1, plot2] = [TFltV(), TFltV()]
 	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/100, numiters, x, u ,z, trainingSet, edgeWeights, numtests)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb, numiters, x, u ,z, trainingSet, edgeWeights, numtests)
 		print "Lambda = ", lamb
 
 		#Get accuracy
