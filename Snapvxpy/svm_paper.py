@@ -56,16 +56,29 @@ def solveZ(data):
 	inputs = int(data[data.size-1])
 	lamb = data[data.size-2]
 	rho = data[data.size-3]
+	weight = data[data.size-4]
+	useConvex = data[data.size-5]
 	x1 = data[0:inputs]
 	x2 = data[inputs:2*inputs]
 	u1 = data[2*inputs:3*inputs]
 	u2 = data[3*inputs:4*inputs]
-	weight = data[data.size-4]
 	a = x1 + u1
 	b = x2 + u2
-	theta = max(1 - lamb*weight/(rho*LA.norm(a - b)+0.000001), 0.5) #So no divide by zero error
-	z1 = theta*a + (1-theta)*b
-	z2 = theta*b + (1-theta)*a
+	if(useConvex == 1):
+		theta = max(1 - lamb*weight/(rho*LA.norm(a - b)+0.000001), 0.5) #So no divide by zero error
+		z1 = theta*a + (1-theta)*b
+		z2 = theta*b + (1-theta)*a
+
+	else: #Non-convex version
+		epsilon = 0.1
+		d = LA.norm(a-b)
+		c = lamb*weight
+
+		theta1 = (-rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+e,2) - 8*rho*c)) / (4*rho*d)
+		theta2 = (-rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+e,2) - 8*rho*c)) / (4*rho*d)
+
+		z1 = 0
+		z2 = 0
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
 	return znew
 
@@ -77,7 +90,7 @@ def solveU(data):
 	rho = data[data.size-1]
 	return u + (x - z)
 
-def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests):
+def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests, useConvex):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
@@ -143,7 +156,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			weightsList[0,counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			counter = counter+1
 		xtemp = xtemp.reshape(2*sizeOptVar, edges, order='F')
-		temp = np.concatenate((xtemp,utemp,ztemp,np.reshape(weightsList, (-1,edges)),np.tile([rho,lamb,sizeOptVar], (edges,1)).transpose()), axis=0)
+		temp = np.concatenate((xtemp,utemp,ztemp,np.reshape(weightsList, (-1,edges)),np.tile([useConvex,rho,lamb,sizeOptVar], (edges,1)).transpose()), axis=0)
 		newz = pool.map(solveZ, temp.transpose())
 		ztemp = np.array(newz).transpose()[0]
 		ztemp = ztemp.reshape(sizeOptVar, 2*edges, order='F')
@@ -179,12 +192,12 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = True
+	useConvex = 1 #1 = true, 0 = false
 	rho = 0.0001
-	numiters = 25
-	thresh = 5
+	numiters = 40
+	thresh = 2.5
 	lamb = 0.0
-	updateVal = 0.1
+	updateVal = 0.05
 	#Graph Information
 	nodes = 100
 	#Size of x
@@ -246,7 +259,7 @@ def main():
 	#Run regularization path
 	[plot1, plot2] = [TFltV(), TFltV()]
 	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex)
 		print "Lambda = ", lamb
 
 		#Get accuracy
@@ -270,7 +283,7 @@ def main():
 	pl1 = np.array(plot1)
 	pl2 = np.array(plot2)
 	plt.plot(pl1, pl2)
-	#plt.savefig('svmImage',bbox_inches='tight')
+	plt.savefig('image_svm',bbox_inches='tight')
 
 
 
