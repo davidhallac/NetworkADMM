@@ -75,7 +75,16 @@ def solveZ(data):
 		c = lamb*weight
 
 		theta1 = (-rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+e,2) - 8*rho*c)) / (4*rho*d)
+		z1 = theta1*a + (1-theta1*b)
+		z2 = theta1*a + (1-theta1*b)
+		objective1 = 0
+
 		theta2 = (-rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+e,2) - 8*rho*c)) / (4*rho*d)
+		z1 = theta2*a + (1-theta2*b)
+		z2 = theta2*a + (1-theta2*b)
+		objective2 = 0
+
+		objective3 = 0
 
 		z1 = 0
 		z2 = 0
@@ -195,9 +204,9 @@ def main():
 	useConvex = 1 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 40
-	thresh = 2.5
+	thresh = 2
 	lamb = 0.0
-	updateVal = 0.05
+	updateVal = 0.02
 	#Graph Information
 	nodes = 100
 	#Size of x
