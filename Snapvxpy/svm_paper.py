@@ -76,25 +76,32 @@ def solveZ(data):
 		d = LA.norm(a-b)
 		c = lamb*weight
 
-		theta1 = (-rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d)
-		phi = math.log(1 + d*(1-2*theta1)/epsilon)
-		objective1 = c*phi + rho*math.pow(d,2)*(math.pow(theta1,2))
+		if(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c >= 0):
+			theta1 = (-rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d)
+			theta1 = min(max(theta1,0),0.5)
+			phi = math.log(1 + d*(1-2*theta1)/epsilon)
+			objective1 = c*phi + rho*math.pow(d,2)*(math.pow(theta1,2))
 
-		theta2 = (-rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d)
-		phi = math.log(1 + d*(1-2*theta2)/epsilon)
-		objective2 = c*phi + rho*math.pow(d,2)*(math.pow(theta2,2))
+			theta2 = (-rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d)
+			theta2 = min(max(theta2,0),0.5)
+			phi = math.log(1 + d*(1-2*theta2)/epsilon)
+			objective2 = c*phi + rho*math.pow(d,2)*(math.pow(theta2,2))
 
-		objective3 = rho/4*math.pow(LA.norm(a-b),2)
+			objective3 = rho/4*math.pow(LA.norm(a-b),2)
 
-		if(min(objective1, objective2, objective3) == objective1):
-			theta = theta1
-		elif(min(objective1, objective2, objective3) == objective2):
-			theta = theta2
-		else:
-			theta = 0.5
+			if(min(objective1, objective2, objective3) == objective1):
+				theta = min(max(theta1,0),0.5)
+			elif(min(objective1, objective2, objective3) == objective2):
+				theta = min(max(theta2,0),0.5)
+			else:
+				theta = 0.5
+			#print theta1, theta2, theta
+			z1 = (1-theta)*a + theta*b
+			z2 = theta*a + (1-theta)*b
 
-		z1 = (1-theta)*a + theta*b
-		z2 = theta*a + (1-theta)*b
+		else: #No real roots
+			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
+
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
 	return znew
 
