@@ -15,7 +15,7 @@ def solveX(data):
 	rho = data[data.size-3]
 	sizeData = data[data.size-4]
 	numtests = int(data[data.size-5])
-	c = 0
+	c = 0.79
 	x = data[0:inputs]
 	rawData = data[inputs:(inputs + sizeData)]
 	neighs = data[(inputs + sizeData):data.size-5]
@@ -179,6 +179,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
+	useConvex = True
 	rho = 0.0001
 	numiters = 25
 	thresh = 5
