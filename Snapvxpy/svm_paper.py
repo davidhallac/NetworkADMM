@@ -64,6 +64,7 @@ def solveZ(data):
 	u2 = data[3*inputs:4*inputs]
 	a = x1 + u1
 	b = x2 + u2
+	(z1, z2) = (0,0)
 	if(useConvex == 1):
 		theta = max(1 - lamb*weight/(rho*LA.norm(a - b)+0.000001), 0.5) #So no divide by zero error
 		z1 = theta*a + (1-theta)*b
@@ -75,19 +76,25 @@ def solveZ(data):
 		c = lamb*weight
 
 		theta1 = (-rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+e,2) - 8*rho*c)) / (4*rho*d)
-		z1 = theta1*a + (1-theta1*b)
-		z2 = theta1*a + (1-theta1*b)
-		objective1 = 0
+		phi = math.log(1 + d(1-2*theta1)/epsilon)
+		objective1 = c*phi + rho*math.pow(d,2)*(math.pow(theta1,2))
 
 		theta2 = (-rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+e,2) - 8*rho*c)) / (4*rho*d)
-		z1 = theta2*a + (1-theta2*b)
-		z2 = theta2*a + (1-theta2*b)
-		objective2 = 0
+		phi = math.log(1 + d(1-2*theta2)/epsilon)
+		objective2 = c*phi + rho*math.pow(d,2)*(math.pow(theta2,2))
 
-		objective3 = 0
+		objective3 = rho/4*math.pow(LA.norm(a-b),2)
 
-		z1 = 0
-		z2 = 0
+		if(min(objective1, objective2, objective3) == objective1):
+			theta = theta1
+		elif(min(objective1, objective2, objective3) == objective1):
+			theta = theta2
+		else:
+			theta = 0.5
+
+
+		z1 = theta*a + (1-theta*b)
+		z2 = theta*a + (1-theta*b)
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
 	return znew
 
@@ -201,7 +208,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 1 #1 = true, 0 = false
+	useConvex = 0 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 40
 	thresh = 2
