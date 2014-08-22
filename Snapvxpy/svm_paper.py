@@ -5,38 +5,52 @@ from numpy import linalg as LA
 import math
 from multiprocessing import Pool
 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 def solveX(data):
 	inputs = int(data[data.size-1])
 	lamb = data[data.size-2]
 	rho = data[data.size-3]
 	sizeData = data[data.size-4]
+	numtests = int(data[data.size-5])
+	c = 0
 	x = data[0:inputs]
-	a = data[inputs:(inputs + sizeData)]
-	neighs = data[(inputs + sizeData):data.size-4]
+	rawData = data[inputs:(inputs + sizeData)]
+	neighs = data[(inputs + sizeData):data.size-5]
 	xnew = Variable(inputs,1)
 
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	g = 0.5*square(norm(xnew - a))
+	x_train = rawData[0:numtests*inputs]
+	y_train = rawData[numtests*inputs: numtests*(inputs+1)]
 
-	h = 0
+	a = Variable(inputs,1)
+	epsil = Variable(numtests,1)
+	b = Variable(1,1)
+	constraints = [epsil >= 0]
+	g = 0.5*square(norm(a)) + c*norm(epsil,1)
+	for i in range(numtests):
+		temp = np.asmatrix(x_train[i*inputs:i*inputs+numtests])
+		constraints = constraints + [y_train[i]*(temp*a + b) >= 1 - epsil[i]]
+	f = 0
 	for i in range(neighs.size/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
 		if(weight != 0):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
-			h = h + rho/2*square(norm(xnew - z + u))
-	objective = Minimize(5*g+5*h)
-	constraints = []
+			f = f + rho/2*square(norm(a - z + u))
+	objective = Minimize(5*g + 5*f)
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
-		#Todo: CVXOPT scaling issue
-		objective = Minimize(g+1.001*h)
+		#result = p.solve(verbose=True)
+		objective = Minimize(g+0.99*f)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
-		print "SCALING BUG"
-	return xnew.value
+		print "Scaling bug"
+	return a.value
+
 
 def solveZ(data):
 	inputs = int(data[data.size-1])
@@ -63,7 +77,7 @@ def solveU(data):
 	rho = data[data.size-1]
 	return u + (x - z)
 
-def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights):
+def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
@@ -113,7 +127,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 					counter2 = counter2 + 1
 				edgenum = edgenum+1
 			counter = counter + 1
-		temp = np.concatenate((x,a,neighs,np.tile([sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
+		temp = np.concatenate((x,a,neighs,np.tile([numtests,sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
 
@@ -165,36 +179,63 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	rho = 0.1
+	rho = 0.0001
 	numiters = 25
-	thresh = 3
+	thresh = 5
 	lamb = 0.0
-	updateVal = 0.5
+	updateVal = 0.1
 	#Graph Information
-	nodes = 10
-	edges = 25
+	nodes = 100
 	#Size of x
-	sizeOptVar = 5
-	#Size of side information at each node
-	sizeData = 5
+	sizeOptVar = 10
+	#Size of side information at each node filled in below
 
+	partitions = 5
 
 	#Generate graph, edge weights
 	np.random.seed(2)
 	G1 = TUNGraph.New()
 	for i in range(nodes):
 		G1.AddNode(i)
+	sizepart = nodes/partitions
+	for NI in G1.Nodes():
+		for NI2 in G1.Nodes():
+			if(NI.GetId() != NI2.GetId()):				
+				if ((NI.GetId()/sizepart) == (NI2.GetId()/sizepart)):
+					#Same partition, edge w.p 0.5
+					if(np.random.random() >= 0.5):
+						G1.AddEdge(NI.GetId(), NI2.GetId())
+				else:
+					if(np.random.random() >= 0.9):
+						G1.AddEdge(NI.GetId(), NI2.GetId())
 
-	
+	edges = G1.GetEdges()
 
-	#G1 = GenRndGnm(PUNGraph, nodes, edges)
 	edgeWeights = TIntPrFltH()
 	for EI in G1.Edges():
 		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
 		edgeWeights.AddDat(temp, 1)
 
 	#Generate side information
-	a = np.random.randn(sizeData, nodes)
+	a_true = np.random.randn(sizeOptVar, partitions)
+	numtests = 10 #Training set size
+	testSetSize = 5
+	v = np.random.randn(numtests,nodes)
+	vtest = np.random.randn(testSetSize,nodes)
+
+	trainingSet = np.random.randn(numtests*(sizeOptVar+1), nodes) #First all the x_train, then all the y_train below it
+	for i in range(nodes):
+		a_part = a_true[:,i/sizepart]
+		for j in range(numtests):
+			trainingSet[numtests*sizeOptVar+j,i] = np.sign([np.dot(a_part.transpose(), trainingSet[j*sizeOptVar:(j+1)*sizeOptVar,i])+v[j,i]])
+
+	(x_test,y_test) = (np.random.randn(testSetSize*sizeOptVar, nodes), np.zeros((testSetSize, nodes)))
+	for i in range(nodes):
+		a_part = a_true[:,i/sizepart]
+		for j in range(testSetSize):
+			y_test[j,i] = np.sign([np.dot(a_part.transpose(), x_test[j*sizeOptVar:(j+1)*sizeOptVar,i])+vtest[j,i]])
+
+	sizeData = trainingSet.shape[0]
 
 	#Initialize variables to 0
 	x = np.zeros((sizeOptVar,nodes))
@@ -202,14 +243,33 @@ def main():
 	z = np.zeros((sizeOptVar,2*edges))
 
 	#Run regularization path
+	[plot1, plot2] = [TFltV(), TFltV()]
 	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/10, numiters, x, u ,z, a, edgeWeights)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/10, numiters, x, u ,z, trainingSet, edgeWeights, numtests)
 		print "Lambda = ", lamb
+
+		#Get accuracy
+		(right, total) = (0, testSetSize*nodes)
+		a_pred = x
+		for i in range(nodes):
+			temp = a_pred[:,i]
+			for j in range(testSetSize):
+				pred = np.sign([np.dot(temp.transpose(), x_test[j*sizeOptVar:j*sizeOptVar+numtests,i])])
+				if(pred == y_test[j,i]):
+					right = right + 1
+		accuracy = right / float(total)
+		print accuracy
+
+		plot1.Add(lamb)
+		plot2.Add(accuracy)
 		lamb = lamb + updateVal
 
 
-
-
+	#Print/Save plot
+	pl1 = np.array(plot1)
+	pl2 = np.array(plot2)
+	plt.plot(pl1, pl2)
+	#plt.savefig('svmImage',bbox_inches='tight')
 
 
 

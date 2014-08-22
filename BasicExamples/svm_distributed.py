@@ -43,7 +43,8 @@ def solveX(data):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			f = f + rho/2*square(norm(a - z + u))
-	objective = Minimize(5*g + 5*lamb*f)
+	#objective = Minimize(5*g + 5*lamb*f) NO LAMBDA, RIGHT???
+	objective = Minimize(5*g + 5*f)
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
@@ -222,13 +223,13 @@ def main():
 	for i in range(size):
 		a_part = a_true[:,i/sizepart]
 		for j in range(numtests):
-			y_train[j,i] = np.sign([np.dot(a_part.transpose(), x_train[j*inputs:j*inputs+numtests,i])+v[j,i]])
+			y_train[j,i] = np.sign([np.dot(a_part.transpose(), x_train[j*inputs:(j+1)*inputs,i])+v[j,i]])
 
 	(x_test,y_test) = (np.random.randn(testSetSize*inputs, size), np.zeros((testSetSize, size)))
 	for i in range(size):
 		a_part = a_true[:,i/sizepart]
 		for j in range(testSetSize):
-			y_test[j,i] = np.sign([np.dot(a_part.transpose(), x_test[j*inputs:j*inputs+numtests,i])+vtest[j,i]])
+			y_test[j,i] = np.sign([np.dot(a_part.transpose(), x_test[j*inputs:(j+1)*inputs,i])+vtest[j,i]])
 
 	(a_pred,x,u,z,counter) = (np.zeros((inputs,m)),np.zeros((inputs,m)),np.zeros((inputs,2*edges)),np.zeros((inputs,2*edges)),1)
 
