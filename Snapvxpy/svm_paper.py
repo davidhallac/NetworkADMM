@@ -69,8 +69,6 @@ def solveZ(data):
 		theta = max(1 - lamb*weight/(rho*LA.norm(a - b)+0.000001), 0.5) #So no divide by zero error
 		z1 = theta*a + (1-theta)*b
 		z2 = theta*b + (1-theta)*a
-		
-
 	else: #Non-convex version
 		epsilon = 0.1
 		d = LA.norm(a-b)
@@ -95,13 +93,11 @@ def solveZ(data):
 				theta = min(max(theta2,0),0.5)
 			else:
 				theta = 0.5
-			#print theta1, theta2, theta
 			z1 = (1-theta)*a + theta*b
 			z2 = theta*a + (1-theta)*b
-
-		else: #No real roots
+		else: #No real roots, use theta = 0.5
 			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
-
+			
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
 	return znew
 
@@ -113,7 +109,7 @@ def solveU(data):
 	rho = data[data.size-1]
 	return u + (x - z)
 
-def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests, useConvex):
+def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests, useConvex, eabs, erel):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
@@ -127,8 +123,6 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		counter = counter + 1
 
 	#Stopping criteria
-	eabs = math.pow(10,-2)
-	erel = math.pow(10,-3)
 	(r, s, epri, edual, counter) = (1,1,0,0,0)
 	A = np.zeros((2*edges, nodes))
 	for EI in G1.Edges():
@@ -221,6 +215,9 @@ def main():
 	thresh = 2
 	lamb = 0.0
 	updateVal = 0.02
+	#Stopping criteria
+	eabs = math.pow(10,-2)
+	erel = math.pow(10,-3)
 	#Graph Information
 	nodes = 100
 	#Size of x
@@ -282,7 +279,7 @@ def main():
 	#Run regularization path
 	[plot1, plot2] = [TFltV(), TFltV()]
 	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, eabs, erel)
 		print "Lambda = ", lamb
 
 		#Get accuracy
