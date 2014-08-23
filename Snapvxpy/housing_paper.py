@@ -186,7 +186,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s
 
-		#print r, epri, s, edual
+		print r, epri, s, edual
 		iters = iters + 1
 
 	pool.close()
