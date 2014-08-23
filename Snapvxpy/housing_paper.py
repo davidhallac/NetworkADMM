@@ -64,12 +64,12 @@ def solveZ(data):
 		c = lamb*weight
 
 		if(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c >= 0):
-			theta1 = (-rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d)
+			theta1 = (-rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.000001)
 			theta1 = min(max(theta1,0),0.5)
 			phi = math.log(1 + d*(1-2*theta1)/epsilon)
 			objective1 = c*phi + rho*math.pow(d,2)*(math.pow(theta1,2))
 
-			theta2 = (-rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d)
+			theta2 = (-rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.000001)
 			theta2 = min(max(theta2,0),0.5)
 			phi = math.log(1 + d*(1-2*theta2)/epsilon)
 			objective2 = c*phi + rho*math.pow(d,2)*(math.pow(theta2,2))
@@ -197,9 +197,9 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 1
+	useConvex = 0
 	rho = 0.001
-	numiters = 250
+	numiters = 40
 	thresh = 10
 	lamb = 0.0
 	updateVal = 0.1
