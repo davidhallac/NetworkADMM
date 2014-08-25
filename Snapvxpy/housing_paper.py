@@ -98,7 +98,7 @@ def solveU(data):
 	rho = data[data.size-1]
 	return u + (x - z)
 
-def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, useConvex):
+def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, useConvex, epsilon):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
@@ -193,7 +193,8 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i] - a[4,i]/100000),2)
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
-				tempObj = tempObj + lamb*weight*LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
+				edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
+				tempObj = tempObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
 			#Update best variables
 			if(tempObj < bestObj or bestObj == -1):
 				bestx = x
@@ -226,8 +227,8 @@ def main():
 	#Set parameters
 	useConvex = 0
 	rho = 0.001
-	numiters = 40
-	thresh = 10
+	numiters = 25
+	thresh = 3
 	lamb = 0.0
 	updateVal = 0.1
 	numNeighs = 5
@@ -239,6 +240,8 @@ def main():
 	sizeOptVar = 2
 	#Size of side information at each node
 	sizeData = 5
+	#Non-convex vars
+	epsilon = 0.1
 
 
 	#Generate graph, edge weights
@@ -332,7 +335,7 @@ def main():
 	#Run regularization path
 	[plot1, plot2] = [TFltV(), TFltV()]
 	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
 		print "Lambda = ", lamb
 		mse = 0
 		#Calculate accuracy on test set
