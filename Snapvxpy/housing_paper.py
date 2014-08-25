@@ -190,7 +190,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			tempObj = 0
 			#Calculate objective
 			for i in range(G1.GetNodes()):
-				tempObj = tempObj + 0.5*math.pow(LA.norm(x[i] - a[4,i]/100000),2)
+				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i] - a[4,i]/100000),2)
 
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
