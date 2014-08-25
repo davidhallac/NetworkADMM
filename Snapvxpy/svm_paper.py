@@ -15,10 +15,10 @@ def solveX(data):
 	rho = data[data.size-3]
 	sizeData = data[data.size-4]
 	numtests = int(data[data.size-5])
-	c = 0.79
+	c = data[data.size-6]
 	x = data[0:inputs]
 	rawData = data[inputs:(inputs + sizeData)]
-	neighs = data[(inputs + sizeData):data.size-5]
+	neighs = data[(inputs + sizeData):data.size-6]
 	xnew = Variable(inputs,1)
 
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
@@ -97,7 +97,7 @@ def solveZ(data):
 			z2 = theta*a + (1-theta)*b
 		else: #No real roots, use theta = 0.5
 			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
-			
+
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
 	return znew
 
@@ -109,7 +109,7 @@ def solveU(data):
 	rho = data[data.size-1]
 	return u + (x - z)
 
-def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests, useConvex, eabs, erel):
+def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests, useConvex, eabs, erel, c):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
@@ -131,11 +131,21 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		counter = counter+1
 	(sqn, sqp) = (math.sqrt(nodes*sizeOptVar), math.sqrt(2*sizeOptVar*edges))
 
+	#Non-convex case - keeping track of best point so far
+	bestx = x
+	bestu = u
+	bestz = z
+	bestObj = -1
+
 	#Run ADMM
 	iters = 0
 	maxProcesses =  80
 	pool = Pool(processes = min(max(nodes, edges), maxProcesses))
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
+		
+		tempObj = 0 #For non-convex
+
+		#TODO: Update tempObj
 
 		#x-update
 		(neighs, counter) = (np.zeros(((2*sizeOptVar+1)*maxdeg,nodes)), 0)
@@ -157,7 +167,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 					counter2 = counter2 + 1
 				edgenum = edgenum+1
 			counter = counter + 1
-		temp = np.concatenate((x,a,neighs,np.tile([numtests,sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
+		temp = np.concatenate((x,a,neighs,np.tile([c, numtests,sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
 
@@ -189,6 +199,18 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		temp = np.concatenate((u, xtemp, z, np.tile(rho, (1,2*edges))), axis=0)
 		newu = pool.map(solveU, temp.transpose())
 		u = np.array(newu).transpose()
+
+		#Update best objective (for non-convex)
+		if(useConvex != 1):
+			#Calculate objective
+
+			#Update best variables
+			if(tempObj < bestObj or bestObj = -1)
+				bestx = x
+				bestu = u
+				bestz = z
+				bestObj = tempObj
+				print "Updated best objective at iter ", iters, "TODO!!!"
 
 
 		#Stopping criterion - p19 of ADMM paper
@@ -222,7 +244,8 @@ def main():
 	nodes = 100
 	#Size of x
 	sizeOptVar = 10
-	#Size of side information at each node filled in below
+	#C in SVM
+	c = 0.79
 
 	partitions = 5
 
@@ -279,7 +302,7 @@ def main():
 	#Run regularization path
 	[plot1, plot2] = [TFltV(), TFltV()]
 	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, eabs, erel)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, eabs, erel, c)
 		print "Lambda = ", lamb
 
 		#Get accuracy

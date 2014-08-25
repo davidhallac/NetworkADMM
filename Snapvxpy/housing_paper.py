@@ -122,6 +122,12 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		counter = counter+1
 	(sqn, sqp) = (math.sqrt(nodes*sizeOptVar), math.sqrt(2*sizeOptVar*edges))
 
+	#Non-convex case - keeping track of best point so far
+	bestx = x
+	bestu = u
+	bestz = z
+	bestObj = -1
+
 	#Run ADMM
 	iters = 0
 	maxProcesses =  80
@@ -179,6 +185,22 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		newu = pool.map(solveU, temp.transpose())
 		u = np.array(newu).transpose()
 
+		#Update best objective (for non-convex)
+		if(useConvex != 1):
+			#Calculate objective
+			for i in range(G1.GetNodes())
+				tempObj = tempObj + 0.5*math.pow(norm(x[i] - a[4,i]/100000),2)
+
+			for EI in G1.Edges():
+				tempObj = tempObj + 0
+
+			#Update best variables
+			if(tempObj < bestObj or bestObj = -1)
+				bestx = x
+				bestu = u
+				bestz = z
+				bestObj = tempObj
+				print "Updated best objective at iter ", iters
 
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
