@@ -194,7 +194,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
-				tempObj = tempObj + lamb*weight*0
+				tempObj = tempObj + lamb*weight*LA.norm(x[0,EI.GetSrcNId()] - x[0,EI.GetDstNId()])
 
 			#Update best variables
 			if(tempObj < bestObj or bestObj == -1):
@@ -202,7 +202,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				bestu = u
 				bestz = z
 				bestObj = tempObj
-				print "Updated best objective at iter ", iters, "Temp = ", tempObj
+				print "Updated best objective at iter ", iters, "; Obj = ", tempObj
 
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
@@ -216,7 +216,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	pool.close()
 	pool.join()
 
-	return (x,u,z,0,0)
+	return (bestx,bestu,bestz,0,0)
 
 def main():
 
