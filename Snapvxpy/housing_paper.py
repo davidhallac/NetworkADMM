@@ -191,11 +191,9 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			#Calculate objective
 			for i in range(G1.GetNodes()):
 				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i] - a[4,i]/100000),2)
-
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 				tempObj = tempObj + lamb*weight*LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
-
 			#Update best variables
 			if(tempObj < bestObj or bestObj == -1):
 				bestx = x
@@ -216,8 +214,10 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	pool.close()
 	pool.join()
 
-	return (bestx,bestu,bestz,0,0)
-
+	if(useConvex == 1):
+		return (x,u,z,0,0)
+	else:
+		return (bestx,bestu,bestz,0,0)
 
 
 
