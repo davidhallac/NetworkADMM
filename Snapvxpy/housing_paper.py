@@ -187,12 +187,14 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 		#Update best objective (for non-convex)
 		if(useConvex != 1):
+			tempObj = 0
 			#Calculate objective
 			for i in range(G1.GetNodes()):
-				tempObj = tempObj + 0.5*math.pow(norm(x[i] - a[4,i]/100000),2)
+				tempObj = tempObj + 0.5*math.pow(LA.norm(x[i] - a[4,i]/100000),2)
 
 			for EI in G1.Edges():
-				tempObj = tempObj + 0
+				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+				tempObj = tempObj + lamb*weight*0
 
 			#Update best variables
 			if(tempObj < bestObj or bestObj == -1):
@@ -200,7 +202,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				bestu = u
 				bestz = z
 				bestObj = tempObj
-				print "Updated best objective at iter ", iters
+				print "Updated best objective at iter ", iters, "Temp = ", tempObj
 
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
