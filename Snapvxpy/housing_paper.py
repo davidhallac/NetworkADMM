@@ -188,7 +188,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		#Update best objective (for non-convex)
 		if(useConvex != 1):
 			#Calculate objective
-			for i in range(G1.GetNodes())
+			for i in range(G1.GetNodes()):
 				tempObj = tempObj + 0.5*math.pow(norm(x[i] - a[4,i]/100000),2)
 
 			for EI in G1.Edges():
