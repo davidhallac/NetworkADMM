@@ -195,7 +195,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				tempObj = tempObj + 0
 
 			#Update best variables
-			if(tempObj < bestObj or bestObj = -1)
+			if(tempObj < bestObj or bestObj == -1)
 				bestx = x
 				bestu = u
 				bestz = z
