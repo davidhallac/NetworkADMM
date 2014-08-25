@@ -46,7 +46,8 @@ def solveZ(data):
 	lamb = data[data.size-2]
 	rho = data[data.size-3]
 	useConvex = data[data.size-4]
-	weight = data[data.size-5]
+	epsilon = data[data.size-5]
+	weight = data[data.size-6]
 	x1 = data[0:inputs]
 	x2 = data[inputs:2*inputs]
 	u1 = data[2*inputs:3*inputs]
@@ -59,7 +60,6 @@ def solveZ(data):
 		z1 = theta*a + (1-theta)*b
 		z2 = theta*b + (1-theta)*a
 	else: #Non-convex version
-		epsilon = 0.1
 		d = LA.norm(a-b)
 		c = lamb*weight
 
@@ -126,7 +126,15 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	bestx = x
 	bestu = u
 	bestz = z
-	bestObj = -1
+	bestObj = 0
+	if(useConvex != 1):
+		#Calculate objective
+		for i in range(G1.GetNodes()):
+			bestObj = bestObj + 0.5*math.pow(LA.norm(x[0,i] - a[4,i]/100000),2)
+		for EI in G1.Edges():
+			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+			edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
+			bestObj = bestObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
 
 	#Run ADMM
 	iters = 0
@@ -168,7 +176,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			weightsList[0,counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			counter = counter+1
 		xtemp = xtemp.reshape(2*sizeOptVar, edges, order='F')
-		temp = np.concatenate((xtemp,utemp,ztemp,np.reshape(weightsList, (-1,edges)),np.tile([useConvex, rho,lamb,sizeOptVar], (edges,1)).transpose()), axis=0)
+		temp = np.concatenate((xtemp,utemp,ztemp,np.reshape(weightsList, (-1,edges)),np.tile([epsilon, useConvex, rho,lamb,sizeOptVar], (edges,1)).transpose()), axis=0)
 		newz = pool.map(solveZ, temp.transpose())
 		ztemp = np.array(newz).transpose()[0]
 		ztemp = ztemp.reshape(sizeOptVar, 2*edges, order='F')
@@ -196,12 +204,12 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
 				tempObj = tempObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
 			#Update best variables
-			if(tempObj < bestObj or bestObj == -1):
+			if(tempObj < bestObj):
 				bestx = x
 				bestu = u
 				bestz = z
 				bestObj = tempObj
-				print "Updated best objective at iter ", iters, "; Obj = ", tempObj
+				print "Iteration ", iters, "; Obj = ", tempObj
 
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
@@ -227,8 +235,8 @@ def main():
 	#Set parameters
 	useConvex = 0
 	rho = 0.001
-	numiters = 25
-	thresh = 3
+	numiters = 50
+	thresh = 10
 	lamb = 0.0
 	updateVal = 0.1
 	numNeighs = 5
