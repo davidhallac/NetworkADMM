@@ -34,12 +34,11 @@ def solveX(data):
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
+		print "SCALING BUG"
 		#Todo: CVXOPT scaling issue
 		objective = Minimize(50*g+51*h)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
-		print "SCALING BUG"
-	print xnew.value
 	return xnew.value
 
 def solveZ(data):
