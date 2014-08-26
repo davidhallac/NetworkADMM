@@ -32,7 +32,7 @@ def solveX(data):
 	objective = Minimize(50*g+50*h)
 	constraints = []
 	p = Problem(objective, constraints)
-	result = p.solve()
+	result = p.solve(verbose=True)
 	if(result == None):
 		print "SCALING BUG"
 		#Todo: CVXOPT scaling issue
