@@ -29,13 +29,13 @@ def solveX(data):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			h = h + rho/2*square(norm(xnew - z + u))
-	objective = Minimize(5*g+5*h)
+	objective = Minimize(50*g+50*h)
 	constraints = []
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
 		#Todo: CVXOPT scaling issue
-		objective = Minimize(g+.99*h)
+		objective = Minimize(50*g+51*h)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
 		print "SCALING BUG"
