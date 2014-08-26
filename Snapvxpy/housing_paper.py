@@ -39,6 +39,7 @@ def solveX(data):
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
 		print "SCALING BUG"
+	print xnew.value
 	return xnew.value
 
 def solveZ(data):
