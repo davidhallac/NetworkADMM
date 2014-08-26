@@ -16,12 +16,13 @@ def solveX(data):
 	lamb = data[data.size-2]
 	rho = data[data.size-3]
 	sizeData = data[data.size-4]
+	mu = data[data.size-5]
 	x = data[0:inputs]
 	a = data[inputs:(inputs + sizeData)]
-	neighs = data[(inputs + sizeData):data.size-4]
+	neighs = data[(inputs + sizeData):data.size-5]
 	xnew = Variable(inputs,1)
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	g = square(xnew[0]*a[0] + xnew[1]*a[1] + xnew[2]*a[2] + xnew[3] - a[4]) + square(xnew[0]) + square(xnew[1]) + square(xnew[2])
+	g = square(xnew[0]*a[0] + xnew[1]*a[1] + xnew[2]*a[2] + xnew[3] - a[4]) + mu*(square(xnew[0]) + square(xnew[1]) + square(xnew[2]))
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
@@ -160,7 +161,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 					counter2 = counter2 + 1
 				edgenum = edgenum+1
 			counter = counter + 1
-		temp = np.concatenate((x,a,neighs,np.tile([sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
+		temp = np.concatenate((x,a,neighs,np.tile([mu, sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
 
@@ -236,11 +237,11 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 10
+	thresh = 100
 	lamb = 0.0
 	startVal = 0.01
 	addUpdateVal = 0.1
-	multUpdateVal = 1.25
+	multUpdateVal = 1.2
 	useMult = 1
 
 	mu = 1 #For LS regularization
