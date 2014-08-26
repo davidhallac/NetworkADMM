@@ -276,7 +276,7 @@ def main():
 			tempData.Add(3)
 		else:
 			tempData.Add(4)
-		tempData.Add(int(line.split(",")[12]))
+		tempData.Add(float(line.split(",")[9])) #12 for normalized
 		dataset.AddDat(counter, tempData)
 		counter = counter + 1
 
