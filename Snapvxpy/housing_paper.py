@@ -19,9 +19,10 @@ def solveX(data):
 	x = data[0:inputs]
 	a = data[inputs:(inputs + sizeData)]
 	neighs = data[(inputs + sizeData):data.size-4]
-	xnew = Variable(inputs,1)
+	xnew = Variable(inputs,4)
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	g = 0.5*square(norm(xnew[0] - a[4]/100000))
+	g = square(xnew[0]*a[0] + xnew[1]*a[1] + xnew[2]*a[2] + xnew[3] - a[4]) + square(xnew[0]) + square(xnew[1]) + square(xnew[2])
+
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
@@ -241,8 +242,8 @@ def main():
 	updateVal = 0.1
 	numNeighs = 5
 	#Test/Validation Set Information
-	testSetSize = 100
-	validationSetSize = 100
+	testSetSize = 200
+	validationSetSize = 0
 	numNewNeighs = 5 #For test/validation nodes
 	#Size of x
 	sizeOptVar = 2
@@ -253,7 +254,7 @@ def main():
 
 
 	#Generate graph, edge weights
-	file = open("Sacramentorealestatetransactions.csv", "rU")
+	file = open("Sacramentorealestatetransactions_Normalized.csv", "rU")
 	file.readline() #ignore first line
 	G1 = TUNGraph.New()
 	locations = TIntFltPrH()
@@ -275,7 +276,7 @@ def main():
 			tempData.Add(3)
 		else:
 			tempData.Add(4)
-		tempData.Add(int(line.split(",")[9]))
+		tempData.Add(int(line.split(",")[12]))
 		dataset.AddDat(counter, tempData)
 		counter = counter + 1
 
