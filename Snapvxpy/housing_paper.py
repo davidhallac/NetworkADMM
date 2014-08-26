@@ -98,7 +98,7 @@ def solveU(data):
 	rho = data[data.size-1]
 	return u + (x - z)
 
-def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, useConvex, epsilon):
+def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, useConvex, epsilon, mu):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
@@ -130,7 +130,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	if(useConvex != 1):
 		#Calculate objective
 		for i in range(G1.GetNodes()):
-			bestObj = bestObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2)
+			bestObj = bestObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
 		for EI in G1.Edges():
 			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
@@ -198,7 +198,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			tempObj = 0
 			#Calculate objective
 			for i in range(G1.GetNodes()):
-				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2)
+				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 				edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
@@ -236,11 +236,16 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 0.5
+	thresh = 0.1
 	lamb = 0.0
-	updateVal = 0.1
-	numNeighs = 5
+	startVal = 0.01
+	addUpdateVal = 0.1
+	multUpdateVal = 1.25
+	useMult = 0
+
+	mu = 1 #For LS regularization
 	#Test/Validation Set Information
+	numNeighs = 5 #For data we keep
 	testSetSize = 200
 	validationSetSize = 0
 	numNewNeighs = 5 #For test/validation nodes
@@ -343,7 +348,7 @@ def main():
 	#Run regularization path
 	[plot1, plot2] = [TFltV(), TFltV()]
 	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon, mu)
 		print "Lambda = ", lamb
 		mse = 0
 		#Calculate accuracy on test set
@@ -390,14 +395,19 @@ def main():
 		print mse, "= mse"
 		plot1.Add(lamb)
 		plot2.Add(mse)
-		lamb = lamb + updateVal
+		if(lamb == 0):
+			lamb = startVal
+		elif(useMult == 1):
+			lamb = lamb*multUpdateVal
+		else:
+			lamb = lamb + addUpdateVal
 
 
 	#Print/Save plot
 	pl1 = np.array(plot1)
 	pl2 = np.array(plot2)
 	plt.plot(pl1, pl2)
-	plt.set_xscale('log')
+	plt.xscale('log')
 	plt.savefig('image_housing',bbox_inches='tight')
 
 
