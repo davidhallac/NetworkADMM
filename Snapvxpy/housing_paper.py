@@ -379,8 +379,8 @@ def main():
 			constraints = []
 			p = Problem(objective, constraints)
 			result = p.solve()	
-			#print xpred.value
-			#print p
+			print xpred.value
+			print objective
 			#Find MSE
 			regressors = dataset.GetDat(i)
 			mse = mse + math.pow(xpred.value[0]*float(regressors[0]) + xpred.value[1]*float(regressors[1]) + xpred.value[2]*float(regressors[2]) + xpred.value[3] - float(dataset.GetDat(i)[4]),2)/testSetSize
