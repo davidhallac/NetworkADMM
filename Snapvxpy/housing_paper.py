@@ -246,7 +246,7 @@ def main():
 	validationSetSize = 0
 	numNewNeighs = 5 #For test/validation nodes
 	#Size of x
-	sizeOptVar = 2
+	sizeOptVar = 4
 	#Size of side information at each node
 	sizeData = 5
 	#Non-convex vars
