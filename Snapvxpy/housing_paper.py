@@ -397,6 +397,7 @@ def main():
 	pl1 = np.array(plot1)
 	pl2 = np.array(plot2)
 	plt.plot(pl1, pl2)
+	plt.set_xscale('log')
 	plt.savefig('image_housing',bbox_inches='tight')
 
 
