@@ -130,7 +130,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	if(useConvex != 1):
 		#Calculate objective
 		for i in range(G1.GetNodes()):
-			bestObj = bestObj + 0.5*math.pow(LA.norm(x[0,i] - a[4,i]/100000),2)
+			bestObj = bestObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2)
 		for EI in G1.Edges():
 			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
@@ -198,7 +198,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			tempObj = 0
 			#Calculate objective
 			for i in range(G1.GetNodes()):
-				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i] - a[4,i]/100000),2)
+				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2)
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 				edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
@@ -372,16 +372,18 @@ def main():
 			for j in range(numNewNeighs):
 				#neighsList.AddDat(it.GetKey(), it.GetDat())
 				weight = 1/(it.GetDat()+ 0.1)
-				g = g + weight*norm(xpred - x[0, it.GetKey()])
+				g = g + weight*norm(xpred - x[:, it.GetKey()])
 				it.Next()	
 		
 			objective = Minimize(g)
 			constraints = []
 			p = Problem(objective, constraints)
 			result = p.solve()	
-
+			#print xpred.value
+			#print p
 			#Find MSE
-			#print xpred.value[0], float(dataset.GetDat(i)[4])/100000
+			regressors = dataset.GetDat(i)
+			mse = mse + math.pow(xpred.value[0]*float(regressors[0]) + xpred.value[1]*float(regressors[1]) + xpred.value[2]*float(regressors[2]) + xpred.value[3] - float(dataset.GetDat(i)[4]),2)/testSetSize
 			#mse = mse + math.pow(xpred.value[0] - float(dataset.GetDat(i)[4])/100000,2)/testSetSize
 		print mse, "= mse"
 		plot1.Add(lamb)
