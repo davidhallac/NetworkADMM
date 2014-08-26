@@ -32,7 +32,7 @@ def solveX(data):
 	objective = Minimize(50*g+50*h)
 	constraints = []
 	p = Problem(objective, constraints)
-	result = p.solve(verbose=True)
+	result = p.solve()
 	if(result == None):
 		print "SCALING BUG"
 		#Todo: CVXOPT scaling issue
@@ -365,26 +365,28 @@ def main():
 				counter = counter + 1
 			distances.Sort(False, True)
 
-			#Predict price
-			xpred = Variable(sizeOptVar,1)
-			g = 0
+			#Predict price - using CVXPY
+			# xpred = Variable(sizeOptVar,1)
+			# g = 0
+			# it = distances.BegI()
+			# for j in range(numNewNeighs):
+			# 	weight = 1/(it.GetDat()+ 0.1)
+			# 	g = g + weight*norm(xpred - x[:, it.GetKey()])
+			# 	it.Next()	
+			# objective = Minimize(g)
+			# constraints = []
+			# p = Problem(objective, constraints)
+			# result = p.solve(verbose=True)	
+			xpred = np.zeros(sizeOptVar)
 			it = distances.BegI()
 			for j in range(numNewNeighs):
-				#neighsList.AddDat(it.GetKey(), it.GetDat())
 				weight = 1/(it.GetDat()+ 0.1)
-				g = g + weight*norm(xpred - x[:, it.GetKey()])
-				it.Next()	
-		
-			objective = Minimize(g)
-			constraints = []
-			p = Problem(objective, constraints)
-			result = p.solve()	
-			print xpred.value
-			print p
+				xpred = xpred + x[:,it.GetKey()]/sizeOptVar
+
 			#Find MSE
 			regressors = dataset.GetDat(i)
-			mse = mse + math.pow(xpred.value[0]*float(regressors[0]) + xpred.value[1]*float(regressors[1]) + xpred.value[2]*float(regressors[2]) + xpred.value[3] - float(dataset.GetDat(i)[4]),2)/testSetSize
-			#mse = mse + math.pow(xpred.value[0] - float(dataset.GetDat(i)[4])/100000,2)/testSetSize
+			#mse = mse + math.pow(xpred.value[0]*float(regressors[0]) + xpred.value[1]*float(regressors[1]) + xpred.value[2]*float(regressors[2]) + xpred.value[3] - float(dataset.GetDat(i)[4]),2)/testSetSize
+			mse = mse + math.pow(xpred[0]*float(regressors[0]) + xpred[1]*float(regressors[1]) + xpred[2]*float(regressors[2]) + xpred[3] - float(dataset.GetDat(i)[4]),2)/testSetSize
 		print mse, "= mse"
 		plot1.Add(lamb)
 		plot2.Add(mse)
