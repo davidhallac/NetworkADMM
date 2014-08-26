@@ -265,9 +265,9 @@ def main():
 		temp = TFltPr(float(line.split(",")[10]),float(line.split(",")[11]))
 		locations.AddDat(counter, temp)
 		tempData = TIntV()
-		tempData.Add(int(line.split(",")[4]))
-		tempData.Add(int(line.split(",")[5]))
-		tempData.Add(int(line.split(",")[6]))
+		tempData.Add(float(line.split(",")[4]))
+		tempData.Add(float(line.split(",")[5]))
+		tempData.Add(float(line.split(",")[6]))
 		if(line.split(",")[7] == "Residential"):
 			tempData.Add(1)
 		elif(line.split(",")[7] == "Condo"):
