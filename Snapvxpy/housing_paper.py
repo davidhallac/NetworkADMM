@@ -33,13 +33,14 @@ def solveX(data):
 	constraints = []
 	p = Problem(objective, constraints)
 	result = p.solve()
+	print "HI", result
 	if(result == None):
 		#Todo: CVXOPT scaling issue
 		objective = Minimize(g+1.001*h)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
 		print "SCALING BUG"
-	print xnew.value
+	print xnew[1] 
 	return xnew.value
 
 def solveZ(data):
@@ -276,7 +277,7 @@ def main():
 			tempData.Add(3)
 		else:
 			tempData.Add(4)
-		tempData.Add(float(line.split(",")[9])) #12 for normalized
+		tempData.Add(float(line.split(",")[12])) #12 for normalized; 9 for raw
 		dataset.AddDat(counter, tempData)
 		counter = counter + 1
 
