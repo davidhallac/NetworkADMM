@@ -19,10 +19,9 @@ def solveX(data):
 	x = data[0:inputs]
 	a = data[inputs:(inputs + sizeData)]
 	neighs = data[(inputs + sizeData):data.size-4]
-	xnew = Variable(inputs,4)
+	xnew = Variable(inputs,1)
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
 	g = square(xnew[0]*a[0] + xnew[1]*a[1] + xnew[2]*a[2] + xnew[3] - a[4]) + square(xnew[0]) + square(xnew[1]) + square(xnew[2])
-
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
@@ -40,6 +39,7 @@ def solveX(data):
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
 		print "SCALING BUG"
+	print xnew.value
 	return xnew.value
 
 def solveZ(data):
@@ -234,10 +234,10 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 0
+	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 10
+	thresh = 0.5
 	lamb = 0.0
 	updateVal = 0.1
 	numNeighs = 5
