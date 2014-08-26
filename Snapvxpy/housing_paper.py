@@ -382,7 +382,7 @@ def main():
 
 			#Find MSE
 			#print xpred.value[0], float(dataset.GetDat(i)[4])/100000
-			mse = mse + math.pow(xpred.value[0] - float(dataset.GetDat(i)[4])/100000,2)/testSetSize
+			#mse = mse + math.pow(xpred.value[0] - float(dataset.GetDat(i)[4])/100000,2)/testSetSize
 		print mse, "= mse"
 		plot1.Add(lamb)
 		plot2.Add(mse)
