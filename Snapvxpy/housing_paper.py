@@ -237,7 +237,7 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 100
+	thresh = 1000
 	lamb = 0.0
 	startVal = 0.01
 	addUpdateVal = 0.1
