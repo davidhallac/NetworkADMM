@@ -240,7 +240,7 @@ def main():
 	useConvex = 0
 	rho = 0.001
 	numiters = 10
-	thresh = 10
+	thresh = -10
 	lamb = 0.0
 	startVal = 0.01 #first non-zero lambda
 	addUpdateVal = 0.1 #lamb = lamb + ___
@@ -351,7 +351,7 @@ def main():
 
 	#Run regularization path
 	[plot1, plot2] = [TFltV(), TFltV()]
-	while(lamb <= thresh):
+	while(lamb <= thresh or lamb == 0):
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon, mu)
 		print "Lambda = ", lamb
 		mse = 0
