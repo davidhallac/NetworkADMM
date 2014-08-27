@@ -237,15 +237,15 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 0
+	useConvex = 1
 	rho = 0.001
 	numiters = 10
-	thresh = -10
+	thresh = 1
 	lamb = 0.0
 	startVal = 0.01 #first non-zero lambda
 	addUpdateVal = 0.1 #lamb = lamb + ___
 	multUpdateVal = 1.5 #lamb = lamb*____
-	useMult = 1 #1 for mult, 0 for add
+	useMult = 0 #1 for mult, 0 for add
 
 	mu = 1 #For LS regularization
 	#Test/Validation Set Information
