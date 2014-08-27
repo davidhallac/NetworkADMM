@@ -83,11 +83,11 @@ def solveZ(data):
 				theta = min(max(theta2,0),0.5)
 			else:
 				theta = 0.5
-			#print "theta = ", theta
+			print "theta = ", theta
 			z1 = (1-theta)*a + theta*b
 			z2 = theta*a + (1-theta)*b
 		else: #No real roots, use theta = 0.5
-			#print "NO REAL ROOTS"
+			print "NO REAL ROOTS"
 			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
 			
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
@@ -261,7 +261,7 @@ def main():
 	#Size of side information at each node
 	sizeData = 5
 	#Non-convex vars
-	epsilon = 0.001
+	epsilon = 0.0001
 
 
 	#Generate graph, edge weights
