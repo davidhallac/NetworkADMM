@@ -65,12 +65,12 @@ def solveZ(data):
 		c = lamb*weight
 
 		if(rho*math.pow(d+epsilon,2) - 8*c >= 0):
-			theta1 = (rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.0000001)
+			theta1 = (rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.00000001)
 			theta1 = min(max(theta1,0),0.5)
 			phi = math.log(1 + d*(1-2*theta1)/epsilon)
 			objective1 = c*phi + rho*math.pow(d,2)*(math.pow(theta1,2))
 
-			theta2 = (rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.0000001)
+			theta2 = (rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.00000001)
 			theta2 = min(max(theta2,0),0.5)
 			phi = math.log(1 + d*(1-2*theta2)/epsilon)
 			objective2 = c*phi + rho*math.pow(d,2)*(math.pow(theta2,2))
@@ -83,12 +83,21 @@ def solveZ(data):
 				theta = min(max(theta2,0),0.5)
 			else:
 				theta = 0.5
-			print rho*math.pow(d+epsilon,2) - 8*c, theta1, theta2, theta
+			#print rho*math.pow(d+epsilon,2) - 8*c, theta1, theta2, theta
 			z1 = (1-theta)*a + theta*b
 			z2 = theta*a + (1-theta)*b
 		else: #No real roots, use theta = 0.5
 			#print "NO REAL ROOTS"
-			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
+			theta1 = 0
+			objective1 = c*math.log(1 + d/epsilon)
+			objective3 = rho/4*math.pow(LA.norm(a-b),2)
+
+			if(objective1 < objective3):
+				print "Chose 0"
+				(z1, z2) = (a, b)
+			else:
+				print "0.5"
+				(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
 			
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
 	return znew
