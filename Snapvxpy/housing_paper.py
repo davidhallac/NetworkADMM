@@ -234,7 +234,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 1
+	useConvex = 0
 	rho = 0.001
 	numiters = 50
 	thresh = 1000
@@ -385,9 +385,12 @@ def main():
 			# result = p.solve(verbose=True)	
 			xpred = np.zeros(sizeOptVar)
 			it = distances.BegI()
+			sumWeights = 0
 			for j in range(numNewNeighs):
 				weight = 1/(it.GetDat()+ 0.1)
-				xpred = xpred + x[:,it.GetKey()]/sizeOptVar
+				xpred = xpred + weight*x[:,it.GetKey()]
+				sumWeights = sumWeights + weight
+			xpred = xpred / sumWeights
 
 			#Find MSE
 			regressors = dataset.GetDat(i)
