@@ -83,11 +83,10 @@ def solveZ(data):
 				theta = min(max(theta2,0),0.5)
 			else:
 				theta = 0.5
-			#print "theta = ", theta
+			print theta1, theta2, objective1, objective2, objective3, theta
 			z1 = (1-theta)*a + theta*b
 			z2 = theta*a + (1-theta)*b
 		else: #No real roots, use theta = 0.5
-			#print rho*math.pow(d+epsilon,2) - 8*c, rho*math.pow(d+epsilon,2), c, d,
 			#print "NO REAL ROOTS"
 			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
 			
