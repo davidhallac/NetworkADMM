@@ -83,9 +83,11 @@ def solveZ(data):
 				theta = min(max(theta2,0),0.5)
 			else:
 				theta = 0.5
+			print "theta = ", theta
 			z1 = (1-theta)*a + theta*b
 			z2 = theta*a + (1-theta)*b
 		else: #No real roots, use theta = 0.5
+			print "NO REAL ROOTS"
 			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
 			
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
@@ -241,7 +243,7 @@ def main():
 	useConvex = 0
 	rho = 0.001
 	numiters = 10
-	thresh = 1
+	thresh = 0.12
 	lamb = 0.0
 	startVal = 0.01 #first non-zero lambda
 	addUpdateVal = 0.1 #lamb = lamb + ___
@@ -419,7 +421,7 @@ def main():
 	plt.savefig('image_housing',bbox_inches='tight')
 
 	#Plot of clustering
-	pl3 = 
+	pl3 = np.array(plot3)
 
 
 if __name__ == '__main__':
