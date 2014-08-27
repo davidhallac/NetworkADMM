@@ -136,7 +136,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
 			bestObj = bestObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
-
+		print bestObj, "= bestObj"
 	#Run ADMM
 	iters = 0
 	maxProcesses =  80
