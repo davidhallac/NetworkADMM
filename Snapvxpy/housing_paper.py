@@ -93,10 +93,10 @@ def solveZ(data):
 			objective3 = rho/4*math.pow(LA.norm(a-b),2)
 
 			if(objective1 < objective3):
-				print "Chose 0"
+				print "Chose 0", c, d, epsilon, rho
 				(z1, z2) = (a, b)
 			else:
-				print "0.5"
+				#print "0.5"
 				(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
 			
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
@@ -254,7 +254,7 @@ def main():
 	numiters = 10
 	thresh = 0.1
 	lamb = 0.0
-	startVal = 0.0001 #first non-zero lambda
+	startVal = 0.01 #first non-zero lambda
 	addUpdateVal = 0.1 #lamb = lamb + ___
 	multUpdateVal = 1.5 #lamb = lamb*____
 	useMult = 1 #1 for mult, 0 for add
