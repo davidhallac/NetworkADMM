@@ -199,18 +199,20 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			tempObj = 0
 			#Calculate objective
 			for i in range(G1.GetNodes()):
-				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
+				bestObj = bestObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 				edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
-				tempObj = tempObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
+				bestObj = bestObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
 			#Update best variables
-			if(tempObj < bestObj):
+			if(tempObj <= bestObj):
 				bestx = x
 				bestu = u
 				bestz = z
 				bestObj = tempObj
 				print "Iteration ", iters, "; Obj = ", tempObj
+			else:
+				print "Objective ", tempObj, " less than ", bestObj, " at iteration ", iters
 
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
@@ -237,12 +239,12 @@ def main():
 	useConvex = 0
 	rho = 0.001
 	numiters = 50
-	thresh = 1000
+	thresh = 10
 	lamb = 0.0
-	startVal = 0.01
-	addUpdateVal = 0.1
-	multUpdateVal = 1.2
-	useMult = 1
+	startVal = 0.01 #first non-zero lambda
+	addUpdateVal = 0.1 #lamb = lamb + ___
+	multUpdateVal = 1.5 #lamb = lamb*____
+	useMult = 1 #1 for mult, 0 for add
 
 	mu = 1 #For LS regularization
 	#Test/Validation Set Information
