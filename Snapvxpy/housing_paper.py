@@ -199,11 +199,11 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			tempObj = 0
 			#Calculate objective
 			for i in range(G1.GetNodes()):
-				bestObj = bestObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
+				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 				edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
-				bestObj = bestObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
+				tempObj = tempObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
 			#Update best variables
 			if(tempObj <= bestObj):
 				bestx = x
