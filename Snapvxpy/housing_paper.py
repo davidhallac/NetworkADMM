@@ -132,6 +132,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		#Calculate objective
 		for i in range(G1.GetNodes()):
 			bestObj = bestObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
+		print bestObj, "= initial bestObj"
 		for EI in G1.Edges():
 			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
@@ -350,7 +351,7 @@ def main():
 	z = np.zeros((sizeOptVar,2*G1.GetEdges()))
 
 	#Run regularization path
-	[plot1, plot2] = [TFltV(), TFltV()]
+	[plot1, plot2, plot3] = [TFltV(), TFltV(), TFltV()]
 	while(lamb <= thresh or lamb == 0):
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon, mu)
 		print "Lambda = ", lamb
@@ -410,13 +411,15 @@ def main():
 			lamb = lamb + addUpdateVal
 
 
-	#Print/Save plot
+	#Print/Save plot of results
 	pl1 = np.array(plot1)
 	pl2 = np.array(plot2)
 	plt.plot(pl1, pl2)
 	plt.xscale('log')
 	plt.savefig('image_housing',bbox_inches='tight')
 
+	#Plot of clustering
+	pl3 = 
 
 
 if __name__ == '__main__':
