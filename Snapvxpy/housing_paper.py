@@ -87,7 +87,7 @@ def solveZ(data):
 			z1 = (1-theta)*a + theta*b
 			z2 = theta*a + (1-theta)*b
 		else: #No real roots, use theta = 0.5
-			print rho*math.pow(d+epsilon,2) - 8*c, rho*math.pow(d+epsilon,2), 8*c, rho, d, e
+			#print rho*math.pow(d+epsilon,2) - 8*c, rho*math.pow(d+epsilon,2), c, d,
 			#print "NO REAL ROOTS"
 			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
 			
@@ -244,12 +244,12 @@ def main():
 	useConvex = 0
 	rho = 0.001
 	numiters = 10
-	thresh = 0.12
+	thresh = 0.1
 	lamb = 0.0
-	startVal = 0.01 #first non-zero lambda
+	startVal = 0.0001 #first non-zero lambda
 	addUpdateVal = 0.1 #lamb = lamb + ___
 	multUpdateVal = 1.5 #lamb = lamb*____
-	useMult = 0 #1 for mult, 0 for add
+	useMult = 1 #1 for mult, 0 for add
 
 	mu = 1 #For LS regularization
 	#Test/Validation Set Information
