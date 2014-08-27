@@ -65,12 +65,12 @@ def solveZ(data):
 		c = lamb*weight
 
 		if(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c >= 0):
-			theta1 = (rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.000001)
+			theta1 = (rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.0000001)
 			theta1 = min(max(theta1,0),0.5)
 			phi = math.log(1 + d*(1-2*theta1)/epsilon)
 			objective1 = c*phi + rho*math.pow(d,2)*(math.pow(theta1,2))
 
-			theta2 = (rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.000001)
+			theta2 = (rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.0000001)
 			theta2 = min(max(theta2,0),0.5)
 			phi = math.log(1 + d*(1-2*theta2)/epsilon)
 			objective2 = c*phi + rho*math.pow(d,2)*(math.pow(theta2,2))
@@ -261,7 +261,7 @@ def main():
 	#Size of side information at each node
 	sizeData = 5
 	#Non-convex vars
-	epsilon = 0.1
+	epsilon = 0.001
 
 
 	#Generate graph, edge weights
