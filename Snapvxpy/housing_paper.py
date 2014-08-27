@@ -64,7 +64,7 @@ def solveZ(data):
 		d = LA.norm(a-b)
 		c = lamb*weight
 
-		if(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c >= 0):
+		if(rho*math.pow(d+epsilon,2) - 8*c >= 0):
 			theta1 = (rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d+0.0000001)
 			theta1 = min(max(theta1,0),0.5)
 			phi = math.log(1 + d*(1-2*theta1)/epsilon)
@@ -83,11 +83,12 @@ def solveZ(data):
 				theta = min(max(theta2,0),0.5)
 			else:
 				theta = 0.5
-			print "theta = ", theta
+			#print "theta = ", theta
 			z1 = (1-theta)*a + theta*b
 			z2 = theta*a + (1-theta)*b
 		else: #No real roots, use theta = 0.5
-			print "NO REAL ROOTS"
+			print rho*math.pow(d+epsilon,2) - 8*c, rho*math.pow(d+epsilon,2), 8*c, rho, d, e
+			#print "NO REAL ROOTS"
 			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
 			
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
@@ -261,7 +262,7 @@ def main():
 	#Size of side information at each node
 	sizeData = 5
 	#Non-convex vars
-	epsilon = 0.0001
+	epsilon = 0.01
 
 
 	#Generate graph, edge weights
