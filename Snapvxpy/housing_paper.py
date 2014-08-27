@@ -87,13 +87,12 @@ def solveZ(data):
 			z1 = (1-theta)*a + theta*b
 			z2 = theta*a + (1-theta)*b
 		else: #No real roots, use theta = 0.5
-			#print "NO REAL ROOTS"
 			theta1 = 0
 			objective1 = c*math.log(1 + d/epsilon)
 			objective3 = rho/4*math.pow(LA.norm(a-b),2)
 
 			if(objective1 < objective3):
-				print "Chose 0", c, d, epsilon, rho
+				print "Chose 0", a, b
 				(z1, z2) = (a, b)
 			else:
 				#print "0.5"
@@ -249,10 +248,10 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 0
+	useConvex = 1
 	rho = 0.001
 	numiters = 10
-	thresh = 0.1
+	thresh = 1000
 	lamb = 0.0
 	startVal = 0.01 #first non-zero lambda
 	addUpdateVal = 0.1 #lamb = lamb + ___
