@@ -192,7 +192,7 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 10000
+	thresh = 0.12#10000
 	lamb = 0.0
 	startVal = 0.01 #first non-zero lambda
 	useMult = 1 #1 for mult, 0 for add
@@ -350,7 +350,8 @@ def main():
 			#Find MSE
 			regressors = dataset.GetDat(i)
 			#mse = mse + math.pow(xpred.value[0]*float(regressors[0]) + xpred.value[1]*float(regressors[1]) + xpred.value[2]*float(regressors[2]) + xpred.value[3] - float(dataset.GetDat(i)[4]),2)/testSetSize
-			mse = mse + math.pow(xpred[0]*float(regressors[0]) + xpred[1]*float(regressors[1]) + xpred[2]*float(regressors[2]) + xpred[3] - float(dataset.GetDat(i)[4]),2)/testSetSize
+			prediction = xpred[0]*float(regressors[0]) + xpred[1]*float(regressors[1]) + xpred[2]*float(regressors[2]) + xpred[3]
+			mse = mse + math.pow(prediction - float(dataset.GetDat(i)[4]), 2)/testSetSize
 		print mse, "= mse"
 		plot1.Add(lamb)
 		plot2.Add(mse)
