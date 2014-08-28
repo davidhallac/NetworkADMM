@@ -339,19 +339,18 @@ def main():
 			p = Problem(objective, constraints)
 			result = p.solve(verbose=False)	
 			xpred = xpred.value
-			# if(i == 0):
-			# 	print xpred
 
 			# MEAN METHOD
-			xpred = np.zeros(sizeOptVar)
-			it = distances.BegI()
-			sumWeights = 0
-			for j in range(numNewNeighs):
-				weight = 1/(it.GetDat()+ 0.1)
-				xpred = xpred + weight*x[:,it.GetKey()]
-				sumWeights = sumWeights + weight
-				it.Next()
-			xpred = xpred / sumWeights
+			# xpred = np.zeros(sizeOptVar)
+			# it = distances.BegI()
+			# sumWeights = 0
+			# for j in range(numNewNeighs):
+			# 	weight = 1/(it.GetDat()+ 0.1)
+			# 	xpred = xpred + weight*x[:,it.GetKey()]
+			# 	sumWeights = sumWeights + weight
+			# 	it.Next()
+			# xpred = xpred / sumWeights
+			
 			if (i < 10):
 				print xpred, float(dataset.GetDat(i)[4]), i
 
