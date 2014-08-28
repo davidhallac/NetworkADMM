@@ -130,13 +130,13 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
  			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
 			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
 
-			if (counter == 5 and counter2 == 1):
+			if (counter == 5 and counter2 == 0):
 				print edgenum, " = edgenum"
 
 			edgenum = edgenum+1
 		temp = neighs - neighs2
 
-		print neighs[:,2], neighs2[:,2]
+		print LA.norm(temp)#neighs[:,2], neighs2[:,2]
 		temp = np.concatenate((x,a,neighs,np.tile([mu, sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
