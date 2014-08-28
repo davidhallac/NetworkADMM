@@ -90,8 +90,8 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 
 		#x-update
-		(neighs, counter) = (np.zeros(((2*sizeOptVar+1)*maxdeg,nodes)), 0)
-		neighs2 = np.zeros(((2*sizeOptVar+1)*maxdeg,nodes))
+		(neighs2, counter) = (np.zeros(((2*sizeOptVar+1)*maxdeg,nodes)), 0)
+		neighs = np.zeros(((2*sizeOptVar+1)*maxdeg,nodes))
 		for NI in G1.Nodes(): #TODO: Make this more efficient
 			counter2 = 0
 			edgenum = 0
@@ -133,7 +133,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			edgenum = edgenum+1
 		temp = neighs - neighs2
 
-		print np.nonzero(temp)
+		print neighs[:,2], neighs2[:,2]
 		temp = np.concatenate((x,a,neighs,np.tile([mu, sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
