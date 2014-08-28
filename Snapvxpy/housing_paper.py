@@ -90,7 +90,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 
 		#x-update
-		(neighs, counter) = (np.zeros(((2*sizeOptVar+1)*maxdeg,nodes)), 0)
+		neighs = np.zeros(((2*sizeOptVar+1)*maxdeg,nodes))
 		# for NI in G1.Nodes(): #TODO: Make this more efficient
 		# 	counter2 = 0
 		# 	edgenum = 0
@@ -110,7 +110,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		edgenum = 0
 		numSoFar = TIntIntH()
 		for EI in G1.Edges():
-			if (not numSoFar.IsDat(EI.GetSrcNId())):
+			if (not numSoFar.IsKey(EI.GetSrcNId())):
 				numSoFar.AddDat(EI.GetSrcNId(), 0)
 			counter = node2mat.GetDat(EI.GetSrcNId())
 			counter2 = numSoFar.GetDat(EI.GetSrcNId())
@@ -119,7 +119,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
  			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
 			numSoFar.AddDat(EI.GetSrcNId(), counter2+1)
 
-			if (not numSoFar.IsDat(EI.GetDstNId())):
+			if (not numSoFar.IsKey(EI.GetDstNId())):
 				numSoFar.AddDat(EI.GetDstNId(), 0)
 			counter = node2mat.GetDat(EI.GetDstNId())
 			counter2 = numSoFar.GetDat(EI.GetDstNId())
@@ -129,6 +129,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
 
 			edgenum = edgenum+1
+		print neighs[:,0]
 		temp = np.concatenate((x,a,neighs,np.tile([mu, sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
