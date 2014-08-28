@@ -192,7 +192,7 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 10000
+	thresh = 1000
 	lamb = 0.0
 	startVal = 0.01 #first non-zero lambda
 	useMult = 1 #1 for mult, 0 for add
@@ -218,13 +218,13 @@ def main():
 	file.readline() #ignore first line
 	G1 = TUNGraph.New()
 	locations = TIntFltPrH()
-	dataset = TIntIntVH()
+	dataset = TIntFltVH()
 	counter = 0
 	for line in file:
 		G1.AddNode(counter)
 		temp = TFltPr(float(line.split(",")[10]),float(line.split(",")[11]))
 		locations.AddDat(counter, temp)
-		tempData = TIntV()
+		tempData = TFltV()
 		tempData.Add(float(line.split(",")[4]))
 		tempData.Add(float(line.split(",")[5]))
 		tempData.Add(float(line.split(",")[6]))
@@ -236,7 +236,7 @@ def main():
 			tempData.Add(3)
 		else:
 			tempData.Add(4)
-		tempData.Add(float(line.split(",")[12])*10) #12 for normalized; 9 for raw
+		tempData.Add(float(line.split(",")[12])) #12 for normalized; 9 for raw
 		dataset.AddDat(counter, tempData)
 		counter = counter + 1
 
@@ -326,18 +326,23 @@ def main():
 				counter = counter + 1
 			distances.Sort(False, True)
 
-			#Predict price - using CVXPY
-			# xpred = Variable(sizeOptVar,1)
-			# g = 0
-			# it = distances.BegI()
-			# for j in range(numNewNeighs):
-			# 	weight = 1/(it.GetDat()+ 0.1)
-			# 	g = g + weight*norm(xpred - x[:, it.GetKey()])
-			# 	it.Next()	
-			# objective = Minimize(g)
-			# constraints = []
-			# p = Problem(objective, constraints)
-			# result = p.solve(verbose=True)	
+			#Predict price - CVXPY method
+			xpred = Variable(sizeOptVar,1)
+			g = 0
+			it = distances.BegI()
+			for j in range(numNewNeighs):
+				weight = 1/(it.GetDat()+ 0.1)
+				g = g + weight*norm(xpred - x[:, it.GetKey()])
+				it.Next()	
+			objective = Minimize(g)
+			constraints = []
+			p = Problem(objective, constraints)
+			result = p.solve(verbose=False)	
+			xpred = xpred.value
+			# if(i == 0):
+			# 	print xpred
+
+			# MEAN METHOD
 			xpred = np.zeros(sizeOptVar)
 			it = distances.BegI()
 			sumWeights = 0
@@ -347,10 +352,11 @@ def main():
 				sumWeights = sumWeights + weight
 				it.Next()
 			xpred = xpred / sumWeights
+			if (i < 10):
+				print xpred, float(dataset.GetDat(i)[4]), i
 
 			#Find MSE
 			regressors = dataset.GetDat(i)
-			#mse = mse + math.pow(xpred.value[0]*float(regressors[0]) + xpred.value[1]*float(regressors[1]) + xpred.value[2]*float(regressors[2]) + xpred.value[3] - float(dataset.GetDat(i)[4]),2)/testSetSize
 			prediction = xpred[0]*float(regressors[0]) + xpred[1]*float(regressors[1]) + xpred[2]*float(regressors[2]) + xpred[3]
 			mse = mse + math.pow(prediction - float(dataset.GetDat(i)[4]), 2)/testSetSize
 		print mse, "= mse"
