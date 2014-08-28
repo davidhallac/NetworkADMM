@@ -121,6 +121,9 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
  			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
 			numSoFar.AddDat(EI.GetSrcNId(), counter2+1)
 
+			if (counter == 5 and counter2 == 0):
+				print edgenum, " = edgenum"
+
 			if (not numSoFar.IsKey(EI.GetDstNId())):
 				numSoFar.AddDat(EI.GetDstNId(), 0)
 			counter = node2mat.GetDat(EI.GetDstNId())
@@ -129,9 +132,6 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
  			neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] 
  			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
 			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
-
-			if (counter == 5 and counter2 == 0):
-				print edgenum, " = edgenum"
 
 			edgenum = edgenum+1
 		temp = neighs - neighs2
