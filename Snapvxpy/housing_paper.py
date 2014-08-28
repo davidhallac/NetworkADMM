@@ -130,6 +130,9 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
  			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
 			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
 
+			if (counter == 5 and counter2 == 1):
+				print edgenum, " = edgenum"
+
 			edgenum = edgenum+1
 		temp = neighs - neighs2
 
