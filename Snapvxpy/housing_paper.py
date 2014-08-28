@@ -192,10 +192,10 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 0.12#10000
+	thresh = -1#10000
 	lamb = 0.0
 	startVal = 0.01 #first non-zero lambda
-	useMult = 1 #1 for mult, 0 for add
+	useMult = 0 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
 	multUpdateVal = 1.5
 
@@ -364,14 +364,15 @@ def main():
 
 
 	#Print/Save plot of results
-	pl1 = np.array(plot1)
-	pl2 = np.array(plot2)
-	plt.plot(pl1, pl2)
-	plt.xscale('log')
-	plt.savefig('image_housing',bbox_inches='tight')
+	if(thresh > 0):
+		pl1 = np.array(plot1)
+		pl2 = np.array(plot2)
+		plt.plot(pl1, pl2)
+		plt.xscale('log')
+		plt.savefig('image_housing',bbox_inches='tight')
 
-	#Plot of clustering
-	pl3 = np.array(plot3)
+		#Plot of clustering
+		pl3 = np.array(plot3)
 
 
 if __name__ == '__main__':
