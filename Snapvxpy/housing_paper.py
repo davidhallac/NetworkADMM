@@ -131,7 +131,9 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
 
 			edgenum = edgenum+1
-		print LA.norm(neighs - neighs2)
+		temp = neighs - neighs2
+
+		print np.nonzero(temp)
 		temp = np.concatenate((x,a,neighs,np.tile([mu, sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
