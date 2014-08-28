@@ -192,12 +192,12 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 1000
+	thresh = 100000
 	lamb = 0.0
-	startVal = 0.01 #first non-zero lambda
+	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.5
+	multUpdateVal = 10#1.2
 
 	mu = 1 #For LS regularization
 	#Test/Validation Set Information
