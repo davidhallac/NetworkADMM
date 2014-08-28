@@ -90,25 +90,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 
 		#x-update
-		#(neighs2, counter) = (np.zeros(((2*sizeOptVar+1)*maxdeg,nodes)), 0)
 		neighs = np.zeros(((2*sizeOptVar+1)*maxdeg,nodes))
-		# for NI in G1.Nodes(): #TODO: Make this more efficient
-		# 	counter2 = 0
-		# 	edgenum = 0
-		# 	for EI in G1.Edges():
-		# 		if (EI.GetSrcNId() == NI.GetId()):
-		# 			neighs2[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
-		# 			neighs2[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] #u_ij 
-		# 			neighs2[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum] #z_ij
-		# 			counter2 = counter2 + 1
-		# 		elif (EI.GetDstNId() == NI.GetId()):
-		# 			neighs2[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
-		# 			neighs2[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] #u_ij 
-		# 			neighs2[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1] #z_ij
-		# 			counter2 = counter2 + 1
-		# 		edgenum = edgenum+1
-		# 	counter = counter + 1
-
 		edgenum = 0
 		numSoFar = TIntIntH()
 		for EI in G1.Edges():
@@ -210,10 +192,10 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = .1#10000
+	thresh = 10000
 	lamb = 0.0
 	startVal = 0.01 #first non-zero lambda
-	useMult = 0 #1 for mult, 0 for add
+	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
 	multUpdateVal = 1.5
 
@@ -323,7 +305,7 @@ def main():
 	[plot1, plot2, plot3] = [TFltV(), TFltV(), TFltV()]
 	while(lamb <= thresh or lamb == 0):
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon, mu)
-		print "Lambda = ", lamb
+		print "Lambda =", lamb
 		mse = 0
 		#Calculate accuracy on test set
 		for i in testList:
@@ -360,7 +342,7 @@ def main():
 			it = distances.BegI()
 			sumWeights = 0
 			for j in range(numNewNeighs):
-				weight = 1/(it.GetDat()+ 0.1)
+				weight = 1#1/(it.GetDat()+ 0.1)
 				xpred = xpred + weight*x[:,it.GetKey()]
 				sumWeights = sumWeights + weight
 			xpred = xpred / sumWeights
