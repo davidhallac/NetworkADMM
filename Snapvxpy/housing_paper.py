@@ -342,9 +342,10 @@ def main():
 			it = distances.BegI()
 			sumWeights = 0
 			for j in range(numNewNeighs):
-				weight = 1#1/(it.GetDat()+ 0.1)
+				weight = 1/(it.GetDat()+ 0.1)
 				xpred = xpred + weight*x[:,it.GetKey()]
 				sumWeights = sumWeights + weight
+				it.Next()
 			xpred = xpred / sumWeights
 
 			#Find MSE
