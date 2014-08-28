@@ -273,7 +273,7 @@ def main():
 
 
 	#Generate graph, edge weights
-	file = open("Sacramentorealestatetransactions_Normalized.csv", "rU")
+	file = open("Data/Sacramentorealestatetransactions_Normalized.csv", "rU")
 	file.readline() #ignore first line
 	G1 = TUNGraph.New()
 	locations = TIntFltPrH()
