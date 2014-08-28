@@ -37,7 +37,7 @@ def solveX(data):
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
-		print "SCALING BUG", objective
+		print "SCALING BUG"
 		#Todo: CVXOPT scaling issue
 		objective = Minimize(50*g+51*h)
 		p = Problem(objective, constraints)
@@ -90,46 +90,47 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 
 		#x-update
-		neighs = np.zeros(((2*sizeOptVar+1)*maxdeg,nodes))
-		# for NI in G1.Nodes(): #TODO: Make this more efficient
-		# 	counter2 = 0
-		# 	edgenum = 0
-		# 	for EI in G1.Edges():
-		# 		if (EI.GetSrcNId() == NI.GetId()):
-		# 			neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
-		# 			neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] #u_ij 
-		# 			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum] #z_ij
-		# 			counter2 = counter2 + 1
-		# 		elif (EI.GetDstNId() == NI.GetId()):
-		# 			neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
-		# 			neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] #u_ij 
-		# 			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1] #z_ij
-		# 			counter2 = counter2 + 1
-		# 		edgenum = edgenum+1
-		# 	counter = counter + 1
-		edgenum = 0
-		numSoFar = TIntIntH()
-		for EI in G1.Edges():
-			if (not numSoFar.IsKey(EI.GetSrcNId())):
-				numSoFar.AddDat(EI.GetSrcNId(), 0)
-			counter = node2mat.GetDat(EI.GetSrcNId())
-			counter2 = numSoFar.GetDat(EI.GetSrcNId())
- 			neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
- 			neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] 
- 			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
-			numSoFar.AddDat(EI.GetSrcNId(), counter2+1)
+		(neighs, counter) = (np.zeros(((2*sizeOptVar+1)*maxdeg,nodes)), 0)
+		for NI in G1.Nodes(): #TODO: Make this more efficient
+			counter2 = 0
+			edgenum = 0
+			for EI in G1.Edges():
+				if (EI.GetSrcNId() == NI.GetId()):
+					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] #u_ij 
+					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum] #z_ij
+					counter2 = counter2 + 1
+				elif (EI.GetDstNId() == NI.GetId()):
+					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] #u_ij 
+					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1] #z_ij
+					counter2 = counter2 + 1
+				edgenum = edgenum+1
+			counter = counter + 1
 
-			if (not numSoFar.IsKey(EI.GetDstNId())):
-				numSoFar.AddDat(EI.GetDstNId(), 0)
-			counter = node2mat.GetDat(EI.GetDstNId())
-			counter2 = numSoFar.GetDat(EI.GetDstNId())
- 			neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
- 			neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] 
- 			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
-			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
+		# edgenum = 0
+		# numSoFar = TIntIntH()
+		# for EI in G1.Edges():
+		# 	if (not numSoFar.IsKey(EI.GetSrcNId())):
+		# 		numSoFar.AddDat(EI.GetSrcNId(), 0)
+		# 	counter = node2mat.GetDat(EI.GetSrcNId())
+		# 	counter2 = numSoFar.GetDat(EI.GetSrcNId())
+ 	# 		neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+ 	# 		neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] 
+ 	# 		neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
+		# 	numSoFar.AddDat(EI.GetSrcNId(), counter2+1)
 
-			edgenum = edgenum+1
-		print neighs[:,0]
+		# 	if (not numSoFar.IsKey(EI.GetDstNId())):
+		# 		numSoFar.AddDat(EI.GetDstNId(), 0)
+		# 	counter = node2mat.GetDat(EI.GetDstNId())
+		# 	counter2 = numSoFar.GetDat(EI.GetDstNId())
+ 	# 		neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+ 	# 		neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] 
+ 	# 		neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
+		# 	numSoFar.AddDat(EI.GetDstNId(), counter2+1)
+
+		# 	edgenum = edgenum+1
+		print neighs[0]
 		temp = np.concatenate((x,a,neighs,np.tile([mu, sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
