@@ -201,14 +201,14 @@ def main():
 	useConvex = 0
 	rho = 0.001
 	numiters = 50
-	thresh = 1
+	thresh = 10
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.2
+	multUpdateVal = 1.5
 
-	mu = 1 #For LS regularization
+	mu = 0.5 #For LS regularization
 	#Test/Validation Set Information
 	numNeighs = 5 #For data we keep
 	testSetSize = 200
