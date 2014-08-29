@@ -157,6 +157,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			#Calculate objective
 			for i in range(G1.GetNodes()):
 				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
+			initTemp = tempObj
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 				edgeDiff = LA.norm(x[0,node2mat.GetDat(EI.GetSrcNId())] - x[0,node2mat.GetDat(EI.GetDstNId())])
@@ -167,9 +168,9 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				bestu = u
 				bestz = z
 				bestObj = tempObj
-				print "Iteration ", iters, "; Obj = ", tempObj
+				print "Iteration ", iters, "; Obj = ", tempObj, "; Initial = ", initTemp
 			else:
-				print "Objective ", tempObj, " less than ", bestObj, " at iteration ", iters
+				print "Objective ", tempObj, " less than ", bestObj, " at iteration ", iters, "; Initial = ", initTemp
 
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
