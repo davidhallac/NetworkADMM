@@ -208,7 +208,7 @@ def main():
 	addUpdateVal = 0.1 
 	multUpdateVal = 2#1.2
 
-	mu = 10 #For LS regularization
+	mu = 100 #For LS regularization
 	#Test/Validation Set Information
 	numNeighs = 5 #For data we keep
 	testSetSize = 200
