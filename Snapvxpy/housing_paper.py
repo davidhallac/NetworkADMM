@@ -197,7 +197,7 @@ def main():
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 10#1.2
+	multUpdateVal = 2#1.2
 
 	mu = 1 #For LS regularization
 	#Test/Validation Set Information
@@ -351,8 +351,8 @@ def main():
 			# 	it.Next()
 			# xpred = xpred / sumWeights
 			
-			if (i < 10):
-				print xpred, float(dataset.GetDat(i)[4]), i
+			# if (i < 10):
+			# 	print xpred, float(dataset.GetDat(i)[4]), i
 
 			#Find MSE
 			regressors = dataset.GetDat(i)
