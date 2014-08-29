@@ -52,7 +52,8 @@ def solveZ(data):
 			objective3 = rho/4*math.pow(LA.norm(a-b),2)
 
 			if(objective1 < objective3):
-				print "Chose 0", a, b
+				if (d > 10e-8):
+					print "Chose 0", a, b
 				(z1, z2) = (a, b)
 			else:
 				#print "0.5"
