@@ -200,15 +200,15 @@ def main():
 	#Set parameters
 	useConvex = 1
 	rho = 0.001
-	numiters = 500
+	numiters = 50
 	thresh = 10000
 	lamb = 0.0
-	startVal = 0.001
+	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 2#1.2
+	multUpdateVal = 1.2
 
-	mu = 100 #For LS regularization
+	mu = 1 #For LS regularization
 	#Test/Validation Set Information
 	numNeighs = 5 #For data we keep
 	testSetSize = 200
@@ -245,7 +245,7 @@ def main():
 			tempData.Add(3)
 		else:
 			tempData.Add(4)
-		tempData.Add(float(line.split(",")[12])) #12 for normalized; 9 for raw
+		tempData.Add(float(line.split(",")[12])*10) #12 for normalized; 9 for raw
 		dataset.AddDat(counter, tempData)
 		counter = counter + 1
 
