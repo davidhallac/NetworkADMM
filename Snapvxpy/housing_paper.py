@@ -53,7 +53,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
 
-	maxNonConvexIters = 2*numiters
+	maxNonConvexIters = 4*numiters
 
 	#Find max degree of graph; hash the nodes
 	(maxdeg, counter) = (0, 0)
@@ -175,6 +175,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			#else:
 			#	print "Objective ", tempObj, " greater than ", bestObj, " at iteration ", iters, "; Initial = ", initTemp
 			if(iters == numiters - 1 and numiters < maxNonConvexIters):
+				print "MADE IT", iters
 				if(bestObj == initObj):
 					numiters = numiters+1
 
@@ -207,13 +208,13 @@ def main():
 	#Set parameters
 	useConvex = 0
 	rho = 0.001
-	numiters = 10
-	thresh = 1
+	numiters = 2
+	thresh = 10000
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 2
+	multUpdateVal = 1.2
 
 	mu = 0.5 #For LS regularization
 	#Test/Validation Set Information
@@ -367,8 +368,8 @@ def main():
 			# 	it.Next()
 			# xpred = xpred / sumWeights
 			
-			if (i < 10):
-				print xpred, float(dataset.GetDat(i)[4]), i
+			# if (i < 10):
+			# 	print xpred, float(dataset.GetDat(i)[4]), i
 
 			#Find MSE
 			regressors = dataset.GetDat(i)
