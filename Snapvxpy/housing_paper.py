@@ -168,8 +168,8 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				bestz = z
 				bestObj = tempObj
 				print "Iteration ", iters, "; Obj = ", tempObj
-			#else:
-				#print "Objective ", tempObj, " less than ", bestObj, " at iteration ", iters, "; Initial = ", initTemp
+			else:
+				print "Objective ", tempObj, " less than ", bestObj, " at iteration ", iters, "; Initial = ", initTemp
 
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
@@ -200,13 +200,13 @@ def main():
 	#Set parameters
 	useConvex = 0
 	rho = 0.001
-	numiters = 50
+	numiters = 100
 	thresh = 10
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.5
+	multUpdateVal = 2
 
 	mu = 0.5 #For LS regularization
 	#Test/Validation Set Information
