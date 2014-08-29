@@ -39,9 +39,13 @@ def solveX(data):
 	if(result == None):
 		print "SCALING BUG"
 		#Todo: CVXOPT scaling issue
-		objective = Minimize(50*g+51*h)
+		objective = Minimize(51*g+52*h)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
+		if(result == None):
+			objective = Minimize(52*g+50*h)
+			p = Problem(objective, constraints)
+			result = p.solve(verbose=False)
 	return xnew.value
 
 def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, useConvex, epsilon, mu):
