@@ -175,7 +175,6 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			#else:
 			#	print "Objective ", tempObj, " greater than ", bestObj, " at iteration ", iters, "; Initial = ", initTemp
 			if(iters == numiters - 1 and numiters < maxNonConvexIters):
-				print "MADE IT", iters
 				if(bestObj == initObj):
 					numiters = numiters+1
 
@@ -208,7 +207,7 @@ def main():
 	#Set parameters
 	useConvex = 0
 	rho = 0.001
-	numiters = 2
+	numiters = 50
 	thresh = 10000
 	lamb = 0.0
 	startVal = 0.01
