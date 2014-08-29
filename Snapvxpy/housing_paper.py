@@ -186,6 +186,11 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 
 
+
+
+
+
+
 def main():
 
 	#Set parameters
@@ -351,8 +356,8 @@ def main():
 			# 	it.Next()
 			# xpred = xpred / sumWeights
 			
-			# if (i < 10):
-			# 	print xpred, float(dataset.GetDat(i)[4]), i
+			if (i < 10):
+				print xpred, float(dataset.GetDat(i)[4]), i
 
 			#Find MSE
 			regressors = dataset.GetDat(i)
