@@ -208,7 +208,7 @@ def main():
 	useConvex = 0
 	rho = 0.001
 	numiters = 50
-	thresh = 10000
+	thresh = -10000
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
@@ -393,8 +393,12 @@ def main():
 		plt.xscale('log')
 		plt.savefig('image_housing',bbox_inches='tight')
 
+
+
 		#Plot of clustering
 		pl3 = np.array(plot3)
+
+	print "Min value = ", min(pl2)
 
 
 if __name__ == '__main__':
