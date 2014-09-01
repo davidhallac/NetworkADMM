@@ -37,12 +37,12 @@ def solveX(data):
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
-		print "SCALING BUG"
-		#Todo: CVXOPT scaling issue. Rarely happens (but occasionally does when running thousands of tests)
+		#CVXOPT scaling issue. Rarely happens (but occasionally does when running thousands of tests)
 		objective = Minimize(51*g+52*h)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
 		if(result == None):
+			print "SCALING BUG"
 			objective = Minimize(52*g+50*h)
 			p = Problem(objective, constraints)
 			result = p.solve(verbose=False)
@@ -83,12 +83,10 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		#Calculate objective
 		for i in range(G1.GetNodes()):
 			bestObj = bestObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
-		#print bestObj, "= initial bestObj"
 		for EI in G1.Edges():
 			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			edgeDiff = LA.norm(x[:,node2mat.GetDat(EI.GetSrcNId())] - x[:,node2mat.GetDat(EI.GetDstNId())])
 			bestObj = bestObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
-		#print bestObj, "= bestObj"
 		initObj = bestObj #Save for later
 	#Run ADMM
 	iters = 0
@@ -172,8 +170,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				bestz = z
 				bestObj = tempObj
 				print "Iteration ", iters, "; Obj = ", tempObj, "; Initial = ", initTemp
-			#else:
-			#	print "Objective ", tempObj, " greater than ", bestObj, " at iteration ", iters, "; Initial = ", initTemp
+
 			if(iters == numiters - 1 and numiters < maxNonConvexIters):
 				if(bestObj == initObj):
 					numiters = numiters+1
@@ -208,12 +205,12 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 10000
+	thresh = 1000000
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.1
+	multUpdateVal = 1.2
 
 	mu = 0.5 #For LS regularization
 	#Test/Validation Set Information
