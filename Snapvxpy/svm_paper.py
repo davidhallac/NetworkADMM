@@ -230,11 +230,12 @@ def main():
 	multUpdateVal = 1.5
 
 
-
-	#Number of partitions
-	partitions = 5	
 	#Graph Information
 	nodes = 1000
+	#Number of partitions
+	partitions = 20
+	samepart = 0.4
+	diffpart = 0.02	
 	#Size of x
 	sizeOptVar = 10
 	#C in SVM
@@ -257,10 +258,10 @@ def main():
 			if(NI.GetId() != NI2.GetId()):				
 				if ((NI.GetId()/sizepart) == (NI2.GetId()/sizepart)):
 					#Same partition, edge w.p 0.5
-					if(np.random.random() >= 0.5):
+					if(np.random.random() >= 1-samepart):
 						G1.AddEdge(NI.GetId(), NI2.GetId())
 				else:
-					if(np.random.random() >= 0.9):
+					if(np.random.random() >= 1-diffpart):
 						G1.AddEdge(NI.GetId(), NI2.GetId())
 
 	edges = G1.GetEdges()
