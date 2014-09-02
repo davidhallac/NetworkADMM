@@ -53,7 +53,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
 
-	maxNonConvexIters = 5*numiters
+	maxNonConvexIters = 6*numiters
 
 	#Find max degree of graph; hash the nodes
 	(maxdeg, counter) = (0, 0)
@@ -202,15 +202,15 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 1
+	useConvex = 0
 	rho = 0.001
 	numiters = 50
-	thresh = 1000000
+	thresh = 0.011
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.2
+	multUpdateVal = 1.1
 
 	mu = 0.5 #For LS regularization
 	#Test/Validation Set Information
@@ -388,6 +388,8 @@ def main():
 		pl2 = np.array(plot2)
 		plt.plot(pl1, pl2)
 		plt.xscale('log')
+		plt.xlabel(r'$\lambda$')
+		plt.ylabel('MSE')
 		plt.savefig('image_housing',bbox_inches='tight')
 
 
