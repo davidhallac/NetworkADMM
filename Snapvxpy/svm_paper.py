@@ -7,6 +7,7 @@ from multiprocessing import Pool
 #Plotting
 import matplotlib
 matplotlib.use('Agg')
+matplotlib.rc('text',usetex=True)
 import matplotlib.pyplot as plt
 #Other function in this folder
 from z_u_solvers import solveZ, solveU
@@ -54,67 +55,12 @@ def solveX(data):
 	return a.value
 
 
-# def solveZ(data):
-# 	inputs = int(data[data.size-1])
-# 	lamb = data[data.size-2]
-# 	rho = data[data.size-3]
-# 	useConvex = data[data.size-4]
-# 	weight = data[data.size-5]
-# 	x1 = data[0:inputs]
-# 	x2 = data[inputs:2*inputs]
-# 	u1 = data[2*inputs:3*inputs]
-# 	u2 = data[3*inputs:4*inputs]
-# 	a = x1 + u1
-# 	b = x2 + u2
-# 	(z1, z2) = (0,0)
-# 	if(useConvex == 1):
-# 		theta = max(1 - lamb*weight/(rho*LA.norm(a - b)+0.000001), 0.5) #So no divide by zero error
-# 		z1 = theta*a + (1-theta)*b
-# 		z2 = theta*b + (1-theta)*a
-# 	else: #Non-convex version
-# 		epsilon = 0.1
-# 		d = LA.norm(a-b)
-# 		c = lamb*weight
-
-# 		if(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c >= 0):
-# 			theta1 = (-rho*(d+epsilon) + math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d)
-# 			theta1 = min(max(theta1,0),0.5)
-# 			phi = math.log(1 + d*(1-2*theta1)/epsilon)
-# 			objective1 = c*phi + rho*math.pow(d,2)*(math.pow(theta1,2))
-
-# 			theta2 = (-rho*(d+epsilon) - math.sqrt(math.pow(rho,2)*math.pow(d+epsilon,2) - 8*rho*c)) / (4*rho*d)
-# 			theta2 = min(max(theta2,0),0.5)
-# 			phi = math.log(1 + d*(1-2*theta2)/epsilon)
-# 			objective2 = c*phi + rho*math.pow(d,2)*(math.pow(theta2,2))
-
-# 			objective3 = rho/4*math.pow(LA.norm(a-b),2)
-
-# 			if(min(objective1, objective2, objective3) == objective1):
-# 				theta = min(max(theta1,0),0.5)
-# 			elif(min(objective1, objective2, objective3) == objective2):
-# 				theta = min(max(theta2,0),0.5)
-# 			else:
-# 				theta = 0.5
-# 			z1 = (1-theta)*a + theta*b
-# 			z2 = theta*a + (1-theta)*b
-# 		else: #No real roots, use theta = 0.5
-# 			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
-
-# 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
-# 	return znew
-
-# def solveU(data):
-# 	leng = data.size-1
-# 	u = data[0:leng/3]
-# 	x = data[leng/3:2*leng/3]
-# 	z = data[(2*leng/3):leng]
-# 	rho = data[data.size-1]
-# 	return u + (x - z)
-
-def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests, useConvex, eabs, erel, c):
+def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests, useConvex, c, epsilon):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
+
+	maxNonConvexIters = 5*numiters
 
 	#Find max degree of graph; hash the nodes
 	(maxdeg, counter) = (0, 0)
@@ -125,6 +71,8 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		counter = counter + 1
 
 	#Stopping criteria
+	eabs = math.pow(10,-2)
+	erel = math.pow(10,-3)
 	(r, s, epri, edual, counter) = (1,1,0,0,0)
 	A = np.zeros((2*edges, nodes))
 	for EI in G1.Edges():
@@ -137,7 +85,17 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	bestx = x
 	bestu = u
 	bestz = z
-	bestObj = -1
+	bestObj = 0
+	if(useConvex != 1):
+		#Calculate objective
+		for i in range(G1.GetNodes()):
+			bestObj = bestObj + #TODO:
+		for EI in G1.Edges():
+			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+			edgeDiff = LA.norm(x[:,node2mat.GetDat(EI.GetSrcNId())] - x[:,node2mat.GetDat(EI.GetDstNId())])
+			bestObj = bestObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
+		initObj = bestObj
+
 
 	#Run ADMM
 	iters = 0
@@ -145,30 +103,30 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	pool = Pool(processes = min(max(nodes, edges), maxProcesses))
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 		
-		tempObj = 0 #For non-convex
-
-		#TODO: Update tempObj
-
 		#x-update
-		(neighs, counter) = (np.zeros(((2*sizeOptVar+1)*maxdeg,nodes)), 0)
-		for NI in G1.Nodes():
-			counter2 = 0
-			edgenum = 0
-			for EI in G1.Edges():
-				if (node2mat.GetDat(EI.GetSrcNId()) == NI.GetId()):
-					#print "Found: ", NI.GetId(), "Connected to", EI.GetDstNId()
-					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
-					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] #u_ij 
-					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum] #z_ij
-					counter2 = counter2 + 1
-				elif (node2mat.GetDat(EI.GetDstNId()) == NI.GetId()):
-					#print "Found: ", NI.GetId(), "Connected to", EI.GetSrcNId()
-					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
-					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] #u_ij 
-					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1] #z_ij
-					counter2 = counter2 + 1
-				edgenum = edgenum+1
-			counter = counter + 1
+		neighs = np.zeros(((2*sizeOptVar+1)*maxdeg,nodes))
+		edgenum = 0
+		numSoFar = TIntIntH()
+		for EI in G1.Edges():
+			if (not numSoFar.IsKey(EI.GetSrcNId())):
+				numSoFar.AddDat(EI.GetSrcNId(), 0)
+			counter = node2mat.GetDat(EI.GetSrcNId())
+			counter2 = numSoFar.GetDat(EI.GetSrcNId())
+ 			neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+ 			neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] 
+ 			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
+			numSoFar.AddDat(EI.GetSrcNId(), counter2+1)
+
+			if (not numSoFar.IsKey(EI.GetDstNId())):
+				numSoFar.AddDat(EI.GetDstNId(), 0)
+			counter = node2mat.GetDat(EI.GetDstNId())
+			counter2 = numSoFar.GetDat(EI.GetDstNId())
+ 			neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+ 			neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] 
+ 			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1]
+			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
+
+			edgenum = edgenum+1
 		temp = np.concatenate((x,a,neighs,np.tile([c, numtests,sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		newx = pool.map(solveX, temp.transpose())
 		x = np.array(newx).transpose()[0]
@@ -185,7 +143,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			weightsList[0,counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			counter = counter+1
 		xtemp = xtemp.reshape(2*sizeOptVar, edges, order='F')
-		temp = np.concatenate((xtemp,utemp,ztemp,np.reshape(weightsList, (-1,edges)),np.tile([useConvex,rho,lamb,sizeOptVar], (edges,1)).transpose()), axis=0)
+		temp = np.concatenate((xtemp,utemp,ztemp,np.reshape(weightsList, (-1,edges)),np.tile([epsilon, useConvex, rho,lamb,sizeOptVar], (edges,1)).transpose()), axis=0)
 		newz = pool.map(solveZ, temp.transpose())
 		ztemp = np.array(newz).transpose()[0]
 		ztemp = ztemp.reshape(sizeOptVar, 2*edges, order='F')
@@ -204,10 +162,10 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 		#Update best objective (for non-convex)
 		if(useConvex != 1):
-			#Calculate objective
+			#TODO
 
 			#Update best variables
-			if(tempObj < bestObj or bestObj = -1)
+			if(tempObj < bestObj or bestObj == -1):
 				bestx = x
 				bestu = u
 				bestz = z
@@ -221,35 +179,51 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s
 
-		print r, epri, s, edual
+		#print r, epri, s, edual
 		iters = iters + 1
 
 	pool.close()
 	pool.join()
 
+	if(useConvex == 1):
+		return (x,u,z,0,0)
+	else:
+		return (bestx,bestu,bestz,0,0)
 
-	return (x,u,z,0,0)
+
+
+
+
+
+
+
 
 def main():
 
 	#Set parameters
-	useConvex = 0 #1 = true, 0 = false
+	useConvex = 1 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 40
-	thresh = 2
+	thresh = 10
 	lamb = 0.0
-	updateVal = 0.02
-	#Stopping criteria
-	eabs = math.pow(10,-2)
-	erel = math.pow(10,-3)
+	startVal = 0.01
+	useMult = 1 #1 for mult, 0 for add
+	addUpdateVal = 0.1 
+	multUpdateVal = 1.5
+
+
+
+	#Number of partitions
+	partitions = 5	
 	#Graph Information
-	nodes = 100
+	nodes = 1000
 	#Size of x
 	sizeOptVar = 10
 	#C in SVM
 	c = 0.79
+	#Non-convex variable
+	epsilon = 0.01
 
-	partitions = 5
 
 	#Generate graph, edge weights
 	np.random.seed(2)
@@ -302,9 +276,9 @@ def main():
 	z = np.zeros((sizeOptVar,2*edges))
 
 	#Run regularization path
-	[plot1, plot2] = [TFltV(), TFltV()]
-	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, eabs, erel, c)
+	[plot1, plot2, plot3] = [TFltV(), TFltV(), TFltV()]	
+	while(lamb <= thresh or lamb == 0):
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
 		print "Lambda = ", lamb
 
 		#Get accuracy
@@ -321,14 +295,29 @@ def main():
 
 		plot1.Add(lamb)
 		plot2.Add(accuracy)
-		lamb = lamb + updateVal
+		if(lamb == 0):
+			lamb = startVal
+		elif(useMult == 1):
+			lamb = lamb*multUpdateVal
+		else:
+			lamb = lamb + addUpdateVal
 
 
 	#Print/Save plot
-	pl1 = np.array(plot1)
-	pl2 = np.array(plot2)
-	plt.plot(pl1, pl2)
-	plt.savefig('image_svm',bbox_inches='tight')
+	#Print/Save plot of results
+	if(thresh > 0):
+		pl1 = np.array(plot1)
+		pl2 = np.array(plot2)
+		plt.plot(pl1, pl2)
+		plt.xscale('log')
+		plt.xlabel(r'$\lambda$')
+		plt.ylabel('Prediction Accuracy')
+		plt.savefig('image_svm',bbox_inches='tight')
+
+
+
+		#Plot of clustering
+		pl3 = np.array(plot3)
 
 
 

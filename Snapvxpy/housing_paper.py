@@ -54,7 +54,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
 
-	maxNonConvexIters = 6*numiters
+	maxNonConvexIters = 5*numiters
 
 	#Find max degree of graph; hash the nodes
 	(maxdeg, counter) = (0, 0)
@@ -88,7 +88,8 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			edgeDiff = LA.norm(x[:,node2mat.GetDat(EI.GetSrcNId())] - x[:,node2mat.GetDat(EI.GetDstNId())])
 			bestObj = bestObj + lamb*weight*math.log(1 + edgeDiff / epsilon)
-		initObj = bestObj #Save for later
+		initObj = bestObj
+
 	#Run ADMM
 	iters = 0
 	maxProcesses =  80

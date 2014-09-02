@@ -43,21 +43,12 @@ def solveZ(data):
 				theta = min(max(theta2,0),0.5)
 			else:
 				theta = 0.5
-			#print rho*math.pow(d+epsilon,2) - 8*c, theta1, theta2, theta
+
 			z1 = (1-theta)*a + theta*b
 			z2 = theta*a + (1-theta)*b
-		else: #No real roots, use theta = 0.5
-			theta1 = 0
-			objective1 = c*math.log(1 + d/epsilon)
-			objective3 = rho/4*math.pow(LA.norm(a-b),2)
 
-			if(objective1 < objective3):
-				if (d > 10e-8):
-					print "Chose 0", a, b
-				(z1, z2) = (a, b)
-			else:
-				#print "0.5"
-				(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
+		else: #No real roots, use theta = 0.5
+			(z1, z2) = (0.5*a + 0.5*b, 0.5*a + 0.5*b)
 			
 	znew = np.matrix(np.concatenate([z1, z2])).reshape(2*inputs,1)
 	return znew
