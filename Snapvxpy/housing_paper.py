@@ -206,7 +206,7 @@ def main():
 	useConvex = 0
 	rho = 0.001
 	numiters = 50
-	thresh = 0.011
+	thresh = 10000
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
