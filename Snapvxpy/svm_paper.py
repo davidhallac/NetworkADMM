@@ -47,11 +47,15 @@ def solveX(data):
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
-		#result = p.solve(verbose=True)
-		objective = Minimize(g+0.99*f)
+		#CVXOPT scaling issue. Rarely happens (but occasionally does when running thousands of tests)
+		objective = Minimize(5*g+5.1*h)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
-		print "Scaling bug"
+		if(result == None):
+			print "SCALING BUG"
+			objective = Minimize(5.2*g+5*h)
+			p = Problem(objective, constraints)
+			result = p.solve(verbose=False)
 	return a.value
 
 
@@ -231,6 +235,9 @@ def main():
 	c = 0.79
 	#Non-convex variable
 	epsilon = 0.01
+	#Training set size
+	numtests = 10 
+	testSetSize = 5
 
 
 	#Generate graph, edge weights
@@ -259,8 +266,6 @@ def main():
 
 	#Generate side information
 	a_true = np.random.randn(sizeOptVar, partitions)
-	numtests = 10 #Training set size
-	testSetSize = 5
 	v = np.random.randn(numtests,nodes)
 	vtest = np.random.randn(testSetSize,nodes)
 
@@ -277,6 +282,11 @@ def main():
 			y_test[j,i] = np.sign([np.dot(a_part.transpose(), x_test[j*sizeOptVar:(j+1)*sizeOptVar,i])+vtest[j,i]])
 
 	sizeData = trainingSet.shape[0]
+
+	nodes = G1.GetNodes()
+	edges = G1.GetEdges()
+	print nodes, edges
+	print GetBfsFullDiam(G1, 1000, False);
 
 	#Initialize variables to 0
 	x = np.zeros((sizeOptVar,nodes))
