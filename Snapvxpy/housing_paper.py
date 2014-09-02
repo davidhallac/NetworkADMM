@@ -8,6 +8,7 @@ from multiprocessing import Pool
 import csv
 import matplotlib
 matplotlib.use('Agg')
+matplotlib.rc('text',usetex=True)
 import matplotlib.pyplot as plt
 #Other function in this folder
 from z_u_solvers import solveZ, solveU
