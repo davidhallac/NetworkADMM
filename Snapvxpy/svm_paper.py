@@ -43,17 +43,17 @@ def solveX(data):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			f = f + rho/2*square(norm(a - z + u))
-	objective = Minimize(5*g + 5*f)
+	objective = Minimize(50*g + 50*f)
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
 		#CVXOPT scaling issue. Rarely happens (but occasionally does when running thousands of tests)
-		objective = Minimize(5*g+5.1*f)
+		objective = Minimize(50*g+51*f)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
 		if(result == None):
 			print "SCALING BUG"
-			objective = Minimize(5.2*g+5*f)
+			objective = Minimize(52*g+50*f)
 			p = Problem(objective, constraints)
 			result = p.solve(verbose=False)
 	return a.value
@@ -191,7 +191,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s
 
-		#print r, epri, s, edual
+		print r, epri, s, edual
 		iters = iters + 1
 
 	pool.close()
@@ -201,6 +201,12 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		return (x,u,z,0,0)
 	else:
 		return (bestx,bestu,bestz,0,0)
+
+
+
+
+
+
 
 
 
