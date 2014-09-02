@@ -48,12 +48,12 @@ def solveX(data):
 	result = p.solve()
 	if(result == None):
 		#CVXOPT scaling issue. Rarely happens (but occasionally does when running thousands of tests)
-		objective = Minimize(5*g+5.1*h)
+		objective = Minimize(5*g+5.1*f)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
 		if(result == None):
 			print "SCALING BUG"
-			objective = Minimize(5.2*g+5*h)
+			objective = Minimize(5.2*g+5*f)
 			p = Problem(objective, constraints)
 			result = p.solve(verbose=False)
 	return a.value
