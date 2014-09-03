@@ -6,6 +6,9 @@ import math
 from multiprocessing import Pool
 #Plotting
 import csv
+import os    
+import tempfile
+os.environ['MPLCONFIGDIR'] = tempfile.mkdtemp()
 import matplotlib
 matplotlib.use('Agg')
 matplotlib.rc('text',usetex=True)
