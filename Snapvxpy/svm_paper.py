@@ -222,7 +222,7 @@ def main():
 	useConvex = 1 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 40
-	thresh = 10
+	thresh = -1
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
@@ -231,13 +231,13 @@ def main():
 
 
 	#Graph Information
-	nodes = 1000
+	nodes = 20 
 	#Number of partitions
-	partitions = 20
+	partitions = 5
 	samepart = 0.4
 	diffpart = 0.02	
 	#Size of x
-	sizeOptVar = 10
+	sizeOptVar = 10 #Includes 1 for constant offset!
 	#C in SVM
 	c = 0.79
 	#Non-convex variable
@@ -277,6 +277,7 @@ def main():
 	vtest = np.random.randn(testSetSize,nodes)
 
 	trainingSet = np.random.randn(numtests*(sizeOptVar+1), nodes) #First all the x_train, then all the y_train below it
+
 	for i in range(nodes):
 		a_part = a_true[:,i/sizepart]
 		for j in range(numtests):

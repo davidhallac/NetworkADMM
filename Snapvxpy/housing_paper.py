@@ -54,7 +54,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
 
-	maxNonConvexIters = 5*numiters
+	maxNonConvexIters = 6*numiters
 
 	#Find max degree of graph; hash the nodes
 	(maxdeg, counter) = (0, 0)
@@ -207,7 +207,7 @@ def main():
 	useConvex = 0
 	rho = 0.001
 	numiters = 50
-	thresh = 10000
+	thresh = 0.0101
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
