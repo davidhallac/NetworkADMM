@@ -241,7 +241,7 @@ def main():
 	useConvex = 0 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 5
-	thresh = 0.5
+	thresh = 0.2
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
@@ -339,10 +339,16 @@ def main():
 				if(pred == y_test[j,i]):
 					right = right + 1
 		accuracy = right / float(total)
-		print accuracy
+		cons = 0
+		for i in range(edges):
+			if(np.all(z[:,2*i] == z[:,2*i + 1])):
+				cons = cons + 1
+		consensus = cons / float(edges)
+		print accuracy, consensus
 
 		plot1.Add(lamb)
 		plot2.Add(accuracy)
+		plot3.Add(consensus)
 		if(lamb == 0):
 			lamb = startVal
 		elif(useMult == 1):
@@ -364,8 +370,13 @@ def main():
 
 
 		#Plot of clustering
+		plt.figure()
 		pl3 = np.array(plot3)
-
+		plt.plot(pl1, pl3)
+		plt.xscale('log')
+		plt.xlabel(r'$\lambda$')
+		plt.ylabel('\% of edges in Consensus')
+		plt.savefig('consensus_svm',bbox_inches='tight')
 
 
 if __name__ == '__main__':

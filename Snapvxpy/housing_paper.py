@@ -380,9 +380,17 @@ def main():
 			regressors = dataset.GetDat(i)
 			prediction = xpred[0]*float(regressors[0]) + xpred[1]*float(regressors[1]) + xpred[2]*float(regressors[2]) + xpred[3]
 			mse = mse + math.pow(prediction - float(dataset.GetDat(i)[4]), 2)/testSetSize
-		print mse, "= mse"
+
+		cons = 0
+		for i in range(edges):
+			if(np.all(z[:,2*i] == z[:,2*i + 1])):
+				cons = cons + 1
+		consensus = cons / float(edges)
+
+		print mse, "= mse", consensus, " = consensus"
 		plot1.Add(lamb)
 		plot2.Add(mse)
+		plot3.Add(Consensus)
 		if(lamb == 0):
 			lamb = startVal
 		elif(useMult == 1):
@@ -404,7 +412,13 @@ def main():
 
 
 		#Plot of clustering
+		plt.figure()
 		pl3 = np.array(plot3)
+		plt.plot(pl1, pl3)
+		plt.xscale('log')
+		plt.xlabel(r'$\lambda$')
+		plt.ylabel('\% of edges in Consensus')
+		plt.savefig('consensus_housing',bbox_inches='tight')
 
 		print "Min value = ", min(pl2)
 
