@@ -50,7 +50,7 @@ def solveX(data):
 			objective = Minimize(52*g+50*h)
 			p = Problem(objective, constraints)
 			result = p.solve(verbose=False)
-	return xnew.value
+	return xnew.value, g.value
 
 def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, useConvex, epsilon, mu):
 
@@ -83,10 +83,11 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	bestu = u
 	bestz = z
 	bestObj = 0
+	cvxObj = 10000000*np.ones((1, nodes))
 	if(useConvex != 1):
 		#Calculate objective
 		for i in range(G1.GetNodes()):
-			bestObj = bestObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
+			bestObj = bestObj + cvxObj[0,i] #0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
 		for EI in G1.Edges():
 			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			edgeDiff = LA.norm(x[:,node2mat.GetDat(EI.GetSrcNId())] - x[:,node2mat.GetDat(EI.GetDstNId())])
@@ -125,8 +126,11 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			edgenum = edgenum+1
 
 		temp = np.concatenate((x,a,neighs,np.tile([mu, sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
-		newx = pool.map(solveX, temp.transpose())
+		values = pool.map(solveX, temp.transpose())
+		newx = np.array(values)[:,0].tolist()
+		newcvxObj = np.array(values)[:,1].tolist()
 		x = np.array(newx).transpose()[0]
+		cvxObj = np.reshape(np.array(newcvxObj), (-1, nodes))
 
 		#z-update
 		ztemp = z.reshape(2*sizeOptVar, edges, order='F')
@@ -162,7 +166,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			tempObj = 0
 			#Calculate objective
 			for i in range(G1.GetNodes()):
-				tempObj = tempObj + 0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
+				tempObj = tempObj + cvxObj[0,i] #0.5*math.pow(LA.norm(x[0,i]*a[0,i] + x[1,i]*a[1,i] + x[2,i]*a[2,i] + x[3,i] - a[4,i]),2) + mu*(math.pow(x[0,i],2) + math.pow(x[1,i],2) + math.pow(x[2,i],2))
 			initTemp = tempObj
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
@@ -210,7 +214,7 @@ def main():
 	useConvex = 0
 	rho = 0.001
 	numiters = 50
-	thresh = 10000
+	thresh = -1#10000
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
@@ -402,7 +406,7 @@ def main():
 		#Plot of clustering
 		pl3 = np.array(plot3)
 
-	print "Min value = ", min(pl2)
+		print "Min value = ", min(pl2)
 
 
 if __name__ == '__main__':

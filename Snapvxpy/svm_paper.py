@@ -5,6 +5,9 @@ from numpy import linalg as LA
 import math
 from multiprocessing import Pool
 #Plotting
+import os    
+import tempfile
+os.environ['MPLCONFIGDIR'] = tempfile.mkdtemp()
 import matplotlib
 matplotlib.use('Agg')
 matplotlib.rc('text',usetex=True)
@@ -55,8 +58,20 @@ def solveX(data):
 			objective = Minimize(52*g+50*f)
 			p = Problem(objective, constraints)
 			result = p.solve(verbose=False)
-	return a.value, result
-	#return a.value
+	return a.value, g.value
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests, useConvex, c, epsilon):
 
@@ -185,8 +200,9 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				bestu = u
 				bestz = z
 				bestObj = tempObj
-				print "Updated best objective at iter ", iters, "TODO!!!"
-
+				print "Iteration ", iters, "; Obj = ", tempObj, "; Initial = ", initTemp
+			else:
+				print "FAILED AT ITERATION ", iters, "; Obj = ", tempObj, "; Initial = ", initTemp
 
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
@@ -224,8 +240,8 @@ def main():
 	#Set parameters
 	useConvex = 0 #1 = true, 0 = false
 	rho = 0.0001
-	numiters = 50
-	thresh = 0.011
+	numiters = 5
+	thresh = 0.5
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
@@ -334,16 +350,14 @@ def main():
 		else:
 			lamb = lamb + addUpdateVal
 
-		print a_pred
 
-	#Print/Save plot
 	#Print/Save plot of results
 	if(thresh > 0):
 		pl1 = np.array(plot1)
 		pl2 = np.array(plot2)
 		plt.plot(pl1, pl2)
 		plt.xscale('log')
-		#plt.xlabel(r'$\lambda$')
+		plt.xlabel(r'$\lambda$')
 		plt.ylabel('Prediction Accuracy')
 		plt.savefig('image_svm',bbox_inches='tight')
 
