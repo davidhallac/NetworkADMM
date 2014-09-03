@@ -30,12 +30,14 @@ def solveX(data):
 
 	a = Variable(inputs,1)
 	epsil = Variable(numtests,1)
-	b = Variable(1,1)
+	#b = Variable(1,1)
 	constraints = [epsil >= 0]
-	g = 0.5*square(norm(a)) + c*norm(epsil,1)
+	g = c*norm(epsil,1)
+	for i in range(inputs - 1):
+		g = g + 0.5*square(a[i])
 	for i in range(numtests):
 		temp = np.asmatrix(x_train[i*inputs:(i+1)*inputs])
-		constraints = constraints + [y_train[i]*(temp*a + b) >= 1 - epsil[i]]
+		constraints = constraints + [y_train[i]*(temp*a) >= 1 - epsil[i]]
 	f = 0
 	for i in range(neighs.size/(2*inputs+1)):
 		weight = neighs[i*(2*inputs+1)]
@@ -191,7 +193,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s
 
-		print r, epri, s, edual
+		#print r, epri, s, edual
 		iters = iters + 1
 
 	pool.close()
@@ -221,8 +223,8 @@ def main():
 	#Set parameters
 	useConvex = 1 #1 = true, 0 = false
 	rho = 0.0001
-	numiters = 40
-	thresh = 10000
+	numiters = 50
+	thresh = 100
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
