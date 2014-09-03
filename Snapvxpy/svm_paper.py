@@ -222,22 +222,22 @@ def main():
 	useConvex = 1 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 40
-	thresh = 10
+	thresh = 10000
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.5
+	multUpdateVal = 1.2
 
 
 	#Graph Information
-	nodes = 20 
+	nodes = 100
 	#Number of partitions
 	partitions = 5
-	samepart = 0.4
-	diffpart = 0.02	
+	samepart = 0.5#0.4
+	diffpart = 0.1#0.02	
 	#Size of x
-	sizeOptVar = 11 #Includes 1 for constant offset!
+	sizeOptVar = 101 #Includes 1 for constant offset!
 	#C in SVM
 	c = 0.79
 	#Non-convex variable
@@ -277,14 +277,16 @@ def main():
 	vtest = np.random.randn(testSetSize,nodes)
 
 	trainingSet = np.random.randn(numtests*(sizeOptVar+1), nodes) #First all the x_train, then all the y_train below it
-	# for i in range(numtests):
-	# 	trainingSet[___, :] = 1
+	for i in range(numtests):
+		trainingSet[(i+1)*sizeOptVar - 1, :] = 1 #Constant offset
 	for i in range(nodes):
 		a_part = a_true[:,i/sizepart]
 		for j in range(numtests):
 			trainingSet[numtests*sizeOptVar+j,i] = np.sign([np.dot(a_part.transpose(), trainingSet[j*sizeOptVar:(j+1)*sizeOptVar,i])+v[j,i]])
 
 	(x_test,y_test) = (np.random.randn(testSetSize*sizeOptVar, nodes), np.zeros((testSetSize, nodes)))
+	for i in range(testSetSize):
+		x_test[(i+1)*sizeOptVar - 1, :] = 1 #Constant offset
 	for i in range(nodes):
 		a_part = a_true[:,i/sizepart]
 		for j in range(testSetSize):
@@ -337,7 +339,7 @@ def main():
 		pl2 = np.array(plot2)
 		plt.plot(pl1, pl2)
 		plt.xscale('log')
-		plt.xlabel(r'$\lambda$')
+		#plt.xlabel(r'$\lambda$')
 		plt.ylabel('Prediction Accuracy')
 		plt.savefig('image_svm',bbox_inches='tight')
 
