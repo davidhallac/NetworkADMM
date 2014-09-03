@@ -24,13 +24,10 @@ def solveX(data):
 	neighs = data[(inputs + sizeData):data.size-6]
 	xnew = Variable(inputs,1)
 
-	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
 	x_train = rawData[0:numtests*inputs]
 	y_train = rawData[numtests*inputs: numtests*(inputs+1)]
-
 	a = Variable(inputs,1)
 	epsil = Variable(numtests,1)
-	#b = Variable(1,1)
 	constraints = [epsil >= 0]
 	g = c*norm(epsil,1)
 	for i in range(inputs - 1):
@@ -58,15 +55,15 @@ def solveX(data):
 			objective = Minimize(52*g+50*f)
 			p = Problem(objective, constraints)
 			result = p.solve(verbose=False)
-	return a.value
-
+	return a.value, result
+	#return a.value
 
 def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, numtests, useConvex, c, epsilon):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
 
-	maxNonConvexIters = 5*numiters
+	maxNonConvexIters = 6*numiters
 
 	#Find max degree of graph; hash the nodes
 	(maxdeg, counter) = (0, 0)
@@ -92,10 +89,11 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	bestu = u
 	bestz = z
 	bestObj = 0
+	cvxObj = 10000000*np.ones((1, nodes))
 	if(useConvex != 1):
 		#Calculate objective
 		for i in range(G1.GetNodes()):
-			bestObj = bestObj + 0#TODO:
+			bestObj = bestObj + cvxObj[0,i]
 		for EI in G1.Edges():
 			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			edgeDiff = LA.norm(x[:,node2mat.GetDat(EI.GetSrcNId())] - x[:,node2mat.GetDat(EI.GetDstNId())])
@@ -134,8 +132,11 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 			edgenum = edgenum+1
 		temp = np.concatenate((x,a,neighs,np.tile([c, numtests,sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
-		newx = pool.map(solveX, temp.transpose())
+		values = pool.map(solveX, temp.transpose())
+		newx = np.array(values)[:,0].tolist()
+		newcvxObj = np.array(values)[:,1].tolist()
 		x = np.array(newx).transpose()[0]
+		cvxObj = np.reshape(np.array(newcvxObj), (-1, nodes))
 
 		#z-update
 		ztemp = z.reshape(2*sizeOptVar, edges, order='F')
@@ -171,7 +172,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 			tempObj = 0
 			#Calculate objective
 			for i in range(G1.GetNodes()):
-				tempObj = tempObj + 0#TODO
+				tempObj = tempObj + cvxObj[0,i]
 			initTemp = tempObj
 			for EI in G1.Edges():
 				weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
@@ -221,25 +222,25 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 1 #1 = true, 0 = false
+	useConvex = 0 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 50
-	thresh = 100
+	thresh = 0.011
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.2
+	multUpdateVal = 1.5
 
 
 	#Graph Information
-	nodes = 100
+	nodes = 10
 	#Number of partitions
 	partitions = 5
-	samepart = 0.5#0.4
-	diffpart = 0.1#0.02	
+	samepart = 1#0.5
+	diffpart = 0.1#0.1
 	#Size of x
-	sizeOptVar = 101 #Includes 1 for constant offset!
+	sizeOptVar = 11 #Includes 1 for constant offset!
 	#C in SVM
 	c = 0.79
 	#Non-convex variable
@@ -333,6 +334,7 @@ def main():
 		else:
 			lamb = lamb + addUpdateVal
 
+		print a_pred
 
 	#Print/Save plot
 	#Print/Save plot of results
