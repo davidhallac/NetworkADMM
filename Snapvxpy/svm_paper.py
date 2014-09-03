@@ -34,7 +34,7 @@ def solveX(data):
 	constraints = [epsil >= 0]
 	g = 0.5*square(norm(a)) + c*norm(epsil,1)
 	for i in range(numtests):
-		temp = np.asmatrix(x_train[i*inputs:i*inputs+numtests])
+		temp = np.asmatrix(x_train[i*inputs:(i+1)*inputs])
 		constraints = constraints + [y_train[i]*(temp*a + b) >= 1 - epsil[i]]
 	f = 0
 	for i in range(neighs.size/(2*inputs+1)):
@@ -222,7 +222,7 @@ def main():
 	useConvex = 1 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 40
-	thresh = -1
+	thresh = 10
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
@@ -237,13 +237,13 @@ def main():
 	samepart = 0.4
 	diffpart = 0.02	
 	#Size of x
-	sizeOptVar = 10 #Includes 1 for constant offset!
+	sizeOptVar = 11 #Includes 1 for constant offset!
 	#C in SVM
 	c = 0.79
 	#Non-convex variable
 	epsilon = 0.01
 	#Training set size
-	numtests = 10 
+	numtests = 10
 	testSetSize = 5
 
 
@@ -277,7 +277,8 @@ def main():
 	vtest = np.random.randn(testSetSize,nodes)
 
 	trainingSet = np.random.randn(numtests*(sizeOptVar+1), nodes) #First all the x_train, then all the y_train below it
-
+	# for i in range(numtests):
+	# 	trainingSet[___, :] = 1
 	for i in range(nodes):
 		a_part = a_true[:,i/sizepart]
 		for j in range(numtests):
@@ -313,7 +314,7 @@ def main():
 		for i in range(nodes):
 			temp = a_pred[:,i]
 			for j in range(testSetSize):
-				pred = np.sign([np.dot(temp.transpose(), x_test[j*sizeOptVar:j*sizeOptVar+numtests,i])])
+				pred = np.sign([np.dot(temp.transpose(), x_test[j*sizeOptVar:(j+1)*sizeOptVar,i])])
 				if(pred == y_test[j,i]):
 					right = right + 1
 		accuracy = right / float(total)
