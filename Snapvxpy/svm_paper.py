@@ -238,10 +238,10 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 1 #1 = true, 0 = false
+	useConvex = 0 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 50
-	thresh = 0.02
+	thresh = 100
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
