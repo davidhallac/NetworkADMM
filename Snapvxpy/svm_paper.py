@@ -238,23 +238,23 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 0 #1 = true, 0 = false
+	useConvex = 1 #1 = true, 0 = false
 	rho = 0.0001
-	numiters = 5
-	thresh = 0.2
+	numiters = 50
+	thresh = 10000
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.5
+	multUpdateVal = 1.2
 
 
 	#Graph Information
-	nodes = 10
+	nodes = 1000
 	#Number of partitions
-	partitions = 5
-	samepart = 1#0.5
-	diffpart = 0.1#0.1
+	partitions = 50
+	samepart = 0.5
+	diffpart = 0.01
 	#Size of x
 	sizeOptVar = 11 #Includes 1 for constant offset!
 	#C in SVM
@@ -368,7 +368,6 @@ def main():
 		plt.savefig('image_svm',bbox_inches='tight')
 
 
-
 		#Plot of clustering
 		plt.figure()
 		pl3 = np.array(plot3)
@@ -377,6 +376,9 @@ def main():
 		plt.xlabel(r'$\lambda$')
 		plt.ylabel('\% of edges in Consensus')
 		plt.savefig('consensus_svm',bbox_inches='tight')
+
+
+		print "Min value = ", min(pl2)
 
 
 if __name__ == '__main__':
