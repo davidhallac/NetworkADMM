@@ -241,7 +241,7 @@ def main():
 	useConvex = 1 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 50
-	thresh = 10000
+	thresh = 0.02
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
@@ -250,9 +250,9 @@ def main():
 
 
 	#Graph Information
-	nodes = 1000
+	nodes = 10
 	#Number of partitions
-	partitions = 50
+	partitions = 2
 	samepart = 0.5
 	diffpart = 0.01
 	#Size of x
@@ -379,6 +379,8 @@ def main():
 
 
 		print "Min value = ", min(pl2)
+		np.savetxt('svm.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
+
 
 
 if __name__ == '__main__':
