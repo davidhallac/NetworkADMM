@@ -390,7 +390,7 @@ def main():
 		print mse, "= mse", consensus, " = consensus"
 		plot1.Add(lamb)
 		plot2.Add(mse)
-		plot3.Add(Consensus)
+		plot3.Add(consensus)
 		if(lamb == 0):
 			lamb = startVal
 		elif(useMult == 1):
