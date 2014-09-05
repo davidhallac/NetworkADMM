@@ -201,8 +201,12 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				bestz = z
 				bestObj = tempObj
 				print "Iteration ", iters, "; Obj = ", tempObj, "; Initial = ", initTemp
-			#else:
-			#	print "FAILED AT ITERATION ", iters, "; Obj = ", tempObj, "; Initial = ", initTemp
+			# else:
+			# 	print "FAILED AT ITERATION ", iters, "; Obj = ", tempObj, "; Initial = ", initTemp
+
+			if(iters == numiters - 1 and numiters < maxNonConvexIters):
+				if(bestObj == initObj):
+					numiters = numiters+1
 
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
