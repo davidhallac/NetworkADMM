@@ -379,7 +379,7 @@ def main():
 
 
 		print "Min value = ", min(pl2)
-		np.savetxt('svm.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
+		np.savetxt('text_svm.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
 
 
 
