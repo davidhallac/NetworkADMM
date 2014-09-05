@@ -407,9 +407,10 @@ def main():
 		plt.xscale('log')
 		plt.xlabel(r'$\lambda$')
 		plt.ylabel('MSE')
-		plt.savefig('image_housing',bbox_inches='tight')
-
-
+		if(useConvex == 1):
+			plt.savefig('image_housing_convex',bbox_inches='tight')
+		else:
+			plt.savefig('image_housing_nonconvex',bbox_inches='tight')
 
 		#Plot of clustering
 		plt.figure()
@@ -418,10 +419,14 @@ def main():
 		plt.xscale('log')
 		plt.xlabel(r'$\lambda$')
 		plt.ylabel('\% of edges in Consensus')
-		plt.savefig('consensus_housing',bbox_inches='tight')
 
-		print "Min value = ", min(pl2)
-		np.savetxt('text_housing.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
+		if(useConvex == 1):
+			plt.savefig('consensus_housing_convex',bbox_inches='tight')
+			np.savetxt('text_housing_convex.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
+		else:
+			plt.savefig('consensus_housing_nonconvex',bbox_inches='tight')
+			np.savetxt('text_housing_nonconvex.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
+		
 
 
 if __name__ == '__main__':

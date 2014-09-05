@@ -369,7 +369,10 @@ def main():
 		plt.xscale('log')
 		plt.xlabel(r'$\lambda$')
 		plt.ylabel('Prediction Accuracy')
-		plt.savefig('image_svm',bbox_inches='tight')
+		if(useConvex == 1):
+			plt.savefig('image_svm_convex',bbox_inches='tight')
+		else:
+			plt.savefig('image_svm_nonconvex',bbox_inches='tight')
 
 
 		#Plot of clustering
@@ -379,11 +382,12 @@ def main():
 		plt.xscale('log')
 		plt.xlabel(r'$\lambda$')
 		plt.ylabel('\% of edges in Consensus')
-		plt.savefig('consensus_svm',bbox_inches='tight')
-
-
-		print "Min value = ", min(pl2)
-		np.savetxt('text_svm.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
+		if(useConvex == 1):
+			plt.savefig('consensus_svm_convex',bbox_inches='tight')
+			np.savetxt('text_svm_convex.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
+		else:
+			plt.savefig('consensus_svm_nonconvex',bbox_inches='tight')
+			np.savetxt('text_svm_nonconvex.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
 
 
 
