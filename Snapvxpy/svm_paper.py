@@ -250,9 +250,9 @@ def main():
 
 
 	#Graph Information
-	nodes = 10
+	nodes = 1000
 	#Number of partitions
-	partitions = 2
+	partitions = 50
 	samepart = 0.5
 	diffpart = 0.01
 	#Size of x
