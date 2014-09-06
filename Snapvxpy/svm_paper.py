@@ -242,7 +242,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 1 #1 = true, 0 = false
+	useConvex = 0 #1 = true, 0 = false
 	rho = 0.0001
 	numiters = 50
 	thresh = 10
@@ -250,7 +250,7 @@ def main():
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.1
+	multUpdateVal = 1.2
 
 
 	#Graph Information
@@ -278,7 +278,7 @@ def main():
 	sizepart = nodes/partitions
 	for NI in G1.Nodes():
 		for NI2 in G1.Nodes():
-			if(NI.GetId() != NI2.GetId()):				
+			if(NI.GetId() < NI2.GetId()):				
 				if ((NI.GetId()/sizepart) == (NI2.GetId()/sizepart)):
 					#Same partition, edge w.p 0.5
 					if(np.random.random() >= 1-samepart):
