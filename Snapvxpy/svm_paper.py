@@ -250,7 +250,7 @@ def main():
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.2
+	multUpdateVal = 1.1
 
 
 	#Graph Information
