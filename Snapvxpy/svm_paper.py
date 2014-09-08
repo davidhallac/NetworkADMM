@@ -144,7 +144,6 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
  			neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] 
  			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1]
 			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
-
 			edgenum = edgenum+1
 		temp = np.concatenate((x,a,neighs,np.tile([c, numtests,sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		values = pool.map(solveX, temp.transpose())
@@ -257,7 +256,7 @@ def main():
 	nodes = 1000
 	#Number of partitions
 	partitions = 50
-	samepart = 0.5
+	samepart = 0.9
 	diffpart = 0.01
 	#Size of x
 	sizeOptVar = 11 #Includes 1 for constant offset!
