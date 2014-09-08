@@ -4,7 +4,16 @@ import numpy as np
 from numpy import linalg as LA
 import math
 from multiprocessing import Pool
-
+#Plotting
+import os    
+import tempfile
+os.environ['MPLCONFIGDIR'] = tempfile.mkdtemp()
+import matplotlib
+matplotlib.use('Agg')
+matplotlib.rc('text',usetex=True)
+import matplotlib.pyplot as plt
+#Other function in this folder
+from z_u_solvers import solveZ, solveU
 
 def solveX(data):
 	inputs = int(data[data.size-1])

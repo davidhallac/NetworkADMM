@@ -250,7 +250,7 @@ def main():
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.1
+	multUpdateVal = 1.2
 
 
 	#Graph Information
@@ -276,6 +276,7 @@ def main():
 	for i in range(nodes):
 		G1.AddNode(i)
 	sizepart = nodes/partitions
+	correctedges = 0
 	for NI in G1.Nodes():
 		for NI2 in G1.Nodes():
 			if(NI.GetId() < NI2.GetId()):				
@@ -283,6 +284,7 @@ def main():
 					#Same partition, edge w.p 0.5
 					if(np.random.random() >= 1-samepart):
 						G1.AddEdge(NI.GetId(), NI2.GetId())
+						correctedges = correctedges+1
 				else:
 					if(np.random.random() >= 1-diffpart):
 						G1.AddEdge(NI.GetId(), NI2.GetId())
@@ -319,7 +321,7 @@ def main():
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
-	print nodes, edges
+	print nodes, edges, correctedges
 	print GetBfsFullDiam(G1, 1000, False);
 
 	#Initialize variables to 0
