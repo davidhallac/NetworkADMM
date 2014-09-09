@@ -255,18 +255,18 @@ def main():
 	#Graph Information
 	nodes = 1000
 	#Number of partitions
-	partitions = 50
-	samepart = 0.9
+	partitions = 20
+	samepart = 0.5
 	diffpart = 0.01
 	#Size of x
-	sizeOptVar = 11 #Includes 1 for constant offset!
+	sizeOptVar = 51 #Includes 1 for constant offset!
 	#C in SVM
 	c = 0.79
 	#Non-convex variable
 	epsilon = 0.01
 	#Training set size
-	numtests = 10
-	testSetSize = 5
+	numtests = 25
+	testSetSize = 10
 
 
 	#Generate graph, edge weights
@@ -320,7 +320,7 @@ def main():
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
-	print nodes, edges, correctedges
+	print nodes, edges, float(correctedges/edges), 1 - float(correctedges/edges)
 	print GetBfsFullDiam(G1, 1000, False);
 
 	#Initialize variables to 0
