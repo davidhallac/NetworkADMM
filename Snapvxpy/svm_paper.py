@@ -320,7 +320,7 @@ def main():
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
-	print nodes, edges, float(correctedges/edges), 1 - float(correctedges/edges)
+	print nodes, edges, correctedges/float(edges), 1 - float(correctedges)/edges
 	print GetBfsFullDiam(G1, 1000, False);
 
 	#Initialize variables to 0

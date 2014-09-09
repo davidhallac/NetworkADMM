@@ -266,7 +266,7 @@ def main():
 		print outward, inward
 		G1.AddNode(counter)
 
-				
+
 		counter = counter + 1
 
 	file = open("location_sensors.txt", "r")
@@ -303,6 +303,7 @@ def main():
 
 
 	#Generate side information
+	np.random.seed(2)
 	a = np.random.randn(sizeData, nodes)
 
 	#Initialize variables to 0
