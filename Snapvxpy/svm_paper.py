@@ -246,7 +246,7 @@ def main():
 	numiters = 50
 	thresh = 10
 	lamb = 0.0
-	startVal = 0.01
+	startVal = 0.001
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
 	multUpdateVal = 1.2
@@ -261,7 +261,7 @@ def main():
 	#Size of x
 	sizeOptVar = 51 #Includes 1 for constant offset!
 	#C in SVM
-	c = 0.79
+	c = 0.75
 	#Non-convex variable
 	epsilon = 0.01
 	#Training set size
