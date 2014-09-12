@@ -428,7 +428,7 @@ def main():
 			np.savetxt('text_housing_nonconvex.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
 	
 	#Draw Graph
-	DrawGViz(G1, gvlNeato, "graph_undirected.png", "graph 2", True)	
+	#DrawGViz(G1, gvlNeato, "graph_undirected.png", "graph 2", True)	
 
 
 if __name__ == '__main__':
