@@ -244,7 +244,7 @@ def main():
 	useConvex = 1 #1 = true, 0 = false
 	rho = 0.0001 
 	numiters = 50
-	thresh = -10#10
+	thresh = -1#10
 	lamb = 0.0
 	startVal = 0.001
 	useMult = 1 #1 for mult, 0 for add
@@ -389,6 +389,9 @@ def main():
 		else:
 			plt.savefig('consensus_svm_nonconvex',bbox_inches='tight')
 			np.savetxt('text_svm_nonconvex.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
+
+	#Draw Graph
+	DrawGViz(G1, gvlNeato, "graph_undirected.png", "graph 2", True)
 
 
 
