@@ -236,75 +236,56 @@ def main():
 
 	#Generate graph, edge weights
 	file = open("Data/CalIt2.csv", "rU")
-	#file.readline() #ignore first line
+	dataset = TIntFltVH()
 	G1 = TUNGraph.New()
 	counter = 0
 	#for line in file:
 	while True:
-		# temp = TFltPr(float(line.split(",")[10]),float(line.split(",")[11]))
-		# locations.AddDat(counter, temp)
-		# tempData = TFltV()
-		# tempData.Add(float(line.split(",")[4]))
-		# tempData.Add(float(line.split(",")[5]))
-		# tempData.Add(float(line.split(",")[6]))
-		# if(line.split(",")[7] == "Residential"):
-		# 	tempData.Add(1)
-		# elif(line.split(",")[7] == "Condo"):
-		# 	tempData.Add(2)
-		# elif(line.split(",")[7] == "Multi-Family"):
-		# 	tempData.Add(3)
-		# else:
-		# 	tempData.Add(4)
-		# tempData.Add(float(line.split(",")[12])*10) #12 for normalized; 9 for raw
-		# dataset.AddDat(counter, tempData)
 		line = file.readline() #7 --outflow
 		if not line: 
 			break
-		outward = line.split(",")[3]
-		line = file.readline()
-		inward = line.split(",")[3]
-		print outward, inward
+		outward = float(line.split(",")[3])
+		line = file.readline() #9 --inflow
+		inward = float(line.split(",")[3])
+
+		tempData = TFltV()
+		tempData.Add(outward)
+		tempData.Add(inward)
+		dataset.AddDat(counter, tempData)
+
 		G1.AddNode(counter)
-
-
 		counter = counter + 1
 
-	file = open("location_sensors.txt", "r")
-	G1 = TUNGraph.New()
-	locations = TIntFltPrH()
-	for line in file:
-		G1.AddNode(int(line.split()[0]))
-		temp = TFltPr(float(line.split()[1]),float(line.split()[2]))
-		locations.AddDat(int(line.split()[0]), temp)
-
-	#For each node, find closest neightbors and add edge, weight = 5/distance
-	edgeWeights = TIntPrFltH()
-	numNeighs = 3
+	#Build linear graph
 	for NI in G1.Nodes():
-		distances = TIntFltH()
-		x1 = locations.GetDat(NI.GetId()).GetVal1()
-		y1 = locations.GetDat(NI.GetId()).GetVal2()
-		for NI2 in G1.Nodes():
-			if(NI.GetId() != NI2.GetId()):
-				x2 = locations.GetDat(NI2.GetId()).GetVal1()
-				y2 = locations.GetDat(NI2.GetId()).GetVal2()
-				dist = math.sqrt(math.pow(x1-x2,2) + math.pow(y1 - y2,2))
-				distances.AddDat(NI2.GetId(), dist)
-		distances.Sort(False, True)
-		it = distances.BegI()
-		for j in range(numNeighs):
-			if (not G1.IsEdge(NI.GetId(), it.GetKey())):
-				G1.AddEdge(NI.GetId(), it.GetKey())
-				#Add edge weight
-				temp = TIntPr(min(NI.GetId(), it.GetKey()), max(NI.GetId(), it.GetKey()))
-				edgeWeights.AddDat(temp, 5/it.GetDat())
-			it.Next()
+		if (NI.GetId() > 0):
+			G1.AddEdge(NI.GetId(), NI.GetId()-1)
+		
+
+	nodes = G1.GetNodes()
+	edges = G1.GetEdges()
+
+	#Save side information
+	a = np.zeros((2, nodes))
+	for NI in G1.Nodes():
+		a[0,NI.GetId()] = dataset.GetDat(NI.GetId())[0]
+		a[1,NI.GetId()] = dataset.GetDat(NI.GetId())[1]
+		print dataset.GetDat(NI.GetId())[0], dataset.GetDat(NI.GetId())[1] 
+
+
+	temp1 = np.array(a[0,:])
+	temp2 = np.array(a[1,:])
+	plt.scatter(temp1, temp2)
+	plt.savefig('image_svm_convex',bbox_inches='tight')
 
 
 
-	#Generate side information
-	np.random.seed(2)
-	a = np.random.randn(sizeData, nodes)
+
+
+
+
+
+
 
 	#Initialize variables to 0
 	x = np.zeros((sizeOptVar,nodes))
