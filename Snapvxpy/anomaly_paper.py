@@ -320,6 +320,7 @@ def main():
 
 	#Run regularization path
 	while(lamb <= thresh or lamb == 0):
+	#while(False):
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
 		print "Lambda = ", lamb
 
@@ -332,9 +333,29 @@ def main():
 			lamb = lamb + addUpdateVal
 
 
+
+	#Compare to events
+	file = open("Data/CalIt2Events.csv", "rU")
+	events = TIntPrV()	
+	for line in file:
+		if(not line.split(",")[0]):
+			break
+		events.Add(TIntPr(float(line.split(",")[4]), float(line.split(",")[5])))	
+
+	truth = np.zeros((2,nodes))
+	for meeting in events:
+		start = meeting.GetVal1()
+		end = meeting.GetVal2()
+		counter = start
+		while (counter <= end):
+			truth[0,counter] = truth[0,counter] + 5
+			counter = counter + 1
+
+
 	#print results
 	plt.plot(range(nodes), x[0,:])
 	plt.plot(range(nodes), x[1,:], color='r')
+	plt.plot(range(nodes), truth[0,:], color='g')
 	plt.savefig('image_svm_convex',bbox_inches='tight')	
 
 	#Predict events
