@@ -48,7 +48,7 @@ def solveX(data):
 		print "SCALING BUG"
 	return xnew.value, g.value
 
-def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights):
+def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, useConvex, epsilon):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
@@ -119,7 +119,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
  			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1]
 			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
 			edgenum = edgenum+1
-		temp = np.concatenate((x,a,neighs,np.tile([c, numtests,sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
+		temp = np.concatenate((x,a,neighs,np.tile([sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		values = pool.map(solveX, temp.transpose())
 		newx = np.array(values)[:,0].tolist()
 		newcvxObj = np.array(values)[:,1].tolist()
@@ -220,18 +220,22 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	rho = 0.1
-	numiters = 25
-	thresh = -0.15
-	lamb = 0.0
-	updateVal = 0.1
-	#Graph Information
-	nodes = 54
-	edges = 100
+	useConvex = 1
+	rho = 0.001
+	numiters = 50
+	thresh = -5
+	lamb = 10.0
+	startVal = 0.01
+	useMult = 1 #1 for mult, 0 for add
+	addUpdateVal = 0.1 
+	multUpdateVal = 1.1
+
 	#Size of x
-	sizeOptVar = 5
+	sizeOptVar = 2
 	#Size of side information at each node
-	sizeData = 5
+	sizeData = 2
+	#Non-convex vars
+	epsilon = 0.01
 
 
 	#Generate graph, edge weights
@@ -261,6 +265,11 @@ def main():
 		if (NI.GetId() > 0):
 			G1.AddEdge(NI.GetId(), NI.GetId()-1)
 		
+	#Edge weights
+	edgeWeights = TIntPrFltH()
+	for EI in G1.Edges():
+		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
+		edgeWeights.AddDat(temp, 1)
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
@@ -293,33 +302,10 @@ def main():
 		a[0,i] = a[0,i] - baseline[0, i  % (48*7)]
 		a[1,i] = a[1,i] - baseline[1, i  % (48*7)]
 
-	temp1 = np.array(a[0,:])
-	temp2 = np.array(a[1,:])
-	temp3 = np.array(range(nodes))
-	#plt.scatter(temp3 , temp2)
-	#plt.xlim([-2,50])
-	plt.plot(range(nodes), a[0,:])
-	plt.plot(range(nodes), a[1,:], color='r')
-	plt.savefig('image_svm_convex',bbox_inches='tight')
+	# plt.plot(range(nodes), a[0,:])
+	# plt.plot(range(nodes), a[1,:], color='r')
+	# plt.savefig('image_svm_convex',bbox_inches='tight')
 
-	summer = TFltV()
-	for i in range(nodes/48):
-
-		if(i % 7  != 0 and i % 7 != 6):
-
-			for j in range(48):
-				summer.Add(a[0,i*48 + j] + a[1,i*48 + j])
-				#counter2 = counter2 + a[1, i*48 + j]
-
-
-	temp1 = np.array(summer)
-	temp3 = np.array(range(summer.Len()))
-	plt.scatter(temp3 % 48, temp1)
-	plt.xlabel('Time of day')
-	plt.ylabel('\# of People (In + Out)')
-	plt.xlim([-2,50])
-	plt.ylim([-2,120])
-	#plt.savefig('image_svm_convex',bbox_inches='tight')
 
 
 
@@ -333,11 +319,23 @@ def main():
 	z = np.zeros((sizeOptVar,2*G1.GetEdges()))
 
 	#Run regularization path
-	while(lamb <= thresh):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights)
+	while(lamb <= thresh or lamb == 0):
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
 		print "Lambda = ", lamb
-		lamb = lamb + updateVal
 
+
+		if(lamb == 0):
+			lamb = startVal
+		elif(useMult == 1):
+			lamb = lamb*multUpdateVal
+		else:
+			lamb = lamb + addUpdateVal
+
+
+	#print results
+	plt.plot(range(nodes), x[0,:])
+	plt.plot(range(nodes), x[1,:], color='r')
+	plt.savefig('image_svm_convex',bbox_inches='tight')	
 
 
 
