@@ -270,16 +270,56 @@ def main():
 	for NI in G1.Nodes():
 		a[0,NI.GetId()] = dataset.GetDat(NI.GetId())[0]
 		a[1,NI.GetId()] = dataset.GetDat(NI.GetId())[1]
-		print dataset.GetDat(NI.GetId())[0], dataset.GetDat(NI.GetId())[1] 
+		#print dataset.GetDat(NI.GetId())[0], dataset.GetDat(NI.GetId())[1] 
+	
+	#Get baseline for each day/time
+	baseline = np.zeros((2,48*7))
+	for i in range(48*7):
+		(counter, counter2) = (0,0)
+		for j in range(15):
+			counter = counter + a[0, i + 48*7*j]
+			counter2 = counter2 + a[1, i + 48*7*j]
+		baseline[0,i] = counter / 15
+		baseline[1,i] = counter2 / 15
 
+	# plt.plot(range(48*7), baseline[0,:])
+	# plt.plot(range(48*7), baseline[1,:], color='r')
+	# plt.savefig('image_svm_convex',bbox_inches='tight')
+
+
+
+	#Subtract Baseline from a
+	for i in range(nodes):
+		a[0,i] = a[0,i] - baseline[0, i  % (48*7)]
+		a[1,i] = a[1,i] - baseline[1, i  % (48*7)]
 
 	temp1 = np.array(a[0,:])
 	temp2 = np.array(a[1,:])
-	plt.scatter(temp1, temp2)
+	temp3 = np.array(range(nodes))
+	#plt.scatter(temp3 , temp2)
+	#plt.xlim([-2,50])
+	plt.plot(range(nodes), a[0,:])
+	plt.plot(range(nodes), a[1,:], color='r')
 	plt.savefig('image_svm_convex',bbox_inches='tight')
 
+	summer = TFltV()
+	for i in range(nodes/48):
+
+		if(i % 7  != 0 and i % 7 != 6):
+
+			for j in range(48):
+				summer.Add(a[0,i*48 + j] + a[1,i*48 + j])
+				#counter2 = counter2 + a[1, i*48 + j]
 
 
+	temp1 = np.array(summer)
+	temp3 = np.array(range(summer.Len()))
+	plt.scatter(temp3 % 48, temp1)
+	plt.xlabel('Time of day')
+	plt.ylabel('\# of People (In + Out)')
+	plt.xlim([-2,50])
+	plt.ylim([-2,120])
+	#plt.savefig('image_svm_convex',bbox_inches='tight')
 
 
 

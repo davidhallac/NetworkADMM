@@ -403,7 +403,7 @@ def main():
 	if(thresh > 0):
 		pl1 = np.array(plot1)
 		pl2 = np.array(plot2)
-		plt.plot(pl1, pl2)
+		plt.plot(pl1, pl2/100) #To get to unit variance
 		plt.xscale('log')
 		plt.xlabel(r'$\lambda$')
 		plt.ylabel('MSE')
