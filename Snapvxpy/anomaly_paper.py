@@ -338,10 +338,13 @@ def main():
 	plt.savefig('image_svm_convex',bbox_inches='tight')	
 
 	#Predict events
+	counter = 1
 	for i in range(nodes):
-		if(LA.norm(x[:,i]) > 3):
-			print "Event predicted on day #", i / 48, " at time period ", i % 48 
-
+		if(LA.norm(x[:,i]) >= 3 and LA.norm(x[:,i-1]) < 3):
+			print "Event number ", counter, " starts on day #", i / 48, " at time period ", i % 48 
+			counter = counter + 1
+		elif(LA.norm(x[:,i]) >= 3 and LA.norm(x[:,i+1]) < 3):
+			print "Event number ", counter, " ends on day #", i / 48, " at time period ", i % 48 
 
 
 
