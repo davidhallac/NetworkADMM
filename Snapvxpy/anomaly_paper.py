@@ -223,8 +223,8 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = -5
-	lamb = 10.0
+	thresh = 20
+	lamb = 20
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
@@ -337,7 +337,10 @@ def main():
 	plt.plot(range(nodes), x[1,:], color='r')
 	plt.savefig('image_svm_convex',bbox_inches='tight')	
 
-
+	#Predict events
+	for i in range(nodes):
+		if(LA.norm(x[:,i]) > 3):
+			print "Event predicted on day #", i / 48, " at time period " i % 48 
 
 
 
