@@ -340,7 +340,7 @@ def main():
 	#Predict events
 	for i in range(nodes):
 		if(LA.norm(x[:,i]) > 3):
-			print "Event predicted on day #", i / 48, " at time period " i % 48 
+			print "Event predicted on day #", i / 48, " at time period ", i % 48 
 
 
 
