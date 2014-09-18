@@ -321,7 +321,7 @@ def main():
 	#Run regularization path
 	while(lamb <= thresh or lamb == 0):
 	#while(False):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb)/1.5, numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
 		print "Lambda = ", lamb
 
 
@@ -355,23 +355,27 @@ def main():
 	#print results
 	plt.plot(range(nodes), x[0,:])
 	plt.plot(range(nodes), x[1,:], color='r')
-	plt.plot(range(nodes), truth[0,:], color='g--')
+	plt.plot(range(nodes), truth[0,:], color='g')
 	plt.savefig('image_svm_convex',bbox_inches='tight')	
 
 	#Predict events
 	counter = 0
 	start = 0
+	correct = 0
 	for i in range(nodes):
-		if(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i-1]) < 1): #and x[0,i] + x[1,i] >= 0):
+		#if(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i-1]) < 1): #and x[0,i] + x[1,i] >= 0):
+		if (x[0,i] + x[1,i] >= 3 and x[0,i-1] + x[1,i-1] < 3):
 			beginning = i
 			counter = counter + 1
-		elif(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i+1]) < 1): #and x[0,i] + x[1,i] >= 0):			
+		elif (x[0,i] + x[1,i] >= 3 and x[0,i+1] + x[1,i+1] < 3):	
 			print "Event ", counter, " starts at ", beginning, "and ends at ", i
 			#Check if it was correctly counted
 			if(sum(truth[0,beginning:i]) > 0):
 				print "CORRECT"
+				correct = correct + 1
 
 
+	print correct, " correct answers"
 
 if __name__ == '__main__':
 	main()
