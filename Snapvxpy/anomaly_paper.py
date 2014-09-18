@@ -174,8 +174,6 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 				bestz = z
 				bestObj = tempObj
 				print "Iteration ", iters, "; Obj = ", tempObj, "; Initial = ", initTemp
-			else:
-			 	print "FAILED AT ITERATION ", iters, "; Obj = ", tempObj, "; Initial = ", initTemp
 
 			if(iters == numiters - 1 and numiters < maxNonConvexIters):
 				if(bestObj == initObj):
@@ -187,7 +185,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s
 
-		print r, epri, s, edual
+		#print r, epri, s, edual
 		iters = iters + 1
 
 	pool.close()
@@ -364,10 +362,10 @@ def main():
 	correct = 0
 	for i in range(nodes):
 		#if(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i-1]) < 1): #and x[0,i] + x[1,i] >= 0):
-		if (x[0,i] + x[1,i] >= 1 and x[0,i-1] + x[1,i-1] < 1):
+		if (x[0,i] + x[1,i] >= 0.5 and x[0,i-1] + x[1,i-1] < 0.5):
 			beginning = i
 			counter = counter + 1
-		elif (x[0,i] + x[1,i] >= 1 and x[0,i+1] + x[1,i+1] < 1):	
+		elif (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
 			print "Event ", counter, " starts at ", beginning, "and ends at ", i
 			#Check if it was correctly counted
 			if(sum(truth[0,beginning:i]) > 0):
