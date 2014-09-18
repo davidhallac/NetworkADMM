@@ -319,8 +319,8 @@ def main():
 	z = np.zeros((sizeOptVar,2*G1.GetEdges()))
 
 	#Run regularization path
-	#while(lamb <= thresh or lamb == 0):
-	while(False):
+	while(lamb <= thresh or lamb == 0):
+	#while(False):
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
 		print "Lambda = ", lamb
 
