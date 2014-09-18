@@ -220,9 +220,9 @@ def main():
 	#Set parameters
 	useConvex = 0
 	rho = 0.001
-	numiters = 75
-	thresh = 40
-	lamb = 40
+	numiters = 100
+	thresh = 50
+	lamb = 50
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
