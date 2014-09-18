@@ -223,8 +223,8 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 75
-	thresh = 20
-	lamb = 20
+	thresh = 25
+	lamb = 25
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
@@ -364,10 +364,10 @@ def main():
 	correct = 0
 	for i in range(nodes):
 		#if(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i-1]) < 1): #and x[0,i] + x[1,i] >= 0):
-		if (x[0,i] + x[1,i] >= 3 and x[0,i-1] + x[1,i-1] < 3):
+		if (x[0,i] + x[1,i] >= 1 and x[0,i-1] + x[1,i-1] < 1):
 			beginning = i
 			counter = counter + 1
-		elif (x[0,i] + x[1,i] >= 3 and x[0,i+1] + x[1,i+1] < 3):	
+		elif (x[0,i] + x[1,i] >= 1 and x[0,i+1] + x[1,i+1] < 1):	
 			print "Event ", counter, " starts at ", beginning, "and ends at ", i
 			#Check if it was correctly counted
 			if(sum(truth[0,beginning:i]) > 0):
