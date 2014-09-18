@@ -218,7 +218,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 0
+	useConvex = 1
 	rho = 0.001
 	numiters = 100
 	thresh = 50
