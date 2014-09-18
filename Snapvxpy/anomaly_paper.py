@@ -321,7 +321,7 @@ def main():
 	#Run regularization path
 	while(lamb <= thresh or lamb == 0):
 	#while(False):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb)/2, numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
 		print "Lambda = ", lamb
 
 
@@ -348,14 +348,14 @@ def main():
 		end = meeting.GetVal2()
 		counter = start
 		while (counter <= end):
-			truth[0,counter] = truth[0,counter] + 5
+			truth[0,counter] = truth[0,counter] + 2
 			counter = counter + 1
 
 
 	#print results
 	plt.plot(range(nodes), x[0,:])
 	plt.plot(range(nodes), x[1,:], color='r')
-	plt.plot(range(nodes), truth[0,:], color='g')
+	plt.plot(range(nodes), truth[0,:], color='g--')
 	plt.savefig('image_svm_convex',bbox_inches='tight')	
 
 	#Predict events
