@@ -220,11 +220,11 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 1
+	useConvex = 0
 	rho = 0.001
 	numiters = 75
-	thresh = 25
-	lamb = 25
+	thresh = 40
+	lamb = 40
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
@@ -355,7 +355,7 @@ def main():
 	#print results
 	plt.plot(range(nodes), x[0,:])
 	plt.plot(range(nodes), x[1,:], color='r')
-	plt.plot(range(nodes), truth[0,:], color='g')
+	plt.plot(range(nodes), truth[0,:], color='g',linestyle='--')
 	plt.savefig('image_svm_convex',bbox_inches='tight')	
 
 	#Predict events
