@@ -187,7 +187,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		r = LA.norm(np.dot(A,x.transpose()) - z.transpose(),'fro')
 		s = s
 
-		#print r, epri, s, edual
+		print r, epri, s, edual
 		iters = iters + 1
 
 	pool.close()
@@ -222,7 +222,7 @@ def main():
 	#Set parameters
 	useConvex = 1
 	rho = 0.001
-	numiters = 50
+	numiters = 100
 	thresh = 20
 	lamb = 20
 	startVal = 0.01
@@ -321,7 +321,7 @@ def main():
 	#Run regularization path
 	while(lamb <= thresh or lamb == 0):
 	#while(False):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb)/2, numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
 		print "Lambda = ", lamb
 
 
@@ -362,11 +362,11 @@ def main():
 	counter = 0
 	start = 0
 	for i in range(nodes):
-		if(LA.norm(x[:,i]) >= 3 and LA.norm(x[:,i-1]) < 3):
+		if(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i-1]) < 1 and x[0,i] + x[1,i] >= 0):
 			#print "Event number ", counter, " starts on day #", i / 48, " at time period ", i % 48, "iteration ", i
 			beginning = i
 			counter = counter + 1
-		elif(LA.norm(x[:,i]) >= 3 and LA.norm(x[:,i+1]) < 3):
+		elif(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i+1]) < 1 and x[0,i] + x[1,i] >= 0):
 			#print "Event number ", counter - 1, " ends on day #", i / 48, " at time period ", i % 48, "iteration ", i 
 			
 			print "Event ", counter, " starts at ", beginning, "and ends at ", i
