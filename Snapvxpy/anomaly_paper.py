@@ -27,7 +27,7 @@ def solveX(data):
 	xnew = Variable(inputs,1)
 
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	g = 0.5*square(norm(xnew - a))
+	g = 0.5*square(norm(xnew - a)) + square(norm(xnew))
 
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
@@ -362,13 +362,10 @@ def main():
 	counter = 0
 	start = 0
 	for i in range(nodes):
-		if(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i-1]) < 1 and x[0,i] + x[1,i] >= 0):
-			#print "Event number ", counter, " starts on day #", i / 48, " at time period ", i % 48, "iteration ", i
+		if(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i-1]) < 1) #and x[0,i] + x[1,i] >= 0):
 			beginning = i
 			counter = counter + 1
-		elif(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i+1]) < 1 and x[0,i] + x[1,i] >= 0):
-			#print "Event number ", counter - 1, " ends on day #", i / 48, " at time period ", i % 48, "iteration ", i 
-			
+		elif(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i+1]) < 1) #and x[0,i] + x[1,i] >= 0):			
 			print "Event ", counter, " starts at ", beginning, "and ends at ", i
 			#Check if it was correctly counted
 			if(sum(truth[0,beginning:i]) > 0):
