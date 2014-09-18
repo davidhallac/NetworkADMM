@@ -362,10 +362,10 @@ def main():
 	counter = 0
 	start = 0
 	for i in range(nodes):
-		if(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i-1]) < 1) #and x[0,i] + x[1,i] >= 0):
+		if(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i-1]) < 1): #and x[0,i] + x[1,i] >= 0):
 			beginning = i
 			counter = counter + 1
-		elif(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i+1]) < 1) #and x[0,i] + x[1,i] >= 0):			
+		elif(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i+1]) < 1): #and x[0,i] + x[1,i] >= 0):			
 			print "Event ", counter, " starts at ", beginning, "and ends at ", i
 			#Check if it was correctly counted
 			if(sum(truth[0,beginning:i]) > 0):
