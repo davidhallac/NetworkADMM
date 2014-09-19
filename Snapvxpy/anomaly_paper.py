@@ -39,7 +39,7 @@ def solveX(data):
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			h = h + rho/2*square(norm(xnew - z + u))
 	objective = Minimize(5*g+5*h)
-	constraints = [norm(epsil) < 5]
+	constraints = [norm(epsil) <= 5]
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
