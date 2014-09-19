@@ -25,9 +25,11 @@ def solveX(data):
 	a = data[inputs:(inputs + sizeData)]
 	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
+	epsil = Variable(inputs,1)
 
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	g = 0.5*square(norm(xnew - a)) + square(norm(xnew))
+	#g = 0.5*square(norm(xnew - a)) + square(norm(xnew))
+	g = 0.5*square(norm(xnew - a + epsil))
 
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
@@ -37,7 +39,7 @@ def solveX(data):
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			h = h + rho/2*square(norm(xnew - z + u))
 	objective = Minimize(5*g+5*h)
-	constraints = []
+	constraints = [norm(epsil) < 5]
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
@@ -279,19 +281,24 @@ def main():
 		a[1,NI.GetId()] = dataset.GetDat(NI.GetId())[1]
 		#print dataset.GetDat(NI.GetId())[0], dataset.GetDat(NI.GetId())[1] 
 	
-	#Get baseline for each day/time
+	#Get baseline for each day/time (median)
 	baseline = np.zeros((2,48*7))
 	for i in range(48*7):
 		(counter, counter2) = (0,0)
+		(temp, temp2) = (np.zeros((15,1)),np.zeros((15,1)))
 		for j in range(15):
 			counter = counter + a[0, i + 48*7*j]
 			counter2 = counter2 + a[1, i + 48*7*j]
-		baseline[0,i] = counter / 15
-		baseline[1,i] = counter2 / 15
+			temp[j] = a[0,i + 48*7*j]
+			temp2[j] = a[1,i + 48*7*j]
+		baseline[0,i] = np.median(temp)#counter / 15
+		baseline[1,i] = np.median(temp2)#counter2 / 15
 
+
+		#PLOT BASELINES
 	# plt.plot(range(48*7), baseline[0,:])
 	# plt.plot(range(48*7), baseline[1,:], color='r')
-	# plt.savefig('image_svm_convex',bbox_inches='tight')
+	# plt.savefig('temp',bbox_inches='tight')
 
 
 
@@ -300,10 +307,10 @@ def main():
 		a[0,i] = a[0,i] - baseline[0, i  % (48*7)]
 		a[1,i] = a[1,i] - baseline[1, i  % (48*7)]
 
+		#Plot raw anomaly
 	# plt.plot(range(nodes), a[0,:])
 	# plt.plot(range(nodes), a[1,:], color='r')
-	# plt.savefig('image_svm_convex',bbox_inches='tight')
-
+	# plt.savefig('temp',bbox_inches='tight')
 
 
 
@@ -366,7 +373,7 @@ def main():
 			beginning = i
 			counter = counter + 1
 		elif (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
-			print "Event ", counter, " starts at ", beginning, "and ends at ", i
+			print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
 			#Check if it was correctly counted
 			if(sum(truth[0,beginning:i]) > 0):
 				print "CORRECT"
