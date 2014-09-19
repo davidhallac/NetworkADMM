@@ -326,7 +326,7 @@ def main():
 	#Run regularization path
 	while(lamb <= thresh or lamb == 0):
 	#while(False):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb)/1.5, numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb)/2, numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
 		print "Lambda = ", lamb
 
 
@@ -369,14 +369,15 @@ def main():
 	start = 0
 	correct = 0
 	for i in range(nodes):
-		#if(LA.norm(x[:,i]) >= 1 and LA.norm(x[:,i-1]) < 1): #and x[0,i] + x[1,i] >= 0):
 		if (x[0,i] + x[1,i] >= 0.5 and x[0,i-1] + x[1,i-1] < 0.5):
 			beginning = i
-			counter = counter + 1
-		elif (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
-			print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
+			#counter = counter + 1
+		#elif (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
+		if (x[0,i] + x[1,i] - (x[0,i-1] + x[1,i-1]) > 1)
+			#print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
+			print "Event ", counter, " at time ", i
 			#Check if it was correctly counted
-			if(sum(truth[0,beginning:i]) > 0):
+			if(sum(truth[0,i-1:i+1]) > 0):
 				print "CORRECT"
 				correct = correct + 1
 
