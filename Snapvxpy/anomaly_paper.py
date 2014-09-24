@@ -223,7 +223,7 @@ def main():
 	#Set parameters
 	useConvex = 1
 	rho = 0.001
-	numiters = 100
+	numiters = 75
 	thresh = 100
 	lamb = 100
 	startVal = 0.01
@@ -385,6 +385,21 @@ def main():
 
 
 	print correct, " correct answers"
+
+
+	#See how many of the 30 events were detected
+	numevents = 0
+	for meeting in events:
+		start = meeting.GetVal1()
+		end = meeting.GetVal2()
+		counter = start
+		while (counter <= end):
+			if(x[0,i] + x[1,i] - (x[0,i-4] + x[1,i-4]) > 0.5):
+				numevents = numevents + 1
+				break
+			counter = counter + 1
+
+	print numevents, " events detected"
 
 if __name__ == '__main__':
 	main()
