@@ -21,6 +21,7 @@ def solveX(data):
 	lamb = data[data.size-2]
 	rho = data[data.size-3]
 	sizeData = data[data.size-4]
+	tolerance = 3
 	x = data[0:inputs]
 	a = data[inputs:(inputs + sizeData)]
 	neighs = data[(inputs + sizeData):data.size-4]
@@ -39,7 +40,7 @@ def solveX(data):
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			h = h + rho/2*square(norm(xnew - z + u))
 	objective = Minimize(5*g+5*h)
-	constraints = [norm(epsil) <= 5]
+	constraints = [norm(epsil) <= tolerance]
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
@@ -373,7 +374,7 @@ def main():
 		# 	beginning = i
 		# 	#counter = counter + 1
 		#elif (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
-		if (x[0,i] + x[1,i] - (x[0,i-4] + x[1,i-4]) > 1):
+		if (x[0,i] + x[1,i] - (x[0,i-1] + x[1,i-1]) > 0.5):
 			#print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
 			print "Event ", counter, " at time ", i
 			counter = counter + 1
