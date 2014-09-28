@@ -375,7 +375,7 @@ def main():
 		# 	#counter = counter + 1
 		#elif (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
 		
-		if (x[0,i] + x[1,i] >= 0.5)
+		if (x[0,i] + x[1,i] >= 0.5):
 		#if (x[0,i] + x[1,i] - (x[0,i-2] + x[1,i-2]) > 0.5):
 			#print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
 			print "Event ", counter, " at time ", i
@@ -397,7 +397,7 @@ def main():
 		counter = start
 		while (counter <= end):
 			#if(x[0,i] + x[1,i] - (x[0,i-2] + x[1,i-2]) > 0.5):
-			if(x[0,i] + x[1,i] >= 0.5)
+			if(x[0,i] + x[1,i] >= 0.5):
 				numevents = numevents + 1
 				break
 			counter = counter + 1
