@@ -368,6 +368,7 @@ def main():
 
 	#Predict events
 	counter = 0
+	maxLength = 0
 	for i in range(nodes):
 		if (x[0,i] + x[1,i] >= 0.5 and x[0,i-1] + x[1,i-1] < 0.5):
 		 	beginning = i
@@ -376,8 +377,9 @@ def main():
 			if(x[0,i-1] + x[1,i-1] < 0.5):
 				beginning = i-1
 			print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
+			maxLength = max(maxLength, i-beginning)
 			counter = counter + 1
-			
+	print maxLengh, " = maximum length"
 	print counter, " events predicted"
 
 
