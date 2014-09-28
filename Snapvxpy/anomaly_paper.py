@@ -397,7 +397,7 @@ def main():
 		counter = start
 		while (counter <= end):
 			#if(x[0,i] + x[1,i] - (x[0,i-2] + x[1,i-2]) > 0.5):
-			if(x[0,i] + x[1,i] >= 0.5):
+			if(x[0,counter] + x[1,counter] >= 0.5):
 				numevents = numevents + 1
 				break
 			counter = counter + 1
