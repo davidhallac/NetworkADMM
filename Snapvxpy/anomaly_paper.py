@@ -379,7 +379,7 @@ def main():
 			print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
 			maxLength = max(maxLength, i-beginning)
 			counter = counter + 1
-	print maxLengh, " = maximum length"
+	print maxLength, " = maximum length"
 	print counter, " events predicted"
 
 
