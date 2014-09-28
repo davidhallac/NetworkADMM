@@ -225,8 +225,8 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 25
-	lamb = 25
+	thresh = 5
+	lamb = 5
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
@@ -407,6 +407,18 @@ def main():
 				print "Missed event from ", start, " to ", end
 
 	print numevents, " events detected"
+
+	#How many "events" we predicted
+	counter = 0
+		for i in range(nodes):
+		if (x[0,i] + x[1,i] >= 0.5 and x[0,i-1] + x[1,i-1] < 0.5):
+		 	beginning = i
+		if (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
+			end  = i
+			#print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
+			counter = counter + 1
+			
+	print counter, " events predicted"
 
 if __name__ == '__main__':
 	main()
