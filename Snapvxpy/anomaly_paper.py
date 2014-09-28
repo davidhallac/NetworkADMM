@@ -29,8 +29,8 @@ def solveX(data):
 	epsil = Variable(inputs,1)
 
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	#g = 0.5*square(norm(xnew - a)) + square(norm(xnew))
-	g = 0.5*square(norm(xnew - a + epsil))
+	g = 0.5*square(norm(xnew - a)) + square(norm(xnew))
+	#g = 0.5*square(norm(xnew - a + epsil))
 
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
