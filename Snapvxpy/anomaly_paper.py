@@ -30,7 +30,7 @@ def solveX(data):
 
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
 	#g = 0.5*square(norm(xnew - a)) + square(norm(xnew))
-	g = 0.5*square(norm(xnew - a)) + 0.5*(norm(xnew))
+	g = 0.5*square(norm(xnew - a)) + (norm(xnew))
 	#g = 0.5*square(norm(xnew - a + epsil))
 
 	h = 0
