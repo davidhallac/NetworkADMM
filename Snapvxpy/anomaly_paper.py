@@ -363,7 +363,7 @@ def main():
 	plt.plot(range(nodes), x[0,:])
 	plt.plot(range(nodes), x[1,:], color='r')
 	plt.plot(range(nodes), truth[0,:], color='g',linestyle='--')
-	plt.xlim([0,1000])#5040])
+	plt.xlim([0,5040])
 	plt.savefig('image_svm_convex',bbox_inches='tight')	
 
 	#Predict events
