@@ -355,7 +355,7 @@ def main():
 		end = meeting.GetVal2()
 		counter = start
 		while (counter <= end):
-			truth[0,counter] = truth[0,counter] + 2
+			truth[0,counter] = truth[0,counter] + 10
 			counter = counter + 1
 
 
@@ -380,14 +380,14 @@ def main():
 		if (x[0,i] + x[1,i] >= 0.01):
 		#if (x[0,i] + x[1,i] - (x[0,i-1] + x[1,i-1]) > 0.1):
 			#print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
-			print "Event ", counter, " at time ", i
+			#print "Event ", counter, " at time ", i
 			counter = counter + 1
 			#Check if it was correctly counted
 			if(sum(truth[0,i-1:i+1]) > 0):
 				print "CORRECT"
 				correct = correct + 1
 
-
+	print counter, " timestamps triggered"
 	print correct, " correct answers"
 
 
