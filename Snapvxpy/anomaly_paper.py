@@ -224,7 +224,7 @@ def main():
 	#Set parameters
 	useConvex = 1
 	rho = 0.001
-	numiters = 75
+	numiters = 50
 	thresh = 100
 	lamb = 100
 	startVal = 0.01
