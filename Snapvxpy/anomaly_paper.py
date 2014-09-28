@@ -368,23 +368,28 @@ def main():
 
 	#Predict events
 	counter = 0
+	for i in range(nodes):
+		if (x[0,i] + x[1,i] >= 0.5 and x[0,i-1] + x[1,i-1] < 0.5):
+		 	beginning = i
+		if (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
+			end  = i
+			if(x[0,i-1] + x[1,i-1] < 0.5):
+				beginning = i-1
+			print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
+			counter = counter + 1
+			
+	print counter, " events predicted"
+
+
+	counter = 0
 	start = 0
 	correct = 0
-	for i in range(nodes):
-		# if (x[0,i] + x[1,i] >= 0.5 and x[0,i-1] + x[1,i-1] < 0.5):
-		# 	beginning = i
-		# 	#counter = counter + 1
-		#elif (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
-		
+	for i in range(nodes):		
 
 		if (x[0,i] + x[1,i] >= 0.01):
-		#if (x[0,i] + x[1,i] - (x[0,i-1] + x[1,i-1]) > 0.1):
-			#print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
-			#print "Event ", counter, " at time ", i
 			counter = counter + 1
 			#Check if it was correctly counted
 			if(sum(truth[0,i-1:i+1]) > 0):
-				print "CORRECT"
 				correct = correct + 1
 
 	print counter, " timestamps triggered"
@@ -408,17 +413,7 @@ def main():
 
 	print numevents, " events detected"
 
-	#How many "events" we predicted
-	counter = 0
-	for i in range(nodes):
-		if (x[0,i] + x[1,i] >= 0.5 and x[0,i-1] + x[1,i-1] < 0.5):
-		 	beginning = i
-		if (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
-			end  = i
-			#print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
-			counter = counter + 1
-			
-	print counter, " events predicted"
+
 
 if __name__ == '__main__':
 	main()
