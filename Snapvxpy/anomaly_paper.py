@@ -29,7 +29,8 @@ def solveX(data):
 	epsil = Variable(inputs,1)
 
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	g = 0.5*square(norm(xnew - a)) + square(norm(xnew))
+	#g = 0.5*square(norm(xnew - a)) + square(norm(xnew))
+	g = 0.5*square(norm(xnew - a)) + (norm(xnew))
 	#g = 0.5*square(norm(xnew - a + epsil))
 
 	h = 0
@@ -375,8 +376,9 @@ def main():
 		# 	#counter = counter + 1
 		#elif (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
 		
-		if (x[0,i] + x[1,i] >= 0.5):
-		#if (x[0,i] + x[1,i] - (x[0,i-2] + x[1,i-2]) > 0.5):
+
+		if (x[0,i] + x[1,i] >= 0.3):
+		#if (x[0,i] + x[1,i] - (x[0,i-1] + x[1,i-1]) > 0.1):
 			#print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
 			print "Event ", counter, " at time ", i
 			counter = counter + 1
@@ -396,8 +398,8 @@ def main():
 		end = meeting.GetVal2()
 		counter = start
 		while (counter <= end):
-			#if(x[0,i] + x[1,i] - (x[0,i-2] + x[1,i-2]) > 0.5):
-			if(x[0,counter] + x[1,counter] >= 0.5):
+			#if(x[0,counter] + x[1,counter] - (x[0,counter-1] + x[1,counter-1]) > 0.1):
+			if(x[0,counter] + x[1,counter] >= 0.3):
 				numevents = numevents + 1
 				break
 			counter = counter + 1
