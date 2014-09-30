@@ -26,14 +26,11 @@ def solveX(data):
 	a = data[inputs:(inputs + sizeData)]
 	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
-	epsil = Variable(inputs,1)
 
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	#g = 0.5*square(norm(xnew - a)) + square(norm(xnew))
-	mu = 2
+	mu = 1.1
 
 	g = 0.5*square(norm(xnew - a)) + mu*(norm(xnew))
-	#g = 0.5*square(norm(xnew - a + epsil))
 
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
@@ -43,7 +40,7 @@ def solveX(data):
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			h = h + rho/2*square(norm(xnew - z + u))
 	objective = Minimize(5*g+5*h)
-	constraints = [norm(epsil) <= tolerance]
+	constraints = []
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
@@ -89,7 +86,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	if(useConvex != 1):
 		#Calculate objective
 		for i in range(G1.GetNodes()):
-			bestObj = bestObj + cvxObj[0,i] #TODO: Update this
+			bestObj = bestObj + cvxObj[0,i]
 		for EI in G1.Edges():
 			weight = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
 			edgeDiff = LA.norm(x[:,node2mat.GetDat(EI.GetSrcNId())] - x[:,node2mat.GetDat(EI.GetDstNId())])
@@ -227,8 +224,8 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 5
-	lamb = 5
+	thresh = 6
+	lamb = 6
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
@@ -301,28 +298,10 @@ def main():
 		baseline[1,i] = np.median(temp2)#counter2 / 15
 
 
-		#PLOT BASELINES
-	# plt.plot(range(48*7), baseline[0,:])
-	# plt.plot(range(48*7), baseline[1,:], color='r')
-	# plt.savefig('temp',bbox_inches='tight')
-
-
-
 	#Subtract Baseline from a
 	for i in range(nodes):
 		a[0,i] = a[0,i] - baseline[0, i  % (48*7)]
 		a[1,i] = a[1,i] - baseline[1, i  % (48*7)]
-
-		#Plot raw anomaly
-	# plt.plot(range(nodes), a[0,:])
-	# plt.plot(range(nodes), a[1,:], color='r')
-	# plt.savefig('temp',bbox_inches='tight')
-
-
-
-
-
-
 
 	#Initialize variables to 0
 	x = np.zeros((sizeOptVar,nodes))
@@ -409,7 +388,6 @@ def main():
 		end = meeting.GetVal2()
 		counter = start
 		while (counter <= end):
-			#if(x[0,counter] + x[1,counter] - (x[0,counter-1] + x[1,counter-1]) > 0.1):
 			if(x[0,counter] + x[1,counter] >= eventThresh):
 				numevents = numevents + 1
 				break
