@@ -232,6 +232,8 @@ def main():
 	addUpdateVal = 0.1 
 	multUpdateVal = 1.1
 
+	eventThresh = 0.01
+
 	#Size of x
 	sizeOptVar = 2
 	#Size of side information at each node
@@ -370,11 +372,11 @@ def main():
 	counter = 0
 	maxLength = 0
 	for i in range(nodes):
-		if (x[0,i] + x[1,i] >= 0.5 and x[0,i-1] + x[1,i-1] < 0.5):
+		if (x[0,i] + x[1,i] >= eventThresh and x[0,i-1] + x[1,i-1] < eventThresh):
 		 	beginning = i
-		if (x[0,i] + x[1,i] >= 0.5 and x[0,i+1] + x[1,i+1] < 0.5):	
+		if (x[0,i] + x[1,i] >= eventThresh and x[0,i+1] + x[1,i+1] < eventThresh):	
 			end  = i
-			if(x[0,i-1] + x[1,i-1] < 0.5):
+			if(x[0,i-1] + x[1,i-1] < eventThresh):
 				beginning = i-1
 			print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
 			maxLength = max(maxLength, i-beginning)
@@ -388,7 +390,7 @@ def main():
 	correct = 0
 	for i in range(nodes):		
 
-		if (x[0,i] + x[1,i] >= 0.01):
+		if (x[0,i] + x[1,i] >= eventThresh):
 			counter = counter + 1
 			#Check if it was correctly counted
 			if(sum(truth[0,i-1:i+1]) > 0):
@@ -406,7 +408,7 @@ def main():
 		counter = start
 		while (counter <= end):
 			#if(x[0,counter] + x[1,counter] - (x[0,counter-1] + x[1,counter-1]) > 0.1):
-			if(x[0,counter] + x[1,counter] >= 0.01):
+			if(x[0,counter] + x[1,counter] >= eventThresh):
 				numevents = numevents + 1
 				break
 			counter = counter + 1
