@@ -214,7 +214,7 @@ def main():
 	useConvex = 0
 	rho = 0.001
 	numiters = 50
-	thresh = 10000
+	thresh = 0#10000
 	lamb = 0.0
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
@@ -429,6 +429,14 @@ def main():
 	
 	#Draw Graph
 	#DrawGViz(G1, gvlNeato, "graph_undirected.png", "graph 2", True)	
+	for i in range(nodes):
+		for j in range(sizeOptVar):
+			maxval = max(x[j,:])
+			minval = min(x[j,:])
+			if(i == 0):
+				print maxval, minval
+
+
 
 
 if __name__ == '__main__':
