@@ -438,10 +438,8 @@ def main():
 
 			xplot[j,i] = (x[j,i] - minval)/(maxval-minval + 0.01) * 255
 		newval = "{0:02x}{1:02x}{2:02x}".format(int(xplot[3,i]), int(xplot[2,i]), int(xplot[0,i]))
-		print "\"", newval, "\""
-		sys.stdout.write("\"")
-		sys.stdout.write(newval)
-		sys.stdout.write("\",")
+		print "\"", newval, "\","
+		f.write('\"' + newval + '\",')
 
 	f.close()
 
