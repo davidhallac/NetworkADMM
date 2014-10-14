@@ -445,7 +445,7 @@ def main():
 	for NI in G1.Nodes():
 		lat = locations.GetDat(NI.GetId()).GetVal1()
 		lon = locations.GetDat(NI.GetId()).GetVal2()
-		f.write('new GLatLng(' + lat + ',' + lon + '),' )
+		f.write('new GLatLng(' + str(lat) + ',' + str(lon) + '),' )
 	f.close()
 
 
