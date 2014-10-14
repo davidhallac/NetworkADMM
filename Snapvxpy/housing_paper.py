@@ -435,8 +435,8 @@ def main():
 			maxval = max(x[j,:])
 			minval = min(x[j,:])
 
-			xplot[j,i] = (x[j,i] - minval)/(maxval-minval + 0.01) * 255
-		newval = "{0:02x}{1:02x}{2:02x}".format(int(xplot[3,i]), int(xplot[2,i]), int(xplot[0,i]))
+			xplot[j,i] = (x[j,i] - minval)/(maxval-minval + 0.01) * 280
+		newval = "{0:02x}{1:02x}{2:02x}".format(int(max(0, min(xplot[3,i], 255))), int(max(0, min(xplot[3,i], 255))), int(max(xplot[3,i], min(x, 255))))
 		print "\"", newval, "\","
 		f.write('\"' + newval + '\",')
 	f.close()
