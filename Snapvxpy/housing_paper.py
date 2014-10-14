@@ -429,6 +429,7 @@ def main():
 	
 	#Draw Graph
 	#DrawGViz(G1, gvlNeato, "graph_undirected.png", "graph 2", True)	
+	f = open('heatmap.txt','w')
 	xplot = np.zeros((sizeOptVar,nodes))
 	for i in range(nodes):
 		for j in range(sizeOptVar):
@@ -440,8 +441,9 @@ def main():
 		print "\"", newval, "\""
 		sys.stdout.write("\"")
 		sys.stdout.write(newval)
-		sys.stdout.write("\"")
+		sys.stdout.write("\",")
 
+	f.close()
 
 
 if __name__ == '__main__':
