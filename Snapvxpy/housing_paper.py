@@ -219,7 +219,7 @@ def main():
 	startVal = 0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.1
+	multUpdateVal = 1.5#1.1
 
 	mu = 0.5 #For LS regularization
 	#Test/Validation Set Information
@@ -441,8 +441,14 @@ def main():
 		f.write('\"' + newval + '\",')
 	f.close()
 
-
+	f = open('latlong.txt', 'w')
+	for NI in G1.Nodes():
+		lat = locations.GetDat(NI.GetId()).GetVal1()
+		lon = locations.GetDat(NI.GetId()).GetVal2()
+		f.write('new GLatLng(' + lat + ',' + lon + '),' )
+	f.close()
 
 
 if __name__ == '__main__':
 	main()
+
