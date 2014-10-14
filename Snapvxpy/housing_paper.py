@@ -211,7 +211,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	useConvex = 0
+	useConvex = 1
 	rho = 0.001
 	numiters = 50
 	thresh = 1#10000
@@ -427,8 +427,7 @@ def main():
 			plt.savefig('consensus_housing_nonconvex',bbox_inches='tight')
 			np.savetxt('text_housing_nonconvex.out', (pl1, pl2, pl3), delimiter=',', fmt='%1.4f')
 	
-	#Draw Graph
-	#DrawGViz(G1, gvlNeato, "graph_undirected.png", "graph 2", True)	
+	#Get data for heatmap
 	f = open('heatmap.txt','w')
 	xplot = np.zeros((sizeOptVar,nodes))
 	for i in range(nodes):
@@ -440,8 +439,9 @@ def main():
 		newval = "{0:02x}{1:02x}{2:02x}".format(int(xplot[3,i]), int(xplot[2,i]), int(xplot[0,i]))
 		print "\"", newval, "\","
 		f.write('\"' + newval + '\",')
-
 	f.close()
+
+
 
 
 if __name__ == '__main__':
