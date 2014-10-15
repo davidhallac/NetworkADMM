@@ -214,9 +214,9 @@ def main():
 	useConvex = 1
 	rho = 0.001
 	numiters = 50
-	thresh = 0#10000
+	thresh = 1#10000
 	lamb = 0.0
-	startVal = 0.01
+	startVal = 0.1#0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
 	multUpdateVal = 1.5#1.1
@@ -435,7 +435,7 @@ def main():
 			maxval = max(x[j,:])
 			minval = min(x[j,:])
 
-			xplot[j,i] = (x[j,i] - minval)/(maxval-minval + 0.01) * 280
+			xplot[j,i] = (x[j,i] - minval)/(maxval-minval + 0.01) * 512 - 128
 		newval = "{0:02x}{1:02x}{2:02x}".format(int(max(0, min(xplot[3,i], 255))), int(max(0, min(xplot[2,i], 255))), int(max(0, min(xplot[0,i], 255))))
 		print "\"", newval, "\","
 		f.write('\"' + newval + '\",')
