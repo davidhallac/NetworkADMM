@@ -28,9 +28,9 @@ def solveX(data):
 	xnew = Variable(inputs,1)
 
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	mu = 1.1
+	mu = 2.2
 
-	g = 0.5*square(norm(xnew - a)) + mu*(norm(xnew))
+	g = square(norm(xnew - a)) + mu*(norm(xnew))
 
 	h = 0
 	for i in range(neighs.size/(2*inputs+1)):
