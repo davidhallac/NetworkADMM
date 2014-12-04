@@ -216,10 +216,10 @@ def main():
 	numiters = 50
 	thresh = 1000#10000
 	lamb = 0.0
-	startVal = 0.5#0.01
+	startVal = 0.1#0.01
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
-	multUpdateVal = 1.5#1.1
+	multUpdateVal = 1.25#1.1
 
 	mu = 0.5 #For LS regularization
 	#Test/Validation Set Information
