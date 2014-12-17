@@ -236,7 +236,7 @@ def main():
 	#ANOMALY-SPECIFIC VARIABLES
 	eventThresh = 0.01
 	mu = 2.2
-	numTrials = 10
+	numTrials = 25
 	multUpdate = 1.1
 	results = np.zeros((numTrials,5))
 	threshSched = np.zeros((numTrials,1))
