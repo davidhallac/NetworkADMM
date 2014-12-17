@@ -69,8 +69,8 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		counter = counter + 1
 
 	#Stopping criteria
-	eabs = math.pow(10,-2)
-	erel = math.pow(10,-3)
+	eabs = math.pow(10,-3)
+	erel = math.pow(10,-4)
 	(r, s, epri, edual, counter) = (1,1,0,0,0)
 	A = np.zeros((2*edges, nodes))
 	for EI in G1.Edges():
