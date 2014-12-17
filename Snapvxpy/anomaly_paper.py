@@ -224,9 +224,9 @@ def main():
 
 	#ANOMALY-SPECIFIC VARIABLES
 	eventThresh = 0.01
-	mu = 2.2
-	numTrials = 85
-	multUpdate = 1.05
+	mu = 3.2
+	numTrials = 5
+	multUpdate = 1.02
 	results = np.zeros((numTrials,6))
 	threshSched = np.zeros((numTrials,1))
 
@@ -375,7 +375,7 @@ def main():
 			if (x[0,i] + x[1,i] >= eventThresh and x[0,i+1] + x[1,i+1] < eventThresh):	
 				end  = i
 				#print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning + 1
-				maxLength = max(maxLength, i-beginning)
+				maxLength = max(maxLength, i-beginning+1)
 				counter = counter + 1
 		#print maxLength, " = maximum length"
 		#print counter, " events predicted"
