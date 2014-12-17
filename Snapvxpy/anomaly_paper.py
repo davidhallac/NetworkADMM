@@ -222,6 +222,20 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 def main():
 
+	#ANOMALY-SPECIFIC VARIABLES
+	eventThresh = 0.01
+	mu = 100#2.2
+	numTrials = 2
+	multUpdate = 1.02
+	results = np.zeros((numTrials,5))
+	threshSched = np.zeros((numTrials,1))
+
+
+
+
+
+
+
 	#Set parameters
 	useConvex = 1
 	rho = 0.001
@@ -232,15 +246,6 @@ def main():
 	useMult = 1 #1 for mult, 0 for add
 	addUpdateVal = 0.1 
 	multUpdateVal = 1.1
-
-	#ANOMALY-SPECIFIC VARIABLES
-	eventThresh = 0.01
-	mu = 2.2
-	numTrials = 25
-	multUpdate = 1.1
-	results = np.zeros((numTrials,5))
-	threshSched = np.zeros((numTrials,1))
-
 
 	#Size of x
 	sizeOptVar = 2
@@ -422,6 +427,8 @@ def main():
 	print(threshSched)
 	np.set_printoptions(suppress=True)
 	print results
+
+	numpy.savetxt("results.csv", threshSched, delimiter=",")
 
 if __name__ == '__main__':
 	main()
