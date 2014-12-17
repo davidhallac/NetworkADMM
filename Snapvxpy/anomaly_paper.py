@@ -406,7 +406,7 @@ def main():
 					numevents = numevents + 1
 					break
 				counter = counter + 1
-				if (counter > end):
+				#if (counter > end):
 					#print "Missed event from ", start, " to ", end
 
 		#print numevents, " events detected"
