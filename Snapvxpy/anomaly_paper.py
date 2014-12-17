@@ -428,7 +428,7 @@ def main():
 	np.set_printoptions(suppress=True)
 	print results
 
-	numpy.savetxt("results.csv", threshSched, delimiter=",")
+	np.savetxt("results.csv", threshSched, delimiter=",")
 
 if __name__ == '__main__':
 	main()
