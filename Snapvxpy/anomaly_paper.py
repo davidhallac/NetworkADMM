@@ -224,7 +224,7 @@ def main():
 
 	#ANOMALY-SPECIFIC VARIABLES
 	eventThresh = 0.01
-	mu = 102#2.2
+	mu = 150#2.2
 	numTrials = 2
 	multUpdate = 1.02
 	results = np.zeros((numTrials,5))
