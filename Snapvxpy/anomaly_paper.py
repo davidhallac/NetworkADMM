@@ -69,8 +69,8 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		counter = counter + 1
 
 	#Stopping criteria
-	eabs = math.pow(10,-3)
-	erel = math.pow(10,-4)
+	eabs = math.pow(10,-2)
+	erel = math.pow(10,-3)
 	(r, s, epri, edual, counter) = (1,1,0,0,0)
 	A = np.zeros((2*edges, nodes))
 	for EI in G1.Edges():
@@ -224,9 +224,9 @@ def main():
 
 	#ANOMALY-SPECIFIC VARIABLES
 	eventThresh = 0.01
-	mu = 3.2
-	numTrials = 5
-	multUpdate = 1.02
+	mu = 2.2
+	numTrials = 105
+	multUpdate = 1.04
 	results = np.zeros((numTrials,6))
 	threshSched = np.zeros((numTrials,1))
 
