@@ -27,8 +27,10 @@ def solveX(data):
 	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
 
+	mu = data[data.size-5]
+
 	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
-	mu = 2.2
+
 
 	g = square(norm(xnew - a)) + mu*(norm(xnew))
 
@@ -51,7 +53,7 @@ def solveX(data):
 		print "SCALING BUG"
 	return xnew.value, g.value
 
-def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, useConvex, epsilon):
+def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeights, useConvex, epsilon, mu):
 
 	nodes = G1.GetNodes()
 	edges = G1.GetEdges()
@@ -122,7 +124,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
  			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1]
 			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
 			edgenum = edgenum+1
-		temp = np.concatenate((x,a,neighs,np.tile([sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
+		temp = np.concatenate((x,a,neighs,np.tile([mu, sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
 		values = pool.map(solveX, temp.transpose())
 		newx = np.array(values)[:,0].tolist()
 		newcvxObj = np.array(values)[:,1].tolist()
@@ -231,7 +233,14 @@ def main():
 	addUpdateVal = 0.1 
 	multUpdateVal = 1.1
 
+	#ANOMALY-SPECIFIC VARIABLES
 	eventThresh = 0.01
+	mu = 1.1#2.2
+	numTrials = 2
+	multUpdate = 2
+	results = np.zeros((numTrials,5))
+	threshSched = np.zeros((numTrials,1))
+
 
 	#Size of x
 	sizeOptVar = 2
@@ -308,96 +317,111 @@ def main():
 	u = np.zeros((sizeOptVar,2*G1.GetEdges()))
 	z = np.zeros((sizeOptVar,2*G1.GetEdges()))
 
-	#Run regularization path
-	while(lamb <= thresh or lamb == 0):
-	#while(False):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb)/2, numiters, x, u ,z, a, edgeWeights, useConvex, epsilon)
-		print "Lambda = ", lamb
+	# #Run regularization path
+	# while(lamb <= thresh or lamb == 0):
+	# #while(False):
+	# 	(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb)/2, numiters, x, u ,z, a, edgeWeights, useConvex, epsilon, mu)
+	# 	print "Lambda = ", lamb
 
 
-		if(lamb == 0):
-			lamb = startVal
-		elif(useMult == 1):
-			lamb = lamb*multUpdateVal
-		else:
-			lamb = lamb + addUpdateVal
+	# 	if(lamb == 0):
+	# 		lamb = startVal
+	# 	elif(useMult == 1):
+	# 		lamb = lamb*multUpdateVal
+	# 	else:
+	# 		lamb = lamb + addUpdateVal
 
 
+	for q in range(numTrials):
 
-	#Compare to events
-	file = open("Data/CalIt2Events.csv", "rU")
-	events = TIntPrV()	
-	for line in file:
-		if(not line.split(",")[0]):
-			break
-		events.Add(TIntPr(float(line.split(",")[4]), float(line.split(",")[5])))	
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb)/2, numiters, x, u ,z, a, edgeWeights, useConvex, epsilon, mu)
 
-	truth = np.zeros((2,nodes))
-	for meeting in events:
-		start = meeting.GetVal1()
-		end = meeting.GetVal2()
-		counter = start
-		while (counter <= end):
-			truth[0,counter] = truth[0,counter] + 10
-			counter = counter + 1
-
-
-	#print results
-	plt.plot(range(nodes), x[0,:])
-	plt.plot(range(nodes), x[1,:], color='r')
-	plt.plot(range(nodes), truth[0,:], color='g',linestyle='--')
-	plt.xlim([0,5040])
-	plt.savefig('image_svm_convex',bbox_inches='tight')	
-
-	#Predict events
-	counter = 0
-	maxLength = 0
-	for i in range(nodes):
-		if (x[0,i] + x[1,i] >= eventThresh and x[0,i-1] + x[1,i-1] < eventThresh):
-		 	beginning = i
-		if (x[0,i] + x[1,i] >= eventThresh and x[0,i+1] + x[1,i+1] < eventThresh):	
-			end  = i
-			if(x[0,i-1] + x[1,i-1] < eventThresh):
-				beginning = i-1
-			print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning
-			maxLength = max(maxLength, i-beginning)
-			counter = counter + 1
-	print maxLength, " = maximum length"
-	print counter, " events predicted"
-
-
-	counter = 0
-	start = 0
-	correct = 0
-	for i in range(nodes):		
-
-		if (x[0,i] + x[1,i] >= eventThresh):
-			counter = counter + 1
-			#Check if it was correctly counted
-			if(sum(truth[0,i-1:i+1]) > 0):
-				correct = correct + 1
-
-	print counter, " timestamps triggered"
-	print correct, " correct answers"
-
-
-	#See how many of the 30 events were detected
-	numevents = 0
-	for meeting in events:
-		start = meeting.GetVal1()
-		end = meeting.GetVal2()
-		counter = start
-		while (counter <= end):
-			if(x[0,counter] + x[1,counter] >= eventThresh):
-				numevents = numevents + 1
+		#Compare to events
+		file = open("Data/CalIt2Events.csv", "rU")
+		events = TIntPrV()	
+		for line in file:
+			if(not line.split(",")[0]):
 				break
-			counter = counter + 1
-			if (counter > end):
-				print "Missed event from ", start, " to ", end
+			events.Add(TIntPr(float(line.split(",")[4]), float(line.split(",")[5])))	
 
-	print numevents, " events detected"
+		truth = np.zeros((2,nodes))
+		for meeting in events:
+			start = meeting.GetVal1()
+			end = meeting.GetVal2()
+			counter = start
+			while (counter <= end):
+				truth[0,counter] = truth[0,counter] + 10
+				counter = counter + 1
 
 
+		#print results
+		plt.plot(range(nodes), x[0,:])
+		plt.plot(range(nodes), x[1,:], color='r')
+		plt.plot(range(nodes), truth[0,:], color='g',linestyle='--')
+		plt.xlim([0,5040])
+		plt.savefig('image_svm_convex',bbox_inches='tight')	
+
+		#Predict events
+		counter = 0
+		maxLength = 0
+		for i in range(nodes):
+			if (x[0,i] + x[1,i] >= eventThresh and x[0,i-1] + x[1,i-1] < eventThresh):
+			 	beginning = i
+			if (x[0,i] + x[1,i] >= eventThresh and x[0,i+1] + x[1,i+1] < eventThresh):	
+				end  = i
+				#print "Event ", counter, " starts at ", beginning, "and is length ", i - beginning + 1
+				maxLength = max(maxLength, i-beginning)
+				counter = counter + 1
+		#print maxLength, " = maximum length"
+		#print counter, " events predicted"
+
+		numPred = counter
+
+		counter = 0
+		start = 0
+		correct = 0
+		for i in range(nodes):		
+
+			if (x[0,i] + x[1,i] >= eventThresh):
+				counter = counter + 1
+				#Check if it was correctly counted
+				if(sum(truth[0,i-1:i+1]) > 0):
+					correct = correct + 1
+
+		# print counter, " timestamps triggered"
+		# print correct, " correct answers"
+
+		timestampsPred = counter
+		timestampsCorr = correct
+
+
+		#See how many of the 30 events were detected
+		numevents = 0
+		for meeting in events:
+			start = meeting.GetVal1()
+			end = meeting.GetVal2()
+			counter = start
+			while (counter <= end):
+				if(x[0,counter] + x[1,counter] >= eventThresh):
+					numevents = numevents + 1
+					break
+				counter = counter + 1
+				if (counter > end):
+					#print "Missed event from ", start, " to ", end
+
+		#print numevents, " events detected"
+
+
+		results[q,:] = [numevents, numPred, timestampsCorr, timestampsPred, maxLength]
+		threshSched[q,0] = eventThresh
+
+		#Update eventThresh
+		eventThresh = multUpdate*eventThresh
+
+	np.set_printoptions(formatter={'float': '{: 0.7f}'.format})
+	print(threshSched)
+	np.set_printoptions(suppress=True)
+	print results
 
 if __name__ == '__main__':
 	main()
