@@ -225,7 +225,7 @@ def main():
 	#ANOMALY-SPECIFIC VARIABLES
 	eventThresh = 0.01
 	mu = 2.2
-	numTrials = 2
+	numTrials = 85
 	multUpdate = 1.05
 	results = np.zeros((numTrials,6))
 	threshSched = np.zeros((numTrials,1))
@@ -428,7 +428,7 @@ def main():
 	np.set_printoptions(suppress=True)
 	print results
 
-	np.savetxt("results.csv", threshSched, delimiter=",")
+	np.savetxt("results.csv", results, delimiter=",")
 
 if __name__ == '__main__':
 	main()
