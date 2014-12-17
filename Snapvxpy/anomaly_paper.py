@@ -364,7 +364,7 @@ def main():
 		#Predict events
 		counter = 0
 		maxLength = 0
-		for i in range(nodes):
+		for i in range(nodes-1):
 			if (x[0,i] + x[1,i] >= eventThresh and x[0,i-1] + x[1,i-1] < eventThresh):
 			 	beginning = i
 			if (x[0,i] + x[1,i] >= eventThresh and x[0,i+1] + x[1,i+1] < eventThresh):	
@@ -413,10 +413,10 @@ def main():
 
 
 		results[q,:] = [numevents, numPred, timestampsCorr, timestampsPred, maxLength]
-		threshSched[q,0] = eventThresh
+		threshSched[q,0] = mu
 
-		#Update eventThresh
-		eventThresh = multUpdate*eventThresh
+		#Update mu
+		mu = multUpdate*mu
 
 	np.set_printoptions(formatter={'float': '{: 0.7f}'.format})
 	print(threshSched)
