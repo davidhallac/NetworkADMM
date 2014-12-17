@@ -417,7 +417,7 @@ def main():
 		#print numevents, " events detected"
 
 
-		results[q,:] = [numevents, numPred, timestampsCorr, timestampsPred, maxLength]
+		results[q,:] = [mu, numevents, numPred, timestampsCorr, timestampsPred, maxLength]
 		threshSched[q,0] = mu
 
 		#Update mu
