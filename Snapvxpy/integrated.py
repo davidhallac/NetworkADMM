@@ -16,7 +16,7 @@ def solveX(data):
 	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
 
-	#Fill in objective function here! Params: Xnew (unknown), a (side data at node)
+	#FILL IN OBJECTIVE FUNCTION HERE! Params: Xnew (unknown), a (side data at node)
 	g = 0.5*square(norm(xnew - a))
 
 	h = 0
@@ -26,17 +26,21 @@ def solveX(data):
 			u = neighs[i*(2*inputs+1)+1:i*(2*inputs+1)+(inputs+1)]
 			z = neighs[i*(2*inputs+1)+(inputs+1):(i+1)*(2*inputs+1)]
 			h = h + rho/2*square(norm(xnew - z + u))
-	objective = Minimize(5*g+5*h)
+	objective = Minimize(50*g+50*h)
 	constraints = []
 	p = Problem(objective, constraints)
 	result = p.solve()
 	if(result == None):
-		#Todo: CVXOPT scaling issue
-		objective = Minimize(g+1.001*h)
+		#CVXOPT scaling issue. Rarely happens (but occasionally does when running thousands of tests). Ignore for now
+		objective = Minimize(51*g+52*h)
 		p = Problem(objective, constraints)
 		result = p.solve(verbose=False)
-		print "SCALING BUG"
-	return xnew.value
+		if(result == None):
+			print "SCALING BUG"
+			objective = Minimize(52*g+50*h)
+			p = Problem(objective, constraints)
+			result = p.solve(verbose=False)
+	return xnew.value, g.value
 
 def solveZ(data):
 	inputs = int(data[data.size-1])
@@ -94,29 +98,36 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
 
 		#x-update
-		(neighs, counter) = (np.zeros(((2*sizeOptVar+1)*maxdeg,nodes)), 0)
-		for NI in G1.Nodes():
-			counter2 = 0
-			edgenum = 0
-			for EI in G1.Edges():
-				#if (node2mat.GetDat(EI.GetSrcNId()) == NI.GetId()):
-				if (EI.GetSrcNId() == NI.GetId()):
-					#print "Found: ", NI.GetId(), "Connected to", EI.GetDstNId()
-					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
-					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] #u_ij 
-					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum] #z_ij
-					counter2 = counter2 + 1
-				elif (EI.GetDstNId() == NI.GetId()):
-					#print "Found: ", NI.GetId(), "Connected to", EI.GetSrcNId()
-					neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
-					neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] #u_ij 
-					neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1] #z_ij
-					counter2 = counter2 + 1
-				edgenum = edgenum+1
-			counter = counter + 1
+		neighs = np.zeros(((2*sizeOptVar+1)*maxdeg,nodes))
+		edgenum = 0
+		numSoFar = TIntIntH()
+		for EI in G1.Edges():
+			if (not numSoFar.IsKey(EI.GetSrcNId())):
+				numSoFar.AddDat(EI.GetSrcNId(), 0)
+			counter = node2mat.GetDat(EI.GetSrcNId())
+			counter2 = numSoFar.GetDat(EI.GetSrcNId())
+ 			neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+ 			neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum] 
+ 			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum]
+			numSoFar.AddDat(EI.GetSrcNId(), counter2+1)
+
+			if (not numSoFar.IsKey(EI.GetDstNId())):
+				numSoFar.AddDat(EI.GetDstNId(), 0)
+			counter = node2mat.GetDat(EI.GetDstNId())
+			counter2 = numSoFar.GetDat(EI.GetDstNId())
+ 			neighs[counter2*(2*sizeOptVar+1),counter] = edgeWeights.GetDat(TIntPr(EI.GetSrcNId(), EI.GetDstNId()))
+ 			neighs[counter2*(2*sizeOptVar+1)+1:counter2*(2*sizeOptVar+1)+(sizeOptVar+1),counter] = u[:,2*edgenum+1] 
+ 			neighs[counter2*(2*sizeOptVar+1)+(sizeOptVar+1):(counter2+1)*(2*sizeOptVar+1),counter] = z[:,2*edgenum+1]
+			numSoFar.AddDat(EI.GetDstNId(), counter2+1)
+
+			edgenum = edgenum+1
+
 		temp = np.concatenate((x,a,neighs,np.tile([sizeData,rho,lamb,sizeOptVar], (nodes,1)).transpose()), axis=0)
-		newx = pool.map(solveX, temp.transpose())
+		values = pool.map(solveX, temp.transpose())
+		newx = np.array(values)[:,0].tolist()
+		newcvxObj = np.array(values)[:,1].tolist()
 		x = np.array(newx).transpose()[0]
+		cvxObj = np.reshape(np.array(newcvxObj), (-1, nodes))
 
 		#z-update
 		ztemp = z.reshape(2*sizeOptVar, edges, order='F')
@@ -166,21 +177,24 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#Set parameters
-	rho = 0.1
-	numiters = 25
-	thresh = 3
-	lamb = 0.0
-	updateVal = 0.5
+	rho = 0.1 #ADMM parameter
+	numiters = 25 #Max number of ADMM iterations at each step
+	thresh = 3 #maximum lambda value
+	lambInit = 0.5 #Initial non-zero value of lambda to start at
+	updateVal = 1.25 #Amount to update lambda each iteration
+
 	#Graph Information
 	nodes = 10
 	edges = 25
-	#Size of x
+
+	#Size of x, the variable we solve for
 	sizeOptVar = 5
-	#Size of side information at each node
+	#Amount of side information at each node
 	sizeData = 5
 
 
-	#Generate graph, edge weights
+	#Generate graph, edge weights.
+	#FILL IN ACTUAL GRAPH HERE
 	np.random.seed(2)
 	G1 = GenRndGnm(PUNGraph, nodes, edges)
 	edgeWeights = TIntPrFltH()
@@ -189,6 +203,7 @@ def main():
 		edgeWeights.AddDat(temp, 1)
 
 	#Generate side information
+	#FILL IN ACTUAL SIDE INFORMATION HERE
 	a = np.random.randn(sizeData, nodes)
 
 	#Initialize variables to 0
@@ -197,10 +212,14 @@ def main():
 	z = np.zeros((sizeOptVar,2*edges))
 
 	#Run regularization path
-	while(lamb <= thresh):
+	lamb = 0
+	while(lamb <= thresh or lamb == 0):
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/10, numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
-		lamb = lamb + updateVal
+		if(lamb == 0):
+			lamb = lambInit
+		else:
+			lamb = lamb * updateVal
 
 
 
