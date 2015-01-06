@@ -16,7 +16,7 @@ def solveX(data):
 	neighs = data[(inputs + sizeData):data.size-4]
 	xnew = Variable(inputs,1)
 
-	#FILL IN OBJECTIVE FUNCTION HERE! Params: Xnew (unknown), a (side data at node)
+	#REPLACE WITH ACTUAL OBJECTIVE FUNCTION HERE! Params: Xnew (unknown), a (side data at node)
 	g = 0.5*square(norm(xnew - a))
 
 	h = 0
@@ -183,10 +183,6 @@ def main():
 	lambInit = 0.5 #Initial non-zero value of lambda to start at
 	updateVal = 1.25 #Amount to update lambda each iteration
 
-	#Graph Information
-	nodes = 10
-	edges = 25
-
 	#Size of x, the variable we solve for
 	sizeOptVar = 5
 	#Amount of side information at each node
@@ -194,19 +190,25 @@ def main():
 
 
 	#Generate graph, edge weights.
-	#FILL IN ACTUAL GRAPH HERE
+	#REPLACE WITH ACTUAL GRAPH HERE
+	n = 10
+	e = 25
 	np.random.seed(2)
-	G1 = GenRndGnm(PUNGraph, nodes, edges)
+	G1 = GenRndGnm(PUNGraph, n, e)
 	edgeWeights = TIntPrFltH()
 	for EI in G1.Edges():
 		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
 		edgeWeights.AddDat(temp, 1)
 
+	#Get relevant graph info
+	nodes = G1.GetNodes()
+	edges = G1.GetEdges()
+
 	#Generate side information
-	#FILL IN ACTUAL SIDE INFORMATION HERE
+	#REPLACE WITH ACTUAL SIDE INFORMATION HERE
 	a = np.random.randn(sizeData, nodes)
 
-	#Initialize variables to 0
+	#Initialize variables to 0. Get relevant info
 	x = np.zeros((sizeOptVar,nodes))
 	u = np.zeros((sizeOptVar,2*edges))
 	z = np.zeros((sizeOptVar,2*edges))
