@@ -291,158 +291,159 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 def main():
 
-	#Set parameters
-	useConvex = 1 #1 = true, 0 = false
-	rho = 0.0001 
-	numiters = 50
-	thresh = 1000#10
-	lamb = 0.0
-	startVal = 0.1
-	useMult = 1 #1 for mult, 0 for add
-	addUpdateVal = 0.1 
-	multUpdateVal = 1.5
+	nodes = [100, 100, 100]
+	partitions = [2, 20, 200]
+	for loopVal in range(len(paritions)):
+		#Set parameters
+		useConvex = 1 #1 = true, 0 = false
+		rho = 0.0001 
+		numiters = 50
+		thresh = 10#10
+		lamb = 0.0
+		startVal = 0.001
+		useMult = 1 #1 for mult, 0 for add
+		addUpdateVal = 0.1 
+		multUpdateVal = 1.25
 
 
-	#Graph Information
-	nodes = 10#1000
-	#Number of partitions
-	partitions = 2#20
-	samepart = 0.5
-	diffpart = 0.01
-	#Size of x
-	sizeOptVar = 51 #Includes 1 for constant offset!
-	#C in SVM
-	c = 0.75
-	#Non-convex variable
-	epsilon = 0.01
-	#Training set size
-	numtests = 25
-	testSetSize = 10
+		#Graph Information
+		nodes = nodes[loopVal]#1000
+		#Number of partitions
+		partitions = partitions[loopVal]#2#20
+		samepart = 0.5
+		diffpart = 0.01
+		#Size of x
+		sizeOptVar = 51 #Includes 1 for constant offset!
+		#C in SVM
+		c = 0.75
+		#Non-convex variable
+		epsilon = 0.01
+		#Training set size
+		numtests = 25
+		testSetSize = 10
 
 
-	#Generate graph, edge weights
-	np.random.seed(2)
-	G1 = TUNGraph.New()
-	for i in range(nodes):
-		G1.AddNode(i)
-	sizepart = nodes/partitions
-	correctedges = 0
-	for NI in G1.Nodes():
-		for NI2 in G1.Nodes():
-			if(NI.GetId() < NI2.GetId()):				
-				if ((NI.GetId()/sizepart) == (NI2.GetId()/sizepart)):
-					#Same partition, edge w.p 0.5
-					if(np.random.random() >= 1-samepart):
-						G1.AddEdge(NI.GetId(), NI2.GetId())
-						correctedges = correctedges+1
-				else:
-					if(np.random.random() >= 1-diffpart):
-						G1.AddEdge(NI.GetId(), NI2.GetId())
-
-	edges = G1.GetEdges()
-
-	edgeWeights = TIntPrFltH()
-	for EI in G1.Edges():
-		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
-		edgeWeights.AddDat(temp, 1)
-
-	#Generate side information
-	a_true = np.random.randn(sizeOptVar, partitions)
-	v = np.random.randn(numtests,nodes)
-	vtest = np.random.randn(testSetSize,nodes)
-
-	trainingSet = np.random.randn(numtests*(sizeOptVar+1), nodes) #First all the x_train, then all the y_train below it
-	for i in range(numtests):
-		trainingSet[(i+1)*sizeOptVar - 1, :] = 1 #Constant offset
-	for i in range(nodes):
-		a_part = a_true[:,i/sizepart]
-		for j in range(numtests):
-			trainingSet[numtests*sizeOptVar+j,i] = np.sign([np.dot(a_part.transpose(), trainingSet[j*sizeOptVar:(j+1)*sizeOptVar,i])+v[j,i]])
-
-	(x_test,y_test) = (np.random.randn(testSetSize*sizeOptVar, nodes), np.zeros((testSetSize, nodes)))
-	for i in range(testSetSize):
-		x_test[(i+1)*sizeOptVar - 1, :] = 1 #Constant offset
-	for i in range(nodes):
-		a_part = a_true[:,i/sizepart]
-		for j in range(testSetSize):
-			y_test[j,i] = np.sign([np.dot(a_part.transpose(), x_test[j*sizeOptVar:(j+1)*sizeOptVar,i])+vtest[j,i]])
-
-	sizeData = trainingSet.shape[0]
-
-	nodes = G1.GetNodes()
-	edges = G1.GetEdges()
-	print nodes, edges, correctedges/float(edges), 1 - float(correctedges)/edges
-	print GetBfsFullDiam(G1, 1000, False);
-
-	#Initialize variables to 0
-	x = np.zeros((sizeOptVar,nodes))
-	u = np.zeros((sizeOptVar,2*edges))
-	z = np.zeros((sizeOptVar,2*edges))
-
-	#Run regularization path for centralized
-	[plot1, plot2, plot3] = [TFltV(), TFltV(), TFltV()]	
-	lambda_startOver = lamb
-	t = time.time()
-	while(lamb <= thresh or lamb == 0):
-		(x, u, z, pl1, pl2) = runNonDistributed(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
-		#print "Lambda = ", lamb
-
-		#Get accuracy
-		(right, total) = (0, testSetSize*nodes)
-		a_pred = x
+		#Generate graph, edge weights
+		np.random.seed(2)
+		G1 = TUNGraph.New()
 		for i in range(nodes):
-			temp = a_pred[:,i]
-			for j in range(testSetSize):
-				pred = np.sign([np.dot(temp.transpose(), x_test[j*sizeOptVar:(j+1)*sizeOptVar,i])])
-				if(pred == y_test[j,i]):
-					right = right + 1
-		accuracy = right / float(total)
-		print "Lambda = ", lamb, ", ", accuracy
+			G1.AddNode(i)
+		sizepart = nodes/partitions
+		correctedges = 0
+		for NI in G1.Nodes():
+			for NI2 in G1.Nodes():
+				if(NI.GetId() < NI2.GetId()):				
+					if ((NI.GetId()/sizepart) == (NI2.GetId()/sizepart)):
+						#Same partition, edge w.p 0.5
+						if(np.random.random() >= 1-samepart):
+							G1.AddEdge(NI.GetId(), NI2.GetId())
+							correctedges = correctedges+1
+					else:
+						if(np.random.random() >= 1-diffpart):
+							G1.AddEdge(NI.GetId(), NI2.GetId())
 
-		if(lamb == 0):
-			lamb = startVal
-		elif(useMult == 1):
-			lamb = lamb*multUpdateVal
-		else:
-			lamb = lamb + addUpdateVal
+		edges = G1.GetEdges()
 
-	elapsed_centralized = time.time() - t
-	print elapsed_centralized
+		edgeWeights = TIntPrFltH()
+		for EI in G1.Edges():
+			temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
+			edgeWeights.AddDat(temp, 1)
 
+		#Generate side information
+		a_true = np.random.randn(sizeOptVar, partitions)
+		v = np.random.randn(numtests,nodes)
+		vtest = np.random.randn(testSetSize,nodes)
 
-
-	#Start again for distributed
-	#Initialize variables to 0
-	x = np.zeros((sizeOptVar,nodes))
-	u = np.zeros((sizeOptVar,2*edges))
-	z = np.zeros((sizeOptVar,2*edges))
-	lamb = lambda_startOver
-	t = time.time()
-	while(lamb <= thresh or lamb == 0):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
-		#print "Lambda = ", lamb
-
-		#Get accuracy
-		(right, total) = (0, testSetSize*nodes)
-		a_pred = x
+		trainingSet = np.random.randn(numtests*(sizeOptVar+1), nodes) #First all the x_train, then all the y_train below it
+		for i in range(numtests):
+			trainingSet[(i+1)*sizeOptVar - 1, :] = 1 #Constant offset
 		for i in range(nodes):
-			temp = a_pred[:,i]
+			a_part = a_true[:,i/sizepart]
+			for j in range(numtests):
+				trainingSet[numtests*sizeOptVar+j,i] = np.sign([np.dot(a_part.transpose(), trainingSet[j*sizeOptVar:(j+1)*sizeOptVar,i])+v[j,i]])
+
+		(x_test,y_test) = (np.random.randn(testSetSize*sizeOptVar, nodes), np.zeros((testSetSize, nodes)))
+		for i in range(testSetSize):
+			x_test[(i+1)*sizeOptVar - 1, :] = 1 #Constant offset
+		for i in range(nodes):
+			a_part = a_true[:,i/sizepart]
 			for j in range(testSetSize):
-				pred = np.sign([np.dot(temp.transpose(), x_test[j*sizeOptVar:(j+1)*sizeOptVar,i])])
-				if(pred == y_test[j,i]):
-					right = right + 1
-		accuracy = right / float(total)
-		print "Lambda = ", lamb, ", ", accuracy
+				y_test[j,i] = np.sign([np.dot(a_part.transpose(), x_test[j*sizeOptVar:(j+1)*sizeOptVar,i])+vtest[j,i]])
 
-		if(lamb == 0):
-			lamb = startVal
-		elif(useMult == 1):
-			lamb = lamb*multUpdateVal
-		else:
-			lamb = lamb + addUpdateVal
+		sizeData = trainingSet.shape[0]
 
-	elapsed_dist = time.time() - t
-	print elapsed_dist
+		nodes = G1.GetNodes()
+		edges = G1.GetEdges()
+		print nodes, edges, correctedges/float(edges), 1 - float(correctedges)/edges
+		print GetBfsFullDiam(G1, 1000, False);
+
+		#Initialize variables to 0
+		x = np.zeros((sizeOptVar,nodes))
+		u = np.zeros((sizeOptVar,2*edges))
+		z = np.zeros((sizeOptVar,2*edges))
+
+		#Run regularization path for centralized
+		[plot1, plot2, plot3] = [TFltV(), TFltV(), TFltV()]	
+		lambda_startOver = lamb
+		t = time.time()
+		while(lamb <= thresh or lamb == 0):
+			(x, u, z, pl1, pl2) = runNonDistributed(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
+
+			#Get accuracy
+			(right, total) = (0, testSetSize*nodes)
+			a_pred = x
+			for i in range(nodes):
+				temp = a_pred[:,i]
+				for j in range(testSetSize):
+					pred = np.sign([np.dot(temp.transpose(), x_test[j*sizeOptVar:(j+1)*sizeOptVar,i])])
+					if(pred == y_test[j,i]):
+						right = right + 1
+			accuracy = right / float(total)
+			#print "Lambda = ", lamb, ", ", accuracy
+
+			if(lamb == 0):
+				lamb = startVal
+			elif(useMult == 1):
+				lamb = lamb*multUpdateVal
+			else:
+				lamb = lamb + addUpdateVal
+
+		elapsed_centralized = time.time() - t
+		print nodes, partitions, elapsed_centralized
+
+
+
+		#Start again for distributed
+		#Initialize variables to 0
+		x = np.zeros((sizeOptVar,nodes))
+		u = np.zeros((sizeOptVar,2*edges))
+		z = np.zeros((sizeOptVar,2*edges))
+		lamb = lambda_startOver
+		t = time.time()
+		while(lamb <= thresh or lamb == 0):
+			(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
+
+			#Get accuracy
+			(right, total) = (0, testSetSize*nodes)
+			a_pred = x
+			for i in range(nodes):
+				temp = a_pred[:,i]
+				for j in range(testSetSize):
+					pred = np.sign([np.dot(temp.transpose(), x_test[j*sizeOptVar:(j+1)*sizeOptVar,i])])
+					if(pred == y_test[j,i]):
+						right = right + 1
+			accuracy = right / float(total)
+			#print "Lambda = ", lamb, ", ", accuracy
+
+			if(lamb == 0):
+				lamb = startVal
+			elif(useMult == 1):
+				lamb = lamb*multUpdateVal
+			else:
+				lamb = lamb + addUpdateVal
+
+		elapsed_dist = time.time() - t
+		print nodes, partitions, elapsed_dist
 
 
 
