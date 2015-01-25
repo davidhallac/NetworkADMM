@@ -385,7 +385,7 @@ def main():
 	t = time.time()
 	while(lamb <= thresh or lamb == 0):
 		(x, u, z, pl1, pl2) = runNonDistributed(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
-		print "Lambda = ", lamb
+		#print "Lambda = ", lamb
 
 		#Get accuracy
 		(right, total) = (0, testSetSize*nodes)
@@ -397,7 +397,7 @@ def main():
 				if(pred == y_test[j,i]):
 					right = right + 1
 		accuracy = right / float(total)
-		print accuracy
+		print "Lambda = ", lamb, ", ", accuracy
 
 		if(lamb == 0):
 			lamb = startVal
@@ -420,7 +420,7 @@ def main():
 	t = time.time()
 	while(lamb <= thresh or lamb == 0):
 		(x, u, z, pl1, pl2) = runNonDistributed(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
-		print "Lambda = ", lamb
+		#print "Lambda = ", lamb
 
 		#Get accuracy
 		(right, total) = (0, testSetSize*nodes)
@@ -432,7 +432,7 @@ def main():
 				if(pred == y_test[j,i]):
 					right = right + 1
 		accuracy = right / float(total)
-		print accuracy
+		print "Lambda = ", lamb, ", ", accuracy
 
 		if(lamb == 0):
 			lamb = startVal
