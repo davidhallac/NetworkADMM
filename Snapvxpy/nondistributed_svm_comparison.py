@@ -293,8 +293,7 @@ def main():
 
 	nodeList = [100, 100, 100]
 	parts = [2, 20]
-	print len(parts)
-	for loopVal in range(len(parts)):
+	for loopVal in range(2):
 		#Set parameters
 		useConvex = 1 #1 = true, 0 = false
 		rho = 0.0001 
