@@ -90,7 +90,7 @@ def runNonDistributed(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a,
 		obj = obj + lamb*norm(xi - xj) #TODO: norm(x_i - x_j)
 
 	prob = Problem(Minimize(obj), cons)
-	result = prob.solve()
+	result = prob.solve(verbose=True)
 
 	x = np.zeros((sizeOptVar,nodes))
 	for i in range(nodes):
