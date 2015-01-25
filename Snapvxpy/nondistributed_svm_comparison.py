@@ -293,7 +293,7 @@ def main():
 
 	nodes = [100, 100, 100]
 	partitions = [2, 20]
-	for loopVal in range(len(paritions)):
+	for loopVal in range(len(partitions)):
 		#Set parameters
 		useConvex = 1 #1 = true, 0 = false
 		rho = 0.0001 
