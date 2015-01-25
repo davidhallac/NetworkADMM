@@ -291,8 +291,8 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 def main():
 
-	nodeList = [20, 20, 20]
-	parts = [2, 10]
+	nodeList = [100, 100, 20]
+	parts = [2, 20]
 	for loopVal in range(2):
 		#Set parameters
 		useConvex = 1 #1 = true, 0 = false
@@ -303,7 +303,7 @@ def main():
 		startVal = 0.001
 		useMult = 1 #1 for mult, 0 for add
 		addUpdateVal = 0.1 
-		multUpdateVal = 1.25
+		multUpdateVal = 1.5
 
 
 		#Graph Information
@@ -399,7 +399,7 @@ def main():
 					if(pred == y_test[j,i]):
 						right = right + 1
 			accuracy = right / float(total)
-			#print "Lambda = ", lamb, ", ", accuracy
+			print "Lambda = ", lamb, ", ", accuracy
 
 			if(lamb == 0):
 				lamb = startVal
@@ -433,7 +433,7 @@ def main():
 					if(pred == y_test[j,i]):
 						right = right + 1
 			accuracy = right / float(total)
-			#print "Lambda = ", lamb, ", ", accuracy
+			print "Lambda = ", lamb, ", ", accuracy
 
 			if(lamb == 0):
 				lamb = startVal
