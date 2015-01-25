@@ -419,7 +419,7 @@ def main():
 	lamb = lambda_startOver
 	t = time.time()
 	while(lamb <= thresh or lamb == 0):
-		(x, u, z, pl1, pl2) = runNonDistributed(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
 		#print "Lambda = ", lamb
 
 		#Get accuracy
