@@ -291,9 +291,10 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 def main():
 
-	nodes = [100, 100, 100]
-	partitions = [2, 20]
-	for loopVal in range(len(partitions)):
+	nodeList = [100, 100, 100]
+	parts = [2, 20]
+	print len(parts)
+	for loopVal in range(len(parts)):
 		#Set parameters
 		useConvex = 1 #1 = true, 0 = false
 		rho = 0.0001 
@@ -307,9 +308,9 @@ def main():
 
 
 		#Graph Information
-		nodes = nodes[loopVal]#1000
+		nodes = nodeList[loopVal]#1000
 		#Number of partitions
-		partitions = partitions[loopVal]#2#20
+		partitions = parts[loopVal]#2#20
 		samepart = 0.5
 		diffpart = 0.01
 		#Size of x
