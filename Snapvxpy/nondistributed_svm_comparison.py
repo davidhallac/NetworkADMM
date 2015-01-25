@@ -303,7 +303,7 @@ def main():
 		startVal = 0.001
 		useMult = 1 #1 for mult, 0 for add
 		addUpdateVal = 0.1 
-		multUpdateVal = 1.5
+		multUpdateVal = 2
 
 
 		#Graph Information
@@ -387,8 +387,9 @@ def main():
 		lambda_startOver = lamb
 		t = time.time()
 		while(lamb <= thresh or lamb == 0):
+			t2 = time.time()
 			(x, u, z, pl1, pl2) = runNonDistributed(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
-
+			ellapsed_temp = time.time() - t2
 			#Get accuracy
 			(right, total) = (0, testSetSize*nodes)
 			a_pred = x
@@ -399,7 +400,7 @@ def main():
 					if(pred == y_test[j,i]):
 						right = right + 1
 			accuracy = right / float(total)
-			print "Lambda = ", lamb, ", ", accuracy
+			print "Lambda = ", lamb, ", ", accuracy, "; Ellapsed Time: ", ellapsed_temp
 
 			if(lamb == 0):
 				lamb = startVal
@@ -408,8 +409,8 @@ def main():
 			else:
 				lamb = lamb + addUpdateVal
 
-		elapsed_centralized = time.time() - t
-		print nodes, partitions, elapsed_centralized
+		ellapsed_centralized = time.time() - t
+		print nodes, partitions, ellapsed_centralized
 
 
 
@@ -421,8 +422,9 @@ def main():
 		lamb = lambda_startOver
 		t = time.time()
 		while(lamb <= thresh or lamb == 0):
+			t2 = time.time()
 			(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
-
+			ellapsed_temp = time.time() - t2
 			#Get accuracy
 			(right, total) = (0, testSetSize*nodes)
 			a_pred = x
@@ -433,7 +435,7 @@ def main():
 					if(pred == y_test[j,i]):
 						right = right + 1
 			accuracy = right / float(total)
-			print "Lambda = ", lamb, ", ", accuracy
+			print "Lambda = ", lamb, ", ", accuracy, "; Ellapsed Time: ", ellapsed_temp
 
 			if(lamb == 0):
 				lamb = startVal
@@ -442,8 +444,8 @@ def main():
 			else:
 				lamb = lamb + addUpdateVal
 
-		elapsed_dist = time.time() - t
-		print nodes, partitions, elapsed_dist
+		ellapsed_dist = time.time() - t
+		print nodes, partitions, ellapsed_dist
 
 
 
