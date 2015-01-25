@@ -292,7 +292,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	nodes = [100, 100, 100]
-	partitions = [2, 20, 200]
+	partitions = [2, 20]
 	for loopVal in range(len(paritions)):
 		#Set parameters
 		useConvex = 1 #1 = true, 0 = false
