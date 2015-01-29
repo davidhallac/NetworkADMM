@@ -292,7 +292,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	nodeList = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-	numattempts = nodeList.size
+	numattempts = nodeList.__len__()
 	times = np.zeros((numattempts,2))
 
 	for loopVal in range(numattempts):
