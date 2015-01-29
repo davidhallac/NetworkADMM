@@ -291,7 +291,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 def main():
 
-	nodeList = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+	nodeList = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
 	numattempts = nodeList.__len__()
 	times = np.zeros((numattempts,2))
 
@@ -299,8 +299,8 @@ def main():
 		#Set parameters
 		useConvex = 1 #1 = true, 0 = false
 		rho = 0.0001 
-		numiters = 50
-		thresh = 10#10
+		numiters = 100#50
+		thresh = 10
 		lamb = 0.0
 		startVal = 0.001
 		useMult = 1 #1 for mult, 0 for add
