@@ -449,8 +449,8 @@ def main():
 		ellapsed_dist = time.time() - t
 		print nodes, partitions, ellapsed_dist
 
-		times[i,0] = ellapsed_centralized
-		times[i,1] = ellapsed_dist
+		times[loopVal,0] = ellapsed_centralized
+		times[loopVal,1] = ellapsed_dist
 
 	print temp
 
