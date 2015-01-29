@@ -291,25 +291,27 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 def main():
 
-	nodeList = [100, 100, 20]
-	parts = [2, 20]
-	for loopVal in range(2):
+	nodeList = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+	numattempts = nodeList.size
+	times = np.zeros((numattempts,2))
+
+	for loopVal in range(numattempts):
 		#Set parameters
 		useConvex = 1 #1 = true, 0 = false
 		rho = 0.0001 
 		numiters = 50
-		thresh = 0.01#10
+		thresh = 10#10
 		lamb = 0.0
 		startVal = 0.001
 		useMult = 1 #1 for mult, 0 for add
 		addUpdateVal = 0.1 
-		multUpdateVal = 2
+		multUpdateVal = 2.5
 
 
 		#Graph Information
 		nodes = nodeList[loopVal]#1000
 		#Number of partitions
-		partitions = parts[loopVal]#2#20
+		partitions = min(nodes/10, 20)#parts[loopVal]#2#20
 		samepart = 0.5
 		diffpart = 0.01
 		#Size of x
