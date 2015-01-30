@@ -390,7 +390,8 @@ def main():
 		t = time.time()
 		while(lamb <= thresh or lamb == 0):
 			t2 = time.time()
-			(x, u, z, pl1, pl2) = runNonDistributed(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
+			if (nodes <= 100): #Takes too long. I have results for 200, 300 already
+				(x, u, z, pl1, pl2) = runNonDistributed(G1, sizeOptVar, sizeData, lamb, rho + math.sqrt(lamb), numiters, x, u ,z, trainingSet, edgeWeights, numtests, useConvex, c, epsilon)
 			ellapsed_temp = time.time() - t2
 			#Get accuracy
 			(right, total) = (0, testSetSize*nodes)
