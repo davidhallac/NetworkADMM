@@ -453,7 +453,7 @@ def main():
 		times[loopVal,0] = ellapsed_centralized
 		times[loopVal,1] = ellapsed_dist
 
-	print temp
+	print times
 
 if __name__ == '__main__':
 	main()
