@@ -291,7 +291,7 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 
 def main():
 
-	nodeList = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,2000,3000,4000,5000,6000,7000,8000,9000,10000]
+	nodeList = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,2000,3000,4000,5000]
 	numattempts = nodeList.__len__()
 	times = np.zeros((numattempts,2))
 
@@ -311,7 +311,7 @@ def main():
 		#Graph Information
 		nodes = nodeList[loopVal]#1000
 		#Number of partitions
-		partitions = min(nodes/10, 20)#parts[loopVal]#2#20
+		partitions = max(nodes/20,1)#min(nodes/10, 20)#20
 		samepart = 0.5
 		diffpart = 0.01
 		#Size of x
