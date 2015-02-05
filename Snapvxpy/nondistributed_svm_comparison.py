@@ -292,9 +292,9 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 def main():
 
 	#nodeList = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,2000,3000,4000] #For 20 clust
-	#nodeList = [10, 20, 40, 60, 80, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,2000,3000,4000] #For n/20 clust
-	nodeList = [10, 20, 40, 60, 80, 100, 140, 200, 240, 300, 340, 400, 440, 500] #Not doing the last ones since we already have them
-	#Eventually do 5000 nodes
+	
+	nodeList = [10, 20, 40, 60, 80, 100, 140, 200, 240, 300, 340, 400, 440, 500, 600, 700, 800, 900, 1000,2000,3000, 4000]
+	nodeList = [5000]
 	numattempts = nodeList.__len__()
 	times = np.zeros((numattempts,2))
 
