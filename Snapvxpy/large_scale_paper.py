@@ -216,7 +216,7 @@ def main():
 	#Run regularization path
 	lamb = 0
 	while(lamb <= thresh or lamb == 0):
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/100, numiters, x, u ,z, a, edgeWeights)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/50, numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
 		if(lamb == 0):
 			lamb = lambInit
