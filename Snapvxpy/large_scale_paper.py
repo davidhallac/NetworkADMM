@@ -196,7 +196,7 @@ def main():
 	n = 10
 	e = 25
 	np.random.seed(2)
-	G1 = GenRndDegK(100, 3)
+	G1 = GenRndDegK(1000, 3)
 	edgeWeights = TIntPrFltH()
 	for EI in G1.Edges():
 		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
