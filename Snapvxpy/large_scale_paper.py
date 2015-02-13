@@ -196,7 +196,7 @@ def main():
 	n = 10
 	e = 25
 	np.random.seed(2)
-	G1 = GenRndDegK(10000, 3)
+	G1 = GenRndDegK(1000, 3)
 	edgeWeights = TIntPrFltH()
 	for EI in G1.Edges():
 		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
@@ -221,7 +221,7 @@ def main():
 	while(lamb <= thresh or lamb == 0):
 		t2 = time.time()
 		#max(lamb + 0.00001, rho + lamb/50)
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/50, numiters, x, u ,z, a, edgeWeights)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, max(lamb + 0.00001, rho + lamb/50), numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
 		if(lamb == 0):
 			lamb = lambInit
