@@ -4,6 +4,8 @@ import numpy as np
 from numpy import linalg as LA
 import math
 from multiprocessing import Pool
+#time
+import time
 
 
 def solveX(data):
@@ -215,16 +217,19 @@ def main():
 
 	#Run regularization path
 	lamb = 0
+	t = time.time()
 	while(lamb <= thresh or lamb == 0):
+		t2 = time.time()
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/50, numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
 		if(lamb == 0):
 			lamb = lambInit
 		else:
 			lamb = lamb * updateVal
-
-
-
+		ellapsed_temp = time.time() - t2
+		print ellapsed_temp
+	ellapsed_total = time.time() - t
+	print "Total Time = ", ellapsed_total
 
 
 
