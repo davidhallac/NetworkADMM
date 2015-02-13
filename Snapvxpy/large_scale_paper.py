@@ -186,9 +186,9 @@ def main():
 	updateVal = 2.5 #Amount to update lambda each iteration
 
 	#Size of x, the variable we solve for
-	sizeOptVar = 10000
+	sizeOptVar = 1000
 	#Amount of side information at each node
-	sizeData = 10000
+	sizeData = 1000
 
 
 	#Generate graph, edge weights.
@@ -196,7 +196,7 @@ def main():
 	n = 10
 	e = 25
 	np.random.seed(2)
-	G1 = GenRndDegK(1000, 3)
+	G1 = GenRndDegK(10000, 3)
 	edgeWeights = TIntPrFltH()
 	for EI in G1.Edges():
 		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
@@ -220,6 +220,7 @@ def main():
 	t = time.time()
 	while(lamb <= thresh or lamb == 0):
 		t2 = time.time()
+		#max(lamb + 0.00001, rho + lamb/50)
 		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, rho + lamb/50, numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
 		if(lamb == 0):
