@@ -186,9 +186,9 @@ def main():
 	updateVal = 2.5 #Amount to update lambda each iteration
 
 	#Size of x, the variable we solve for
-	sizeOptVar = 100
+	sizeOptVar = 1000
 	#Amount of side information at each node
-	sizeData = 100
+	sizeData = 1000
 
 
 	#Generate graph, edge weights.
@@ -221,7 +221,7 @@ def main():
 	while(lamb <= thresh or lamb == 0):
 		t2 = time.time()
 		#min(lamb + 0.00001, rho + lamb/50)
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, min(lamb + 0.00001, rho + lamb/50), numiters, x, u ,z, a, edgeWeights)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, min(lamb + 0.00001, rho + lamb/25), numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
 		if(lamb == 0):
 			lamb = lambInit
