@@ -221,7 +221,7 @@ def main():
 	while(lamb <= thresh or lamb == 0):
 		t2 = time.time()
 		#max(lamb + 0.00001, rho + lamb/50)
-		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, max(lamb + 0.00001, rho + lamb/50), numiters, x, u ,z, a, edgeWeights)
+		(x, u, z, pl1, pl2) = runADMM(G1, sizeOptVar, sizeData, lamb, min(lamb + 0.00001, rho + lamb/50), numiters, x, u ,z, a, edgeWeights)
 		print "Lambda = ", lamb
 		if(lamb == 0):
 			lamb = lambInit
