@@ -186,9 +186,9 @@ def main():
 	updateVal = 2.5 #Amount to update lambda each iteration
 
 	#Size of x, the variable we solve for
-	sizeOptVar = 80000
+	sizeOptVar = 75000
 	#Amount of side information at each node
-	sizeData = 80000
+	sizeData = 75000
 
 
 	#Generate graph, edge weights.
