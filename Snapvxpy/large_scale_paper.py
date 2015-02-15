@@ -96,9 +96,8 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 	#Run ADMM
 	iters = 0
 	maxProcesses =  80
-	#pool = Pool(processes = min(max(nodes, edges), maxProcesses))
+	pool = Pool(processes = min(max(nodes, edges), maxProcesses))
 	while(iters < numiters and (r > epri or s > edual or iters < 1)):
-		pool = Pool(processes = min(max(nodes, edges), maxProcesses))
 		#x-update
 		neighs = np.zeros(((2*sizeOptVar+1)*maxdeg,nodes))
 		edgenum = 0
@@ -160,9 +159,6 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		newu = pool.map(solveU, temp.transpose())
 		u = np.array(newu).transpose()
 
-		pool.close()
-		pool.join()
-
 		#Stopping criterion - p19 of ADMM paper
 		epri = sqp*eabs + erel*max(LA.norm(np.dot(A,x.transpose()), 'fro'), LA.norm(z, 'fro'))
 		edual = sqn*eabs + erel*LA.norm(np.dot(A.transpose(),u.transpose()), 'fro')
@@ -172,8 +168,8 @@ def runADMM(G1, sizeOptVar, sizeData, lamb, rho, numiters, x, u, z, a, edgeWeigh
 		print r, epri, s, edual
 		iters = iters + 1
 
-	# pool.close()
-	# pool.join()
+	pool.close()
+	pool.join()
 
 
 	return (x,u,z,0,0)
