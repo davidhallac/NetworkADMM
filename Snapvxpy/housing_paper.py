@@ -385,6 +385,7 @@ def main():
 			#Find MSE
 			regressors = dataset.GetDat(i)
 			prediction = xpred[0]*float(regressors[0]) + xpred[1]*float(regressors[1]) + xpred[2]*float(regressors[2]) + xpred[3]
+			prediction = avgPrice
 			mse = mse + math.pow(prediction - float(dataset.GetDat(i)[4]), 2)/testSetSize
 
 		cons = 0
