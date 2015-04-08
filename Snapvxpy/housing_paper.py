@@ -326,8 +326,8 @@ def main():
 	u = np.zeros((sizeOptVar,2*G1.GetEdges()))
 	z = np.zeros((sizeOptVar,2*G1.GetEdges()))
 
-	avgPrice = np.mean(a[4,:])
-	print avgPrice
+	# avgPrice = np.mean(a[4,:])
+	# print avgPrice
 
 	#Run regularization path
 	[plot1, plot2, plot3] = [TFltV(), TFltV(), TFltV()]
@@ -385,7 +385,7 @@ def main():
 			#Find MSE
 			regressors = dataset.GetDat(i)
 			prediction = xpred[0]*float(regressors[0]) + xpred[1]*float(regressors[1]) + xpred[2]*float(regressors[2]) + xpred[3]
-			prediction = avgPrice
+		#	prediction = avgPrice
 			mse = mse + math.pow(prediction - float(dataset.GetDat(i)[4]), 2)/testSetSize
 
 		cons = 0
@@ -395,7 +395,7 @@ def main():
 		consensus = cons / float(edges)
 
 		print mse, "= mse", consensus, " = consensus"
-		sys.exit(0)
+		#sys.exit(0)
 		plot1.Add(lamb)
 		plot2.Add(mse)
 		plot3.Add(consensus)
