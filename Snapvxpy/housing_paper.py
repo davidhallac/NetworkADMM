@@ -15,7 +15,7 @@ matplotlib.rc('text',usetex=True)
 import matplotlib.pyplot as plt
 #Other function in this folder
 from z_u_solvers import solveZ, solveU
-
+import sys
 
 def solveX(data):
 	inputs = int(data[data.size-1])
@@ -307,6 +307,9 @@ def main():
 	print nodes, edges
 	print GetBfsFullDiam(G1, 1000, False);
 
+	# SaveEdgeList(G1, 'mygraph.txt')
+	# sys.exit()
+
 	#Get side information
 	a = np.zeros((sizeData, nodes))
 	counter = 0
@@ -322,6 +325,9 @@ def main():
 	x = np.zeros((sizeOptVar,nodes))
 	u = np.zeros((sizeOptVar,2*G1.GetEdges()))
 	z = np.zeros((sizeOptVar,2*G1.GetEdges()))
+
+	avgPrice = np.mean(a[4,:])
+	print avgPrice
 
 	#Run regularization path
 	[plot1, plot2, plot3] = [TFltV(), TFltV(), TFltV()]
