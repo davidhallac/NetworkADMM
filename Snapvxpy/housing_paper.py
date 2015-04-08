@@ -395,6 +395,7 @@ def main():
 		consensus = cons / float(edges)
 
 		print mse, "= mse", consensus, " = consensus"
+		sys.exit(0)
 		plot1.Add(lamb)
 		plot2.Add(mse)
 		plot3.Add(consensus)
