@@ -191,7 +191,7 @@ def main():
 
 	#Generate graph, edge weights.
 	#REPLACE WITH ACTUAL GRAPH HERE
-	nodes = 3000
+	nodes = 2000
 	np.random.seed(2)
 	G1 = GenRndDegK(nodes, 3)
 	edgeWeights = TIntPrFltH()
