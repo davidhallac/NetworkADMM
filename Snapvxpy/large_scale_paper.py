@@ -179,14 +179,14 @@ def main():
 	#Set parameters
 	rho = 0.1 #ADMM parameter
 	numiters = 50 #Max number of ADMM iterations at each step
-	thresh = 10 #maximum lambda value
+	thresh = 0.002#10 #maximum lambda value
 	lambInit = 0.001 #Initial non-zero value of lambda to start at
 	updateVal = 2.5 #Amount to update lambda each iteration
 
 	#Size of x, the variable we solve for
-	sizeOptVar = 1000
+	sizeOptVar = 50000
 	#Amount of side information at each node
-	sizeData = 1000
+	sizeData = 50000
 
 
 	#Generate graph, edge weights.
