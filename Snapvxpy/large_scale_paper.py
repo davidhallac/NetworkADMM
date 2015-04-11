@@ -191,8 +191,9 @@ def main():
 
 	#Generate graph, edge weights.
 	#REPLACE WITH ACTUAL GRAPH HERE
+	nodes = 2000
 	np.random.seed(2)
-	G1 = GenRndDegK(1000, 3)
+	G1 = GenRndDegK(nodes, 3)
 	edgeWeights = TIntPrFltH()
 	for EI in G1.Edges():
 		temp = TIntPr(EI.GetSrcNId(), EI.GetDstNId())
