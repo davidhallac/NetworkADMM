@@ -184,15 +184,13 @@ def main():
 	updateVal = 2.5 #Amount to update lambda each iteration
 
 	#Size of x, the variable we solve for
-	sizeOptVar = 5000
+	sizeOptVar = 1000
 	#Amount of side information at each node
-	sizeData = 5000
+	sizeData = 1000
 
 
 	#Generate graph, edge weights.
 	#REPLACE WITH ACTUAL GRAPH HERE
-	n = 10
-	e = 25
 	np.random.seed(2)
 	G1 = GenRndDegK(1000, 3)
 	edgeWeights = TIntPrFltH()
@@ -215,6 +213,7 @@ def main():
 
 	#Run regularization path
 	lamb = 0
+	countLamb = 0
 	t = time.time()
 	while(lamb <= thresh or lamb == 0):
 		t2 = time.time()
@@ -227,8 +226,10 @@ def main():
 			lamb = lamb * updateVal
 		ellapsed_temp = time.time() - t2
 		print ellapsed_temp
+		countLamb = countLamb + 1
 	ellapsed_total = time.time() - t
 	print "Total Time = ", ellapsed_total
+	print "Total Number of Lambda's = ", countLamb
 
 
 
