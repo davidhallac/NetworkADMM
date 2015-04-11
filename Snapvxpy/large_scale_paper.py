@@ -184,14 +184,14 @@ def main():
 	updateVal = 2.5 #Amount to update lambda each iteration
 
 	#Size of x, the variable we solve for
-	sizeOptVar = 50000
+	sizeOptVar = 100000
 	#Amount of side information at each node
-	sizeData = 50000
+	sizeData = 100000
 
 
 	#Generate graph, edge weights.
 	#REPLACE WITH ACTUAL GRAPH HERE
-	nodes = 2000
+	nodes = 1000
 	np.random.seed(2)
 	G1 = GenRndDegK(nodes, 3)
 	edgeWeights = TIntPrFltH()
