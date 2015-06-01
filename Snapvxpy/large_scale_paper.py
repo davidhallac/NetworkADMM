@@ -183,6 +183,8 @@ def main():
 	lambInit = 0.1 #Initial non-zero value of lambda to start at
 	updateVal = 2.5 #Amount to update lambda each iteration
 
+
+	#CHANGE THESE TWO VALUES TO VARY THE TOTAL PROBLEM SIZE (2000 * 50,000 = 100 million unknowns)
 	#Size of x, the variable we solve for
 	sizeOptVar = 50000
 	#Amount of side information at each node
@@ -190,7 +192,6 @@ def main():
 
 
 	#Generate graph, edge weights.
-	#REPLACE WITH ACTUAL GRAPH HERE
 	nodes = 2000
 	np.random.seed(2)
 	G1 = GenRndDegK(nodes, 3)
