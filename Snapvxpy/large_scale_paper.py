@@ -179,8 +179,8 @@ def main():
 	#Set parameters
 	rho = 0.1 #ADMM parameter
 	numiters = 50 #Max number of ADMM iterations at each step
-	thresh = 0.011#10 #maximum lambda value
-	lambInit = 0.01 #Initial non-zero value of lambda to start at
+	thresh = 0.11#10 #maximum lambda value
+	lambInit = 0.1 #Initial non-zero value of lambda to start at
 	updateVal = 2.5 #Amount to update lambda each iteration
 
 	#Size of x, the variable we solve for
