@@ -179,8 +179,8 @@ def main():
 	#Set parameters
 	rho = 0.1 #ADMM parameter
 	numiters = 50 #Max number of ADMM iterations at each step
-	thresh = 0.002#10 #maximum lambda value
-	lambInit = 0.001 #Initial non-zero value of lambda to start at
+	thresh = 0.011#10 #maximum lambda value
+	lambInit = 0.01 #Initial non-zero value of lambda to start at
 	updateVal = 2.5 #Amount to update lambda each iteration
 
 	#Size of x, the variable we solve for
@@ -204,7 +204,6 @@ def main():
 	edges = G1.GetEdges()
 
 	#Generate side information
-	#REPLACE WITH ACTUAL SIDE INFORMATION HERE
 	a = np.random.randn(sizeData, nodes)
 
 	#Initialize variables to 0. Get relevant info
